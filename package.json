@@ -1,0 +1,20 @@
+{
+  "name": "sprinklers3",
+  "version": "1.0.0",
+  "private": true,
+  "description": "A frontend for mqtt based IoT sprinklers systems",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/amikhalev/sprinklers3.git"
+  },
+  "author": "Alex Mikhalev <alexmikhalevalex@gmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/amikhalev/sprinklers3/issues"
+  },
+  "homepage": "https://github.com/amikhalev/sprinklers3#readme"
+}
