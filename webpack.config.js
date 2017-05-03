@@ -3,7 +3,10 @@ const webpack = require("webpack");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 
 module.exports = {
-    entry: "./app/script/index.tsx",
+    entry: [
+        "react-hot-loader/patch",
+        "./app/script/index.tsx"
+    ],
     devtool: "sourcemap",
     output: {
         path: path.resolve(__dirname, "dist"),
@@ -17,7 +20,7 @@ module.exports = {
     },
     module: {
         rules: [
-            { test: /\.tsx?$/, loader: "awesome-typescript-loader" },
+            { test: /\.tsx?$/, loaders: ["react-hot-loader/webpack", "awesome-typescript-loader"] },
             { test: /\.css$/, loader: "style-loader!css-loader" },
             { test: /\.(ttf|eot|svg|woff(2)?|png|jpg)(\?[a-z0-9=&.]+)?$/, loader: "file-loader" }
         ]
@@ -25,6 +28,16 @@ module.exports = {
     plugins: [
         new HtmlWebpackPlugin({
             title: "sprinklers3"
-        })
-    ]
+        }),
+        new webpack.NamedModulesPlugin(),
+        new webpack.HotModuleReplacementPlugin()
+    ],
+    externals: {
+        "react": "React",
+        "react-dom": "ReactDOM"
+    },
+    devServer: {
+        hot: true,
+        contentBase: "./dist"
+    }
 };

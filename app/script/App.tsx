@@ -1,30 +1,62 @@
 import * as React from "react";
 import { observer } from "mobx-react";
-import { SprinklersDevice } from "./sprinklers";
-import "semantic-ui-css/semantic.min.css";
-import "app/style/app.css";
-import { Item } from "semantic-ui-react";
+import { SprinklersDevice, Section } from "./sprinklers";
+import { Item, Table, Header } from "semantic-ui-react";
+import FontAwesome = require("react-fontawesome");
 import * as classNames from "classnames";
 
+import "semantic-ui-css/semantic.css";
+import "font-awesome/css/font-awesome.css"
+import "app/style/app.css";
+
 @observer
-class Device extends React.Component<{ device: SprinklersDevice }, any> {
+class SectionRow extends React.PureComponent<{ section: Section }, void> {
     render() {
-        const {id, connected} = this.props.device;
+        const { name, state } = this.props.section;
+        return (
+            <Table.Row>
+                <Table.Cell className="section--name">Section {name}</Table.Cell>
+                <Table.Cell className="section--state">State: {state + ""}</Table.Cell>
+            </Table.Row>
+        );
+    }
+}
+
+@observer
+class DeviceView extends React.PureComponent<{ device: SprinklersDevice }, void> {
+    render() {
+        const { id, connected, sections } = this.props.device; //src={require("app/images/raspberry_pi.png")}
         return (
             <Item>
-                <Item.Image src={require("app/images/raspberry_pi.png")} />
+                <Item.Image  />
                 <Item.Content>
-                    <Item.Header>
+                    <Header as="h1">
                         <span>Device </span><kbd>{id}</kbd>
-                    </Item.Header>
-                    <Item.Meta>
-                        <span className={classNames({
-                            "device--connected": connected,
-                            "device--disconnected": !connected
+                        <small className={classNames({
+                            "device--connectedState": true,
+                            "device--connectedState-connected": connected,
+                            "device--connectedState-disconnected": !connected
                         })}>
+                            <FontAwesome name={connected ? "plug" : "chain-broken"} />
+                            &nbsp;
                             {connected ? "Connected" : "Disconnected"}
-                        </span>
+                        </small>
+                    </Header>
+                    <Item.Meta>
+
                     </Item.Meta>
+                    <Table celled striped>
+                        <Table.Header>
+                            <Table.Row>
+                                <Table.HeaderCell colSpan="3">Sections</Table.HeaderCell>
+                            </Table.Row>
+                        </Table.Header>
+                        <Table.Body>
+                            {
+                                sections.map((s, i) => <SectionRow section={s} key={i} />)
+                            }
+                        </Table.Body>
+                    </Table>
                 </Item.Content>
             </Item>
         );
@@ -32,8 +64,8 @@ class Device extends React.Component<{ device: SprinklersDevice }, any> {
 }
 
 @observer
-export default class App extends React.Component<{ device: SprinklersDevice }, any> {
+export default class App extends React.PureComponent<{ device: SprinklersDevice }, any> {
     render() {
-        return <Item.Group divided><Device device={this.props.device} /></Item.Group>
+        return <Item.Group divided><DeviceView device={this.props.device} /></Item.Group>
     }
 }

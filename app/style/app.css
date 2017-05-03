@@ -1,7 +1,15 @@
-.device--connected {
-    color: #00FF00;
+.device--connectedState-connected {
+    color: #13D213;
 }
 
-.device--disconnected {
-    color: #FF0000;
+.device--connectedState-disconnected {
+    color: #D20000;
+}
+
+.section--name {
+    width: 200px;
+}
+
+.section--state {
+
 }

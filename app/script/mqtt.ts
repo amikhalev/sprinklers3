@@ -3,7 +3,7 @@ import "paho-mqtt/mqttws31";
 import MQTT = Paho.MQTT;
 
 import { EventEmitter } from "events";
-import { SprinklersDevice, SprinklersApi } from "./sprinklers";
+import { SprinklersDevice, SprinklersApi, Section } from "./sprinklers";
 
 
 export class MqttApiClient extends EventEmitter implements SprinklersApi {
@@ -42,6 +42,9 @@ export class MqttApiClient extends EventEmitter implements SprinklersApi {
     }
 
     getDevice(prefix: string): SprinklersDevice {
+        if (/\//.test(prefix)) {
+            throw new Error("Prefix cannot contain a /");
+        }
         if (!this.devices[prefix]) {
             const device = this.devices[prefix] = new MqttSprinklersDevice(this, prefix);
             if (this.connected) {
@@ -60,10 +63,15 @@ export class MqttApiClient extends EventEmitter implements SprinklersApi {
 
     private onMessageArrived(m: MQTT.Message) {
         // console.log("message arrived: ", m)
-        for (const prefix in this.devices) {
-            const device = this.devices[prefix];
-            device.onMessage(m);
+        const topicIdx = m.destinationName.indexOf('/'); // find the first /
+        const prefix = m.destinationName.substr(0, topicIdx); // assume prefix does not contain a /
+        const topic = m.destinationName.substr(topicIdx + 1);
+        const device = this.devices[prefix];
+        if (!device) {
+            console.warn(`recieved message for unknown device. prefix: ${prefix}`);
+            return;
         }
+        device.onMessage(topic, m.payloadString);
     }
 
     private onConnectionLost(e: MQTT.MQTTError) {
@@ -83,15 +91,17 @@ class MqttSprinklersDevice extends SprinklersDevice {
 
     private getSubscriptions() {
         return [
-            `${this.prefix}/connected`
+            `${this.prefix}/connected`,
+            `${this.prefix}/sections`,
+            `${this.prefix}/sections/+/#`
         ];
-    }    
+    }
 
     doSubscribe() {
         const c = this.apiClient.client;
         this.getSubscriptions()
             .forEach(filter => c.subscribe(filter, { qos: 1 }));
-        
+
     }
 
     doUnsubscribe() {
@@ -100,21 +110,51 @@ class MqttSprinklersDevice extends SprinklersDevice {
             .forEach(filter => c.unsubscribe(filter));
     }
 
-    onMessage(m: MQTT.Message) {
-        const postfix = m.destinationName.replace(`${this.prefix}/`, "");
-        if (postfix === m.destinationName)
-            return;
-        switch (postfix) {
-            case "connected":
-                this.connected = (m.payloadString == "true");
-                console.log(`MqttSprinklersDevice with prefix ${this.prefix}: ${this.connected}`)
-                break;
-            default:
-                console.warn(`MqttSprinklersDevice recieved invalid message`, m)
+    /**
+     * Updates this device with the specified message
+     * @param topic The topic, with prefix removed
+     * @param payload The payload string
+     */
+    onMessage(topic: string, payload: string) {
+        var matches;
+        if (topic == "connected") {
+            this.connected = (payload == "true");
+            // console.log(`MqttSprinklersDevice with prefix ${this.prefix}: ${this.connected}`)
+        } else if ((matches = topic.match(/^sections(?:\/(\d+)(?:\/?(.+))?)?$/)) != null) {
+            const [topic, secStr, subTopic] = matches;
+            // console.log(`section: ${secStr}, topic: ${subTopic}, payload: ${payload}`);
+            if (!secStr) { // new number of sections
+                this.sections = new Array(Number(payload));
+            } else {
+                const secNum = Number(secStr);
+                var section = this.sections[secNum];
+                if (!section) {
+                    this.sections[secNum] = section = new MqttSection();
+                }
+                (section as MqttSection).onMessage(subTopic, payload);
+            }
+        } else {
+            console.warn(`MqttSprinklersDevice recieved invalid topic: ${topic}`)
         }
     }
 
     get id(): string {
         return this.prefix;
+    }
+}
+
+interface SectionJSON {
+    name: string;
+    pin: number;
+}
+
+class MqttSection extends Section {
+    onMessage(topic: string, payload: string) {
+        if (topic == "state") {
+            this.state = (payload == "true");
+        } else if (topic == null) {
+            const json = JSON.parse(payload) as SectionJSON;
+            this.name = json.name;
+        }
     }
 }

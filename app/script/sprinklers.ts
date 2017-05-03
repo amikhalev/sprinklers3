@@ -1,6 +1,6 @@
 import { observable } from "mobx";
 
-class Section {
+export class Section {
     @observable
     name: string = ""
 
