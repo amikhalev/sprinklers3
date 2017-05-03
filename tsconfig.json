@@ -1,0 +1,9 @@
+{
+    "compilerOptions": {
+        "sourceMap": true,
+        "jsx": "react",
+        "experimentalDecorators": true,
+        "target": "es5",
+        "typeRoots": ["node_modules/@types"]
+    }
+}

@@ -1,0 +1,7 @@
+.device--connected {
+    color: #00FF00;
+}
+
+.device--disconnected {
+    color: #FF0000;
+}
