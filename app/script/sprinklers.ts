@@ -33,7 +33,7 @@ class ProgramItem {
     duration: number = 0;
 }
 
-class Program {
+export class Program {
     @observable
     name: string = ""
     @observable
@@ -44,6 +44,9 @@ class Program {
 
     @observable
     sequence: Array<ProgramItem> = [];
+
+    @observable
+    running: boolean = false;
 }
 
 export abstract class SprinklersDevice {

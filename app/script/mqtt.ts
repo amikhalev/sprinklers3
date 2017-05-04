@@ -3,7 +3,7 @@ import "paho-mqtt/mqttws31";
 import MQTT = Paho.MQTT;
 
 import { EventEmitter } from "events";
-import { SprinklersDevice, SprinklersApi, Section } from "./sprinklers";
+import { SprinklersDevice, SprinklersApi, Section, Program } from "./sprinklers";
 
 
 export class MqttApiClient extends EventEmitter implements SprinklersApi {
@@ -93,7 +93,9 @@ class MqttSprinklersDevice extends SprinklersDevice {
         return [
             `${this.prefix}/connected`,
             `${this.prefix}/sections`,
-            `${this.prefix}/sections/+/#`
+            `${this.prefix}/sections/+/#`,
+            `${this.prefix}/programs`,
+            `${this.prefix}/programs/+/#`
         ];
     }
 
@@ -133,6 +135,19 @@ class MqttSprinklersDevice extends SprinklersDevice {
                 }
                 (section as MqttSection).onMessage(subTopic, payload);
             }
+        } else if ((matches = topic.match(/^programs(?:\/(\d+)(?:\/?(.+))?)?$/)) != null) {
+            const [topic, progStr, subTopic] = matches;
+            // console.log(`program: ${progStr}, topic: ${subTopic}, payload: ${payload}`);
+            if (!progStr) { // new number of programs
+                this.programs = new Array(Number(payload));
+            } else {
+                const progNum = Number(progStr);
+                var program = this.programs[progNum];
+                if (!program) {
+                    this.programs[progNum] = program = new MqttProgram();
+                }
+                (program as MqttProgram).onMessage(subTopic, payload);
+            }
         } else {
             console.warn(`MqttSprinklersDevice recieved invalid topic: ${topic}`)
         }
@@ -155,6 +170,25 @@ class MqttSection extends Section {
         } else if (topic == null) {
             const json = JSON.parse(payload) as SectionJSON;
             this.name = json.name;
+        }
+    }
+}
+
+interface ProgramJSON {
+    name: string;
+    enabled: boolean;
+    // sequence: Array<ProgramItem>;
+    // sched: Schedule;
+}
+
+class MqttProgram extends Program {
+    onMessage(topic: string, payload: string) {
+        if (topic == "running") {
+            this.running = (payload == "true");
+        } else if (topic == null) {
+            const json = JSON.parse(payload) as Partial<ProgramJSON>;
+            this.name = json.name;
+            this.enabled = json.enabled;
         }
     }
 }
