@@ -1,5 +1,5 @@
-import "paho-mqtt/mqttws31";
 /// <reference path="./paho-mqtt.d.ts" />
+import "paho-mqtt/mqttws31";
 import MQTT = Paho.MQTT;
 
 import { EventEmitter } from "events";
@@ -15,7 +15,7 @@ export class MqttApiClient extends EventEmitter implements SprinklersApi {
 
     constructor() {
         super();
-        this.client = new Paho.MQTT.Client(location.hostname, 1884, MqttApiClient.newClientId());
+        this.client = new MQTT.Client(location.hostname, 1884, MqttApiClient.newClientId());
         this.client.onMessageArrived = m => this.onMessageArrived(m);
         this.client.onConnectionLost = e => this.onConnectionLost(e);
     }

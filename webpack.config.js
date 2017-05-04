@@ -5,9 +5,11 @@ const HtmlWebpackPlugin = require("html-webpack-plugin");
 module.exports = {
     entry: [
         "react-hot-loader/patch",
+        "webpack-dev-server/client?http://localhost:8080",
+        "webpack/hot/only-dev-server",
         "./app/script/index.tsx"
     ],
-    devtool: "sourcemap",
+    devtool: "inline-source-map",
     output: {
         path: path.resolve(__dirname, "dist"),
         filename: "bundle.js"
@@ -32,12 +34,7 @@ module.exports = {
         new webpack.NamedModulesPlugin(),
         new webpack.HotModuleReplacementPlugin()
     ],
-    externals: {
-        "react": "React",
-        "react-dom": "ReactDOM"
-    },
     devServer: {
-        hot: true,
-        contentBase: "./dist"
+        hot: true
     }
 };
