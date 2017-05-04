@@ -38,10 +38,10 @@ class ProgramRow extends React.PureComponent<{ program: Program }, void> {
 @observer
 class DeviceView extends React.PureComponent<{ device: SprinklersDevice }, void> {
     render() {
-        const { id, connected, sections, programs } = this.props.device; //src={require("app/images/raspberry_pi.png")}
+        const { id, connected, sections, programs } = this.props.device;
         return (
             <Item>
-                <Item.Image  />
+                <Item.Image src={require<string>("app/images/raspberry_pi.png")} />
                 <Item.Content>
                     <Header as="h1">
                         <span>Device </span><kbd>{id}</kbd>

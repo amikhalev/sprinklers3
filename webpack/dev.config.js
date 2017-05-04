@@ -11,7 +11,7 @@ module.exports = {
     ],
     devtool: "inline-source-map",
     output: {
-        path: path.resolve(__dirname, "dist"),
+        path: path.resolve(__dirname, "build"),
         filename: "bundle.js"
     },
     resolve: {
@@ -29,7 +29,7 @@ module.exports = {
     },
     plugins: [
         new HtmlWebpackPlugin({
-            title: "sprinklers3"
+            template: "./app/index.html"
         }),
         new webpack.NamedModulesPlugin(),
         new webpack.HotModuleReplacementPlugin()

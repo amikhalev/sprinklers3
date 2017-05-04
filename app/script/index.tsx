@@ -9,8 +9,7 @@ const client = new MqttApiClient();
 client.start();
 const device = client.getDevice("grinklers");
 
-const rootElem = document.createElement("div");
-document.body.appendChild(rootElem);
+const rootElem = document.getElementById("app");
 
 ReactDOM.render(<AppContainer>
     <App device={device} />
