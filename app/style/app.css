@@ -13,3 +13,7 @@
 .section--state {
 
 }
+
+.program--name {
+    width: 200px;
+}

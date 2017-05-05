@@ -10,27 +10,68 @@ import "font-awesome/css/font-awesome.css"
 import "app/style/app.css";
 
 @observer
-class SectionRow extends React.PureComponent<{ section: Section }, void> {
-    render() {
-        const { name, state } = this.props.section;
+class SectionTable extends React.PureComponent<{ sections: Section[] }, void> {
+    static renderRow(section: Section, index: number) {
+        const { name, state } = section;
         return (
-            <Table.Row>
+            <Table.Row key={index}>
                 <Table.Cell className="section--name">Section {name}</Table.Cell>
                 <Table.Cell className="section--state">State: {state + ""}</Table.Cell>
             </Table.Row>
         );
     }
+
+    render() {
+        return (<Table celled striped>
+            <Table.Header>
+                <Table.Row>
+                    <Table.HeaderCell colSpan="3">Sections</Table.HeaderCell>
+                </Table.Row>
+                <Table.Row>
+                    <Table.HeaderCell>Name</Table.HeaderCell>
+                    <Table.HeaderCell>State</Table.HeaderCell>
+                </Table.Row>
+            </Table.Header>
+            <Table.Body>
+                {
+                    this.props.sections.map(SectionTable.renderRow)
+                }
+            </Table.Body>
+        </Table>
+        );
+    }
 }
 
 @observer
-class ProgramRow extends React.PureComponent<{ program: Program }, void> {
-    render() {
-        const { name, running } = this.props.program;
+class ProgramTable extends React.PureComponent<{ programs: Program[] }, void> {
+    static renderRow(program: Program, i: number) {
+        const { name, running } = program;
         return (
-            <Table.Row>
+            <Table.Row key={i}>
                 <Table.Cell className="program--name">Program {name}</Table.Cell>
                 <Table.Cell className="program--running">running: {running + ""}</Table.Cell>
             </Table.Row>
+        );
+    }
+
+    render() {
+        return (
+            <Table celled striped>
+                <Table.Header>
+                    <Table.Row>
+                        <Table.HeaderCell colSpan="3">Programs</Table.HeaderCell>
+                    </Table.Row>
+                    <Table.Row>
+                        <Table.HeaderCell>Name</Table.HeaderCell>
+                        <Table.HeaderCell>Running</Table.HeaderCell>
+                    </Table.Row>
+                </Table.Header>
+                <Table.Body>
+                    {
+                        this.props.programs.map(ProgramTable.renderRow)
+                    }
+                </Table.Body>
+            </Table>
         );
     }
 }
@@ -58,30 +99,8 @@ class DeviceView extends React.PureComponent<{ device: SprinklersDevice }, void>
                     <Item.Meta>
 
                     </Item.Meta>
-                    <Table celled striped>
-                        <Table.Header>
-                            <Table.Row>
-                                <Table.HeaderCell colSpan="3">Sections</Table.HeaderCell>
-                            </Table.Row>
-                        </Table.Header>
-                        <Table.Body>
-                            {
-                                sections.map((s, i) => <SectionRow section={s} key={i} />)
-                            }
-                        </Table.Body>
-                    </Table>
-                    <Table celled striped>
-                        <Table.Header>
-                            <Table.Row>
-                                <Table.HeaderCell colSpan="3">Programs</Table.HeaderCell>
-                            </Table.Row>
-                        </Table.Header>
-                        <Table.Body>
-                            {
-                                programs.map((p, i) => <ProgramRow program={p} key={i} />)
-                            }
-                        </Table.Body>
-                    </Table>
+                    <SectionTable sections={sections} />
+                    <ProgramTable programs={programs} />
                 </Item.Content>
             </Item>
         );
