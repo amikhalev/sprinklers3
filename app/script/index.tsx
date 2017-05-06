@@ -21,5 +21,5 @@ if (module.hot) {
         ReactDOM.render(<AppContainer>
             <NextApp device={device} />
         </AppContainer>, rootElem);
-    })
+    });
 }

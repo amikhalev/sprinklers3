@@ -1,19 +1,36 @@
-.device--connectedState-connected {
+.device--connectionState {
+    margin-left: 10px;
+    font-size: 18px;
+    font-weight: 100;
+}
+
+.device--connectionState-connected {
     color: #13D213;
 }
 
-.device--connectedState-disconnected {
+.device--connectionState-disconnected {
     color: #D20000;
 }
 
-.section--name {
-    width: 200px;
+.section--number,
+.program--number {
+    width: 20px
+}
+
+.section--name,
+.program--name {
+    width: 150px;
+    white-space: nowrap;
 }
 
 .section--state {
 
 }
 
-.program--name {
-    width: 200px;
+.section--state-true {
+    color: green;
+}
+
+.section--state-false {
+
 }

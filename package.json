@@ -8,7 +8,8 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "clean": "rm -rf ./dist ./build",
     "build": "webpack --config ./webpack/prod.config.js",
-    "start:dev": "webpack-dev-server --config ./webpack/dev.config.js"
+    "start:dev": "webpack-dev-server --config ./webpack/dev.config.js",
+    "lint": "tslint app/script/**/* || :"
   },
   "repository": {
     "type": "git",
@@ -23,6 +24,7 @@
   "dependencies": {
     "@types/classnames": "0.0.32",
     "@types/node": "^7.0.13",
+    "@types/object-assign": "^4.0.30",
     "@types/react": "^15.0.23",
     "@types/react-dom": "^15.5.0",
     "@types/react-fontawesome": "^1.5.0",
@@ -30,12 +32,13 @@
     "font-awesome": "^4.7.0",
     "mobx": "^3.1.9",
     "mobx-react": "^4.1.8",
+    "object-assign": "^4.1.1",
     "paho-mqtt": "^1.0.3",
     "react": "^15.5.4",
     "react-dom": "^15.5.4",
     "react-fontawesome": "^1.6.1",
     "semantic-ui-css": "^2.2.10",
-    "semantic-ui-react": "^0.67.0"
+    "semantic-ui-react": "^0.67.2"
   },
   "devDependencies": {
     "@types/webpack-env": "^1.13.0",

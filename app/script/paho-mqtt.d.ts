@@ -1,9 +1,11 @@
+/* tslint:disable:interface-name */
+
 declare namespace Paho {
     namespace MQTT {
-        interface MQTTError { errorCode: string, errorMessage: string }
-        interface WithInvocationContext { invocationContext: object }
+        interface MQTTError { errorCode: string; errorMessage: string; }
+        interface WithInvocationContext { invocationContext: object; }
         interface ErrorWithInvocationContext extends MQTTError, WithInvocationContext {}
-        interface OnSubscribeSuccessParams extends WithInvocationContext { grantedQos: number }
+        interface OnSubscribeSuccessParams extends WithInvocationContext { grantedQos: number; }
         type OnConnectionLostHandler = (error: MQTTError) => void;
         type OnMessageHandler = (message: Message) => void;
         interface ConnectionOptions {
@@ -18,8 +20,8 @@ declare namespace Paho {
             onSuccess?: (o: WithInvocationContext) => void;
             mqttVersion?: number;
             onFailure?: (e: ErrorWithInvocationContext) => void;
-            hosts?: Array<string>; 
-            ports?: Array<number>;
+            hosts?: string[];
+            ports?: number[];
         }
         interface SubscribeOptions {
             qos?: number;
@@ -35,41 +37,41 @@ declare namespace Paho {
             timeout?: number;
         }
         class Client {
+            public readonly clientId: string;
+            public readonly host: string;
+            public readonly path: string;
+            public readonly port: number;
 
+            public onConnectionLost: OnConnectionLostHandler;
+            public onMessageArrived: OnMessageHandler;
+            public onMessageDelivered: OnMessageHandler;
+
+            // tslint:disable unified-signatures
             constructor(host: string, port: number, path: string, clientId: string);
             constructor(host: string, port: number, clientId: string);
             constructor(hostUri: string, clientId: string);
 
-            readonly clientId: string;
-            readonly host: string;
-            readonly path: string;
-            readonly port: number;
+            public connect(connectionOptions?: ConnectionOptions);
+            public disconnect();
 
-            onConnectionLost: OnConnectionLostHandler;
-            onMessageArrived: OnMessageHandler;
-            onMessageDelivered: OnMessageHandler;
+            public getTraceLog(): object[];
+            public startTrace();
+            public stopTrace();
 
-            connect(connectionOptions?: ConnectionOptions);
-            disconnect();
-
-            getTraceLog(): Object[];
-            startTrace();
-            stopTrace();
-
-            send(message: Message);
-            subscribe(filter: string, subcribeOptions?: SubscribeOptions);
-            unsubscribe(filter: string, unsubcribeOptions?: UnsubscribeOptions);
+            public send(message: Message);
+            public subscribe(filter: string, subcribeOptions?: SubscribeOptions);
+            public unsubscribe(filter: string, unsubcribeOptions?: UnsubscribeOptions);
         }
 
         class Message {
-            constructor(payload: String | ArrayBuffer);
+            public destinationName: string;
+            public readonly duplicate: boolean;
+            public readonly payloadBytes: ArrayBuffer;
+            public readonly payloadString: string;
+            public qos: number;
+            public retained: boolean;
 
-            destinationName: string;
-            readonly duplicate: boolean;
-            readonly payloadBytes: ArrayBuffer;
-            readonly payloadString: string;
-            qos: number;
-            retained: boolean;
+            constructor(payload: string | ArrayBuffer);
         }
     }
 }

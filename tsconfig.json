@@ -8,6 +8,7 @@
     },
     "files": [
         "./node_modules/@types/webpack-env/index.d.ts",
+        "./app/script/paho-mqtt.d.ts",
         "./app/script/index.tsx"
     ]
 }
