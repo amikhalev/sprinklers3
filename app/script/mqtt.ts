@@ -4,10 +4,10 @@ import MQTT = Paho.MQTT;
 import { EventEmitter } from "events";
 import * as objectAssign from "object-assign";
 import {
-    SprinklersDevice, SprinklersApi, Section, Program, ProgramItem, Schedule, TimeOfDay, Weekday,
+    SprinklersDevice, ISprinklersApi, Section, Program, IProgramItem, Schedule, ITimeOfDay, Weekday,
 } from "./sprinklers";
 
-export class MqttApiClient extends EventEmitter implements SprinklersApi {
+export class MqttApiClient extends EventEmitter implements ISprinklersApi {
     private static newClientId() {
         return "sprinklers3-MqttApiClient-" + Math.round(Math.random() * 1000);
     }
@@ -182,7 +182,7 @@ class MqttSection extends Section {
 }
 
 interface IScheduleJSON {
-    times: TimeOfDay[];
+    times: ITimeOfDay[];
     weekdays: number[];
     from?: string;
     to?: string;
@@ -200,7 +200,7 @@ function scheduleFromJSON(json: IScheduleJSON): Schedule {
 interface IProgramJSON {
     name: string;
     enabled: boolean;
-    sequence: ProgramItem[];
+    sequence: IProgramItem[];
     sched: IScheduleJSON;
 }
 
