@@ -1,7 +1,9 @@
 import * as React from "react";
+import { computed } from "mobx";
+import DevTools from "mobx-react-devtools";
 import { observer } from "mobx-react";
 import { SprinklersDevice, Section, Program } from "./sprinklers";
-import { Item, Table, Header } from "semantic-ui-react";
+import { Item, Table, Header, Segment, Form, Input, DropdownItemProps } from "semantic-ui-react";
 import FontAwesome = require("react-fontawesome");
 import * as classNames from "classnames";
 
@@ -50,6 +52,31 @@ class SectionTable extends React.PureComponent<{ sections: Section[] }, void> {
             </Table.Body>
         </Table>
         );
+    }
+}
+
+@observer
+class RunSectionForm extends React.Component<{ sections: Section[] }, void> {
+    public render() {
+        return <Segment>
+            <Header>Run Section</Header>
+            <Form>
+                <Form.Group>
+                    <Form.Select label="Section" placeholder="Section" options={this.sectionOptions} />
+                    <Form.Input control={Input} label="Duration" placeholder="Duration" />
+                </Form.Group>
+            </Form>
+        </Segment>;
+    }
+
+
+    @computed
+    private get sectionOptions(): DropdownItemProps[] {
+        // return this.props.sections.map((s, i) => ({
+        //     text: s.name,
+        //     value: i,
+        // }));
+        return [];
     }
 }
 
@@ -116,6 +143,7 @@ class DeviceView extends React.PureComponent<{ device: SprinklersDevice }, void>
 
                     </Item.Meta>
                     <SectionTable sections={sections} />
+                    <RunSectionForm sections={sections} />
                     <ProgramTable programs={programs} />
                 </Item.Content>
             </Item>
@@ -126,6 +154,9 @@ class DeviceView extends React.PureComponent<{ device: SprinklersDevice }, void>
 @observer
 export default class App extends React.PureComponent<{ device: SprinklersDevice }, any> {
     public render() {
-        return <Item.Group divided><DeviceView device={this.props.device} /></Item.Group>;
+        return <Item.Group divided>
+        <DeviceView device={this.props.device} />
+        <DevTools />
+        </Item.Group>;
     }
 }

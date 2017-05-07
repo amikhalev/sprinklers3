@@ -65,7 +65,7 @@ export class MqttApiClient extends EventEmitter implements ISprinklersApi {
     }
 
     private onMessageArrived(m: MQTT.Message) {
-        // console.log("message arrived: ", m)
+        console.log("message arrived: ", m);
         const topicIdx = m.destinationName.indexOf("/"); // find the first /
         const prefix = m.destinationName.substr(0, topicIdx); // assume prefix does not contain a /
         const topic = m.destinationName.substr(topicIdx + 1);
@@ -94,13 +94,13 @@ class MqttSprinklersDevice extends SprinklersDevice {
 
     public doSubscribe() {
         const c = this.apiClient.client;
-        this.getSubscriptions()
+        this.subscriptions
             .forEach((filter) => c.subscribe(filter, { qos: 1 }));
     }
 
     public doUnsubscribe() {
         const c = this.apiClient.client;
-        this.getSubscriptions()
+        this.subscriptions
             .forEach((filter) => c.unsubscribe(filter));
     }
 
@@ -120,7 +120,7 @@ class MqttSprinklersDevice extends SprinklersDevice {
             const [_topic, secStr, subTopic] = matches;
             // console.log(`section: ${secStr}, topic: ${subTopic}, payload: ${payload}`);
             if (!secStr) { // new number of sections
-                this.sections = new Array(Number(payload));
+                this.sections.length = Number(payload);
             } else {
                 const secNum = Number(secStr);
                 let section = this.sections[secNum];
@@ -136,7 +136,7 @@ class MqttSprinklersDevice extends SprinklersDevice {
             const [_topic, progStr, subTopic] = matches;
             // console.log(`program: ${progStr}, topic: ${subTopic}, payload: ${payload}`);
             if (!progStr) { // new number of programs
-                this.programs = new Array(Number(payload));
+                this.programs.length = Number(payload);
             } else {
                 const progNum = Number(progStr);
                 let program = this.programs[progNum];
@@ -154,7 +154,7 @@ class MqttSprinklersDevice extends SprinklersDevice {
         return this.prefix;
     }
 
-    private getSubscriptions() {
+    private get subscriptions() {
         return [
             `${this.prefix}/connected`,
             `${this.prefix}/sections`,

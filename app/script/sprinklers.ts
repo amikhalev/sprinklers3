@@ -1,4 +1,4 @@
-import { observable } from "mobx";
+import { observable, IObservableArray } from "mobx";
 
 export class Section {
     @observable
@@ -54,10 +54,10 @@ export abstract class SprinklersDevice {
     public connected: boolean = false;
 
     @observable
-    public sections: Section[] = [];
+    public sections: IObservableArray<Section> = [] as IObservableArray<Section>;
 
     @observable
-    public programs: Program[] = [];
+    public programs: IObservableArray<Program> = [] as IObservableArray<Program>;
 
     abstract get id(): string;
 }
