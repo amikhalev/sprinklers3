@@ -16,8 +16,8 @@
             "args": ["update"]
         },
         {
-            "taskName": "start:dev",
-            "args": ["run", "start:dev"]
+            "taskName": "start",
+            "args": ["run", "start"]
         },
         {
             "taskName": "test",
