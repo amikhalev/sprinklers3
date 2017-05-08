@@ -2,7 +2,7 @@ import * as React from "react";
 import { computed } from "mobx";
 import DevTools from "mobx-react-devtools";
 import { observer } from "mobx-react";
-import { SprinklersDevice, Section, Program } from "./sprinklers";
+import { SprinklersDevice, Section, Program, Duration } from "./sprinklers";
 import { Item, Table, Header, Segment, Form, Input, DropdownItemProps } from "semantic-ui-react";
 import FontAwesome = require("react-fontawesome");
 import * as classNames from "classnames";
@@ -16,6 +16,9 @@ import "app/style/app.css";
 @observer
 class SectionTable extends React.PureComponent<{ sections: Section[] }, void> {
     private static renderRow(section: Section, index: number) {
+        if (!section) {
+            return null;
+        }
         const { name, state } = section;
         return (
             <Table.Row key={index}>
@@ -55,6 +58,25 @@ class SectionTable extends React.PureComponent<{ sections: Section[] }, void> {
     }
 }
 
+class DurationInput extends React.Component<{
+    duration: Duration,
+    onDurationChange?: (newDuration: Duration) => void;
+}, void> {
+    public render() {
+        const duration = this.props.duration;
+        return <div className="field durationInput">
+            <label>Duration</label>
+            <div className="fields">
+                <Form.Field control={Input} className="durationInput--minutes" placeholder="Minutes"
+                    value={duration.minutes} />
+                <Form.Field className="durationInput--colon"><span>:</span></Form.Field>
+                <Form.Field control={Input} className="durationInput--seconds" placeholder="Seconds"
+                    value={duration.seconds} />
+            </div>
+        </div>;
+    }
+}
+
 @observer
 class RunSectionForm extends React.Component<{ sections: Section[] }, void> {
     public render() {
@@ -63,26 +85,27 @@ class RunSectionForm extends React.Component<{ sections: Section[] }, void> {
             <Form>
                 <Form.Group>
                     <Form.Select label="Section" placeholder="Section" options={this.sectionOptions} />
-                    <Form.Input control={Input} label="Duration" placeholder="Duration" />
+                    <DurationInput duration={new Duration(1, 1)} />
                 </Form.Group>
             </Form>
         </Segment>;
     }
 
-
     @computed
     private get sectionOptions(): DropdownItemProps[] {
-        // return this.props.sections.map((s, i) => ({
-        //     text: s.name,
-        //     value: i,
-        // }));
-        return [];
+        return this.props.sections.map((s, i) => ({
+            text: s ? s.name : null,
+            value: i,
+        }));
     }
 }
 
 @observer
 class ProgramTable extends React.PureComponent<{ programs: Program[] }, void> {
     private static renderRow(program: Program, i: number) {
+        if (!program) {
+            return null;
+        }
         const { name, running } = program;
         return (
             <Table.Row key={i}>
@@ -155,8 +178,8 @@ class DeviceView extends React.PureComponent<{ device: SprinklersDevice }, void>
 export default class App extends React.PureComponent<{ device: SprinklersDevice }, any> {
     public render() {
         return <Item.Group divided>
-        <DeviceView device={this.props.device} />
-        <DevTools />
+            <DeviceView device={this.props.device} />
+            <DevTools />
         </Item.Group>;
     }
 }

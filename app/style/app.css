@@ -34,3 +34,12 @@
 .section--state-false {
 
 }
+
+.durationInput--minutes,
+.durationInput--seconds {
+    width: 100px;
+}
+
+.durationInput--colon {
+    line-height: 38px;
+}

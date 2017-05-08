@@ -26,11 +26,29 @@ export class Schedule {
     public to?: Date = null;
 }
 
+export class Duration {
+    public static fromSeconds(seconds: number): Duration {
+        return new Duration(Math.floor(seconds / 60), seconds % 60);
+    }
+
+    public minutes: number = 0;
+    public seconds: number = 0;
+
+    constructor(minutes: number, seconds: number) {
+        this.minutes = minutes;
+        this.seconds = seconds;
+    }
+
+    public toSeconds(): number {
+        return this.minutes * 60 + this.seconds;
+    }
+}
+
 export interface IProgramItem {
     // the section number
     section: number;
-    // duration in seconds
-    duration: number;
+    // duration of the run
+    duration: Duration;
 }
 
 export class Program {

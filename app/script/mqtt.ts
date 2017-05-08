@@ -4,7 +4,7 @@ import MQTT = Paho.MQTT;
 import { EventEmitter } from "events";
 import * as objectAssign from "object-assign";
 import {
-    SprinklersDevice, ISprinklersApi, Section, Program, IProgramItem, Schedule, ITimeOfDay, Weekday,
+    SprinklersDevice, ISprinklersApi, Section, Program, IProgramItem, Schedule, ITimeOfDay, Weekday, Duration,
 } from "./sprinklers";
 
 export class MqttApiClient extends EventEmitter implements ISprinklersApi {
@@ -23,6 +23,7 @@ export class MqttApiClient extends EventEmitter implements ISprinklersApi {
         this.client = new MQTT.Client(location.hostname, 1884, MqttApiClient.newClientId());
         this.client.onMessageArrived = (m) => this.onMessageArrived(m);
         this.client.onConnectionLost = (e) => this.onConnectionLost(e);
+        // (this.client as any).trace = (m => console.log(m));
     }
 
     public start() {
@@ -65,7 +66,15 @@ export class MqttApiClient extends EventEmitter implements ISprinklersApi {
     }
 
     private onMessageArrived(m: MQTT.Message) {
-        console.log("message arrived: ", m);
+        try {
+            this.processMessage(m);
+        } catch (e) {
+            console.error("error while processing mqtt message", e);
+        }
+    }
+
+    private processMessage(m: MQTT.Message) {
+        // console.log("message arrived: ", m);
         const topicIdx = m.destinationName.indexOf("/"); // find the first /
         const prefix = m.destinationName.substr(0, topicIdx); // assume prefix does not contain a /
         const topic = m.destinationName.substr(topicIdx + 1);
@@ -197,10 +206,15 @@ function scheduleFromJSON(json: IScheduleJSON): Schedule {
     return sched;
 }
 
+interface IProgramItemJSON {
+    section: number;
+    duration: number;
+}
+
 interface IProgramJSON {
     name: string;
     enabled: boolean;
-    sequence: IProgramItem[];
+    sequence: IProgramItemJSON[];
     sched: IScheduleJSON;
 }
 
@@ -210,18 +224,26 @@ class MqttProgram extends Program {
             this.running = (payload === "true");
         } else if (topic == null) {
             const json = JSON.parse(payload) as Partial<IProgramJSON>;
-            if (json.name != null) {
-                this.name = json.name;
-            }
-            if (json.enabled != null) {
-                this.enabled = json.enabled;
-            }
-            if (json.sequence != null) {
-                this.sequence = json.sequence;
-            }
-            if (json.sched != null) {
-                this.schedule = scheduleFromJSON(json.sched);
-            }
+            this.updateFromJSON(json);
+        }
+    }
+
+    public updateFromJSON(json: Partial<IProgramJSON>) {
+        if (json.name != null) {
+            this.name = json.name;
+        }
+        if (json.enabled != null) {
+            this.enabled = json.enabled;
+        }
+        if (json.sequence != null) {
+            // tslint:disable:object-literal-sort-keys
+            this.sequence = json.sequence.map((item) => ({
+                section: item.section,
+                duration: Duration.fromSeconds(item.duration),
+            }));
+        }
+        if (json.sched != null) {
+            this.schedule = scheduleFromJSON(json.sched);
         }
     }
 }
