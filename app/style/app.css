@@ -17,8 +17,8 @@
     width: 20px
 }
 
-.section--name,
-.program--name {
+.section--name /*,
+.program--name*/ {
     width: 150px;
     white-space: nowrap;
 }
@@ -37,9 +37,5 @@
 
 .durationInput--minutes,
 .durationInput--seconds {
-    width: 100px;
-}
-
-.durationInput--colon {
-    line-height: 38px;
+    width: 80px;
 }

@@ -2,7 +2,7 @@ import * as React from "react";
 import { computed } from "mobx";
 import DevTools from "mobx-react-devtools";
 import { observer } from "mobx-react";
-import { SprinklersDevice, Section, Program, Duration } from "./sprinklers";
+import { SprinklersDevice, Section, Program, Duration, Schedule } from "./sprinklers";
 import { Item, Table, Header, Segment, Form, Input, DropdownItemProps } from "semantic-ui-react";
 import FontAwesome = require("react-fontawesome");
 import * as classNames from "classnames";
@@ -64,28 +64,55 @@ class DurationInput extends React.Component<{
 }, void> {
     public render() {
         const duration = this.props.duration;
+        const editing = this.props.onDurationChange != null;
         return <div className="field durationInput">
             <label>Duration</label>
             <div className="fields">
-                <Form.Field control={Input} className="durationInput--minutes" placeholder="Minutes"
-                    value={duration.minutes} />
-                <Form.Field className="durationInput--colon"><span>:</span></Form.Field>
-                <Form.Field control={Input} className="durationInput--seconds" placeholder="Seconds"
-                    value={duration.seconds} />
+                <Input type="number" className="field durationInput--minutes"
+                    value={duration.minutes} onChange={this.onMinutesChange}
+                    label="M" labelPosition="right" />
+                <Input type="number" className="field durationInput--seconds"
+                    value={duration.seconds} onChange={this.onSecondsChange} max="60"
+                    label="S" labelPosition="right" />
             </div>
         </div>;
+    }
+
+    private onMinutesChange = (e, { value }) => {
+        this.props.onDurationChange(new Duration(Number(value), this.props.duration.seconds));
+    }
+
+    private onSecondsChange = (e, { value }) => {
+        let newSeconds = Number(value);
+        let newMinutes = this.props.duration.minutes;
+        if (newSeconds >= 60) {
+            newMinutes++;
+            newSeconds = 0;
+        }
+        if (newSeconds < 0) {
+            newMinutes = Math.max(0, newMinutes - 1);
+            newSeconds = 59;
+        }
+        this.props.onDurationChange(new Duration(newMinutes, newSeconds));
     }
 }
 
 @observer
-class RunSectionForm extends React.Component<{ sections: Section[] }, void> {
+class RunSectionForm extends React.Component<{ sections: Section[] }, { duration: Duration }> {
+    public componentWillMount() {
+        this.setState({
+            duration: new Duration(1, 1),
+        });
+    }
+
     public render() {
         return <Segment>
             <Header>Run Section</Header>
             <Form>
                 <Form.Group>
                     <Form.Select label="Section" placeholder="Section" options={this.sectionOptions} />
-                    <DurationInput duration={new Duration(1, 1)} />
+                    <DurationInput duration={this.state.duration}
+                        onDurationChange={(newDuration) => this.setState({ duration: newDuration })} />
                 </Form.Group>
             </Form>
         </Segment>;
@@ -101,19 +128,41 @@ class RunSectionForm extends React.Component<{ sections: Section[] }, void> {
 }
 
 @observer
+class ScheduleView extends React.PureComponent<{ schedule: Schedule }, void> {
+    public render() {
+        return (
+            <div>{JSON.stringify(this.props.schedule)}</div>
+        );
+    }
+}
+
+@observer
 class ProgramTable extends React.PureComponent<{ programs: Program[] }, void> {
     private static renderRow(program: Program, i: number) {
         if (!program) {
             return null;
         }
-        const { name, running } = program;
-        return (
+        const { name, running, enabled, schedule, sequence } = program;
+        return [
             <Table.Row key={i}>
                 <Table.Cell className="program--number">{"" + (i + 1)}</Table.Cell>
                 <Table.Cell className="program--name">{name}</Table.Cell>
                 <Table.Cell className="program--running">{running ? "Running" : "Not running"}</Table.Cell>
+                <Table.Cell className="program--enabled">{enabled ? "Enabled" : "Not enabled"}</Table.Cell>
             </Table.Row>
-        );
+            ,
+            <Table.Row key={i + .5}>
+                <Table.Cell className="program--sequence" colSpan="4">
+                    <ul>
+                        {sequence.map((item) =>
+                     (<li>Section {item.section + 1 + ""} for
+                          {item.duration.minutes}M {item.duration.seconds}S</li>))}
+                     </ul>
+                     <ScheduleView schedule={schedule} />
+                </Table.Cell>
+            </Table.Row>
+            ,
+        ];
     }
 
     public render() {
@@ -121,17 +170,18 @@ class ProgramTable extends React.PureComponent<{ programs: Program[] }, void> {
             <Table celled>
                 <Table.Header>
                     <Table.Row>
-                        <Table.HeaderCell colSpan="3">Programs</Table.HeaderCell>
+                        <Table.HeaderCell colSpan="7">Programs</Table.HeaderCell>
                     </Table.Row>
                     <Table.Row>
                         <Table.HeaderCell className="program--number">#</Table.HeaderCell>
                         <Table.HeaderCell className="program--name">Name</Table.HeaderCell>
-                        <Table.HeaderCell className="program--running">Running</Table.HeaderCell>
+                        <Table.HeaderCell className="program--running">Running?</Table.HeaderCell>
+                        <Table.HeaderCell className="program--enabled">Enabled?</Table.HeaderCell>
                     </Table.Row>
                 </Table.Header>
                 <Table.Body>
                     {
-                        this.props.programs.map(ProgramTable.renderRow)
+                        Array.prototype.concat.apply([], this.props.programs.map(ProgramTable.renderRow))
                     }
                 </Table.Body>
             </Table>
