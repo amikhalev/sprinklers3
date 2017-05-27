@@ -1,11 +1,25 @@
 import { observable, IObservableArray } from "mobx";
 
-export class Section {
+export abstract class Section {
+    public device: SprinklersDevice;
+
     @observable
     public name: string = "";
 
     @observable
     public state: boolean = false;
+
+    constructor(device: SprinklersDevice) {
+        this.device = device;
+    }
+
+    public run(duration: Duration) {
+        this.device.runSection(this, duration);
+    }
+
+    public toString(): string {
+        return `Section{name="${this.name}", state=${this.state}}`;
+    }
 }
 
 export interface ITimeOfDay {
@@ -42,6 +56,30 @@ export class Duration {
     public toSeconds(): number {
         return this.minutes * 60 + this.seconds;
     }
+
+    public withSeconds(newSeconds: number): Duration {
+        let newMinutes = this.minutes;
+        if (newSeconds >= 60) {
+            newMinutes++;
+            newSeconds = 0;
+        }
+        if (newSeconds < 0) {
+            newMinutes = Math.max(0, newMinutes - 1);
+            newSeconds = 59;
+        }
+        return new Duration(newMinutes, newSeconds);
+    }
+
+    public withMinutes(newMinutes: number): Duration {
+        if (newMinutes < 0) {
+            newMinutes = 0;
+        }
+        return new Duration(newMinutes, this.seconds);
+    }
+
+    public toString(): string {
+        return `${this.minutes}M ${this.seconds}S`;
+    }
 }
 
 export interface IProgramItem {
@@ -76,6 +114,8 @@ export abstract class SprinklersDevice {
 
     @observable
     public programs: IObservableArray<Program> = [] as IObservableArray<Program>;
+
+    public abstract runSection(section: number | Section, duration: Duration);
 
     abstract get id(): string;
 }

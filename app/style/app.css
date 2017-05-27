@@ -35,7 +35,7 @@
 
 }
 
-.durationInput--minutes,
-.durationInput--seconds {
-    width: 80px;
+.durationInput--minutes > input,
+.durationInput--seconds > input {
+    width: 70px !important;
 }

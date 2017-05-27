@@ -1,9 +1,10 @@
 import * as React from "react";
-import { computed } from "mobx";
+import {SyntheticEvent} from "react";
+import {computed} from "mobx";
 import DevTools from "mobx-react-devtools";
-import { observer } from "mobx-react";
-import { SprinklersDevice, Section, Program, Duration, Schedule } from "./sprinklers";
-import { Item, Table, Header, Segment, Form, Input, DropdownItemProps } from "semantic-ui-react";
+import {observer} from "mobx-react";
+import {SprinklersDevice, Section, Program, Duration, Schedule} from "./sprinklers";
+import {Item, Table, Header, Segment, Form, Input, Button, DropdownItemProps, DropdownProps} from "semantic-ui-react";
 import FontAwesome = require("react-fontawesome");
 import * as classNames from "classnames";
 
@@ -19,7 +20,7 @@ class SectionTable extends React.PureComponent<{ sections: Section[] }, void> {
         if (!section) {
             return null;
         }
-        const { name, state } = section;
+        const {name, state} = section;
         return (
             <Table.Row key={index}>
                 <Table.Cell className="section--number">{"" + (index + 1)}</Table.Cell>
@@ -29,7 +30,7 @@ class SectionTable extends React.PureComponent<{ sections: Section[] }, void> {
                     "section--state-true": state,
                     "section--state-false": !state,
                 })}>{state ?
-                    (<span><FontAwesome name="tint" /> Irrigating</span>)
+                    (<span><FontAwesome name="tint"/> Irrigating</span>)
                     : "Not irrigating"}
                 </Table.Cell>
             </Table.Row>
@@ -38,22 +39,22 @@ class SectionTable extends React.PureComponent<{ sections: Section[] }, void> {
 
     public render() {
         return (<Table celled striped>
-            <Table.Header>
-                <Table.Row>
-                    <Table.HeaderCell colSpan="3">Sections</Table.HeaderCell>
-                </Table.Row>
-                <Table.Row>
-                    <Table.HeaderCell className="section--number">#</Table.HeaderCell>
-                    <Table.HeaderCell className="section--name">Name</Table.HeaderCell>
-                    <Table.HeaderCell className="section--state">State</Table.HeaderCell>
-                </Table.Row>
-            </Table.Header>
-            <Table.Body>
-                {
-                    this.props.sections.map(SectionTable.renderRow)
-                }
-            </Table.Body>
-        </Table>
+                <Table.Header>
+                    <Table.Row>
+                        <Table.HeaderCell colSpan="3">Sections</Table.HeaderCell>
+                    </Table.Row>
+                    <Table.Row>
+                        <Table.HeaderCell className="section--number">#</Table.HeaderCell>
+                        <Table.HeaderCell className="section--name">Name</Table.HeaderCell>
+                        <Table.HeaderCell className="section--state">State</Table.HeaderCell>
+                    </Table.Row>
+                </Table.Header>
+                <Table.Body>
+                    {
+                        this.props.sections.map(SectionTable.renderRow)
+                    }
+                </Table.Body>
+            </Table>
         );
     }
 }
@@ -64,58 +65,85 @@ class DurationInput extends React.Component<{
 }, void> {
     public render() {
         const duration = this.props.duration;
-        const editing = this.props.onDurationChange != null;
+        // const editing = this.props.onDurationChange != null;
         return <div className="field durationInput">
             <label>Duration</label>
             <div className="fields">
                 <Input type="number" className="field durationInput--minutes"
-                    value={duration.minutes} onChange={this.onMinutesChange}
-                    label="M" labelPosition="right" />
+                       value={duration.minutes} onChange={this.onMinutesChange}
+                       label="M" labelPosition="right"/>
                 <Input type="number" className="field durationInput--seconds"
-                    value={duration.seconds} onChange={this.onSecondsChange} max="60"
-                    label="S" labelPosition="right" />
+                       value={duration.seconds} onChange={this.onSecondsChange} max="60"
+                       label="S" labelPosition="right"/>
             </div>
         </div>;
     }
 
-    private onMinutesChange = (e, { value }) => {
-        this.props.onDurationChange(new Duration(Number(value), this.props.duration.seconds));
+    private onMinutesChange = (e, {value}) => {
+        if (value.length === 0 || isNaN(value)) {
+            return;
+        }
+        const newMinutes = parseInt(value, 10);
+        this.props.onDurationChange(this.props.duration.withMinutes(newMinutes));
     }
 
-    private onSecondsChange = (e, { value }) => {
-        let newSeconds = Number(value);
-        let newMinutes = this.props.duration.minutes;
-        if (newSeconds >= 60) {
-            newMinutes++;
-            newSeconds = 0;
+    private onSecondsChange = (e, {value}) => {
+        if (value.length === 0 || isNaN(value)) {
+            return;
         }
-        if (newSeconds < 0) {
-            newMinutes = Math.max(0, newMinutes - 1);
-            newSeconds = 59;
-        }
-        this.props.onDurationChange(new Duration(newMinutes, newSeconds));
+        const newSeconds = parseInt(value, 10);
+        this.props.onDurationChange(this.props.duration.withSeconds(newSeconds));
     }
 }
 
 @observer
-class RunSectionForm extends React.Component<{ sections: Section[] }, { duration: Duration }> {
-    public componentWillMount() {
-        this.setState({
+class RunSectionForm extends React.Component<{
+    sections: Section[],
+}, {
+    duration: Duration,
+    section: number | "",
+}> {
+    constructor() {
+        super();
+        this.state = {
             duration: new Duration(1, 1),
-        });
+            section: "",
+        };
     }
 
     public render() {
+        const {section, duration} = this.state;
         return <Segment>
             <Header>Run Section</Header>
             <Form>
                 <Form.Group>
-                    <Form.Select label="Section" placeholder="Section" options={this.sectionOptions} />
-                    <DurationInput duration={this.state.duration}
-                        onDurationChange={(newDuration) => this.setState({ duration: newDuration })} />
+                    <Form.Select label="Section" placeholder="Section" options={this.sectionOptions} value={section}
+                                 onChange={this.onSectionChange}/>
+                    <DurationInput duration={duration} onDurationChange={this.onDurationChange}/>
+                    {/*Label must be &nbsp; to align it properly*/}
+                    <Form.Button label="&nbsp;" primary onClick={this.run} disabled={!this.isValid}>Run</Form.Button>
                 </Form.Group>
             </Form>
         </Segment>;
+    }
+
+    private onSectionChange = (e: SyntheticEvent<HTMLElement>, v: DropdownProps) => {
+        this.setState({section: v.value as number});
+    }
+
+    private onDurationChange = (newDuration: Duration) => {
+        this.setState({duration: newDuration});
+    }
+
+    private run = (e: SyntheticEvent<HTMLElement>) => {
+        e.preventDefault();
+        const section: Section = this.props.sections[this.state.section];
+        console.log(`should run section ${section} for ${this.state.duration}`);
+        section.run(this.state.duration);
+    }
+
+    private get isValid(): boolean {
+        return typeof this.state.section === "number";
     }
 
     @computed
@@ -138,11 +166,11 @@ class ScheduleView extends React.PureComponent<{ schedule: Schedule }, void> {
 
 @observer
 class ProgramTable extends React.PureComponent<{ programs: Program[] }, void> {
-    private static renderRow(program: Program, i: number) {
+    private static renderRow(program: Program, i: number): JSX.Element[] {
         if (!program) {
             return null;
         }
-        const { name, running, enabled, schedule, sequence } = program;
+        const {name, running, enabled, schedule, sequence} = program;
         return [
             <Table.Row key={i}>
                 <Table.Cell className="program--number">{"" + (i + 1)}</Table.Cell>
@@ -155,10 +183,10 @@ class ProgramTable extends React.PureComponent<{ programs: Program[] }, void> {
                 <Table.Cell className="program--sequence" colSpan="4">
                     <ul>
                         {sequence.map((item) =>
-                     (<li>Section {item.section + 1 + ""} for
-                          {item.duration.minutes}M {item.duration.seconds}S</li>))}
-                     </ul>
-                     <ScheduleView schedule={schedule} />
+                            (<li>Section {item.section + 1 + ""} for&nbsp;
+                                {item.duration.minutes}M {item.duration.seconds}S</li>))}
+                    </ul>
+                    <ScheduleView schedule={schedule}/>
                 </Table.Cell>
             </Table.Row>
             ,
@@ -189,13 +217,13 @@ class ProgramTable extends React.PureComponent<{ programs: Program[] }, void> {
     }
 }
 
-const ConnectionState = ({ connected }: { connected: boolean }) =>
+const ConnectionState = ({connected}: { connected: boolean }) =>
     <span className={classNames({
         "device--connectionState": true,
         "device--connectionState-connected": connected,
         "device--connectionState-disconnected": !connected,
     })}>
-        <FontAwesome name={connected ? "plug" : "chain-broken"} />
+        <FontAwesome name={connected ? "plug" : "chain-broken"}/>
         &nbsp;
         {connected ? "Connected" : "Disconnected"}
     </span>;
@@ -203,21 +231,21 @@ const ConnectionState = ({ connected }: { connected: boolean }) =>
 @observer
 class DeviceView extends React.PureComponent<{ device: SprinklersDevice }, void> {
     public render() {
-        const { id, connected, sections, programs } = this.props.device;
+        const {id, connected, sections, programs} = this.props.device;
         return (
             <Item>
-                <Item.Image src={require<string>("app/images/raspberry_pi.png")} />
+                <Item.Image src={require<string>("app/images/raspberry_pi.png")}/>
                 <Item.Content>
                     <Header as="h1">
                         <span>Device </span><kbd>{id}</kbd>
-                        <ConnectionState connected={connected} />
+                        <ConnectionState connected={connected}/>
                     </Header>
                     <Item.Meta>
 
                     </Item.Meta>
-                    <SectionTable sections={sections} />
-                    <RunSectionForm sections={sections} />
-                    <ProgramTable programs={programs} />
+                    <SectionTable sections={sections}/>
+                    <RunSectionForm sections={sections}/>
+                    <ProgramTable programs={programs}/>
                 </Item.Content>
             </Item>
         );
@@ -228,7 +256,7 @@ class DeviceView extends React.PureComponent<{ device: SprinklersDevice }, void>
 export default class App extends React.PureComponent<{ device: SprinklersDevice }, any> {
     public render() {
         return <Item.Group divided>
-            <DeviceView device={this.props.device} />
+            <DeviceView device={this.props.device}/>
             <DevTools />
         </Item.Group>;
     }

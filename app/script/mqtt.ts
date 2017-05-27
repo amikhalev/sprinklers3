@@ -2,7 +2,6 @@ import "paho-mqtt/mqttws31";
 import MQTT = Paho.MQTT;
 
 import { EventEmitter } from "events";
-import * as objectAssign from "object-assign";
 import {
     SprinklersDevice, ISprinklersApi, Section, Program, IProgramItem, Schedule, ITimeOfDay, Weekday, Duration,
 } from "./sprinklers";
@@ -80,7 +79,7 @@ export class MqttApiClient extends EventEmitter implements ISprinklersApi {
         const topic = m.destinationName.substr(topicIdx + 1);
         const device = this.devices[prefix];
         if (!device) {
-            console.warn(`recieved message for unknown device. prefix: ${prefix}`);
+            console.warn(`received message for unknown device. prefix: ${prefix}`);
             return;
         }
         device.onMessage(topic, m.payloadString);
@@ -134,7 +133,7 @@ class MqttSprinklersDevice extends SprinklersDevice {
                 const secNum = Number(secStr);
                 let section = this.sections[secNum];
                 if (!section) {
-                    this.sections[secNum] = section = new MqttSection();
+                    this.sections[secNum] = section = new MqttSection(this);
                 }
                 (section as MqttSection).onMessage(subTopic, payload);
             }
@@ -163,6 +162,23 @@ class MqttSprinklersDevice extends SprinklersDevice {
         return this.prefix;
     }
 
+    public runSection(section: Section | number, duration: Duration) {
+        let sectionNum: number;
+        if (typeof section === "number") {
+            sectionNum = section;
+        } else {
+            sectionNum = this.sections.indexOf(section);
+        }
+        if (sectionNum < 0 || sectionNum > this.sections.length) {
+            throw new Error(`Invalid section to run: ${section}`);
+        }
+        const message = new MQTT.Message(JSON.stringify({
+            duration: duration.toSeconds(),
+        } as IRunSectionJSON));
+        message.destinationName = `${this.prefix}/sections/${sectionNum}/run`;
+        this.apiClient.client.send(message);
+    }
+
     private get subscriptions() {
         return [
             `${this.prefix}/connected`,
@@ -179,7 +195,16 @@ interface ISectionJSON {
     pin: number;
 }
 
+interface IRunSectionJSON {
+    duration: number;
+}
+
 class MqttSection extends Section {
+
+    constructor(device: MqttSprinklersDevice) {
+        super(device);
+    }
+
     public onMessage(topic: string, payload: string) {
         if (topic === "state") {
             this.state = (payload === "true");
