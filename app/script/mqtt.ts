@@ -1,10 +1,12 @@
 import "paho-mqtt/mqttws31";
 import MQTT = Paho.MQTT;
 
-import { EventEmitter } from "events";
+import {EventEmitter} from "events";
 import {
     SprinklersDevice, ISprinklersApi, Section, Program, IProgramItem, Schedule, ITimeOfDay, Weekday, Duration,
 } from "./sprinklers";
+import {checkedIndexOf} from "./utils";
+import * as Promise from "bluebird";
 
 export class MqttApiClient extends EventEmitter implements ISprinklersApi {
     private static newClientId() {
@@ -94,6 +96,10 @@ class MqttSprinklersDevice extends SprinklersDevice {
     public readonly apiClient: MqttApiClient;
     public readonly prefix: string;
 
+    private responseCallbacks: {
+        [rid: number]: ResponseCallback;
+    } = {};
+
     constructor(apiClient: MqttApiClient, prefix: string) {
         super();
         this.apiClient = apiClient;
@@ -103,7 +109,7 @@ class MqttSprinklersDevice extends SprinklersDevice {
     public doSubscribe() {
         const c = this.apiClient.client;
         this.subscriptions
-            .forEach((filter) => c.subscribe(filter, { qos: 1 }));
+            .forEach((filter) => c.subscribe(filter, {qos: 1}));
     }
 
     public doUnsubscribe() {
@@ -149,13 +155,25 @@ class MqttSprinklersDevice extends SprinklersDevice {
                 const progNum = Number(progStr);
                 let program = this.programs[progNum];
                 if (!program) {
-                    this.programs[progNum] = program = new MqttProgram();
+                    this.programs[progNum] = program = new MqttProgram(this);
                 }
                 (program as MqttProgram).onMessage(subTopic, payload);
             }
-        } else {
-            console.warn(`MqttSprinklersDevice recieved invalid topic: ${topic}`);
+            return;
         }
+        matches = topic.match(/^responses\/(\d+)$/);
+        if (matches != null) {
+            const [_topic, respIdStr] = matches;
+            console.log(`response: ${respIdStr}`);
+            const respId = parseInt(respIdStr, 10);
+            const data = JSON.parse(payload) as IResponseData;
+            const cb = this.responseCallbacks[respId];
+            if (typeof cb === "function") {
+                cb(data);
+            }
+            return;
+        }
+        console.warn(`MqttSprinklersDevice recieved invalid topic: ${topic}`);
     }
 
     get id(): string {
@@ -163,20 +181,43 @@ class MqttSprinklersDevice extends SprinklersDevice {
     }
 
     public runSection(section: Section | number, duration: Duration) {
-        let sectionNum: number;
-        if (typeof section === "number") {
-            sectionNum = section;
-        } else {
-            sectionNum = this.sections.indexOf(section);
-        }
-        if (sectionNum < 0 || sectionNum > this.sections.length) {
-            throw new Error(`Invalid section to run: ${section}`);
-        }
-        const message = new MQTT.Message(JSON.stringify({
-            duration: duration.toSeconds(),
-        } as IRunSectionJSON));
-        message.destinationName = `${this.prefix}/sections/${sectionNum}/run`;
-        this.apiClient.client.send(message);
+        const sectionNum = checkedIndexOf(section, this.sections, "Section");
+        return this.makeRequest(`sections/${sectionNum}/run`,
+            {
+                duration: duration.toSeconds(),
+            } as IRunSectionJSON);
+    }
+
+    public runProgram(program: Program | number) {
+        const programNum = checkedIndexOf(program, this.programs, "Program");
+        return this.makeRequest(`programs/${programNum}/run`, {});
+    }
+
+    private nextRequestId(): number {
+        return Math.floor(Math.random() * 1000000000);
+    }
+
+    private makeRequest(topic: string, payload: object | string): Promise<IResponseData> {
+        return new Promise<IResponseData>((resolve, reject) => {
+            let payloadStr: string;
+            if (typeof payload === "string") {
+                payloadStr = payload;
+            } else {
+                payloadStr = JSON.stringify(payload);
+            }
+            const message = new MQTT.Message(payloadStr);
+            message.destinationName = this.prefix + "/" + topic;
+            const requestId = this.nextRequestId();
+            this.responseCallbacks[requestId] = (data) => {
+                if (data.error != null) {
+                    reject(data);
+                } else {
+                    resolve(data);
+                }
+            };
+            this.apiClient.client.send(message);
+        });
+
     }
 
     private get subscriptions() {
@@ -186,9 +227,18 @@ class MqttSprinklersDevice extends SprinklersDevice {
             `${this.prefix}/sections/+/#`,
             `${this.prefix}/programs`,
             `${this.prefix}/programs/+/#`,
+            `${this.prefix}/responses/+`,
         ];
     }
 }
+
+interface IResponseData {
+    reqTopic: string;
+    error?: string;
+    [key: string]: any;
+}
+
+type ResponseCallback = (IResponseData) => void;
 
 interface ISectionJSON {
     name: string;
@@ -200,11 +250,6 @@ interface IRunSectionJSON {
 }
 
 class MqttSection extends Section {
-
-    constructor(device: MqttSprinklersDevice) {
-        super(device);
-    }
-
     public onMessage(topic: string, payload: string) {
         if (topic === "state") {
             this.state = (payload === "true");

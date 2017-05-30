@@ -14,7 +14,7 @@ export abstract class Section {
     }
 
     public run(duration: Duration) {
-        this.device.runSection(this, duration);
+        return this.device.runSection(this, duration);
     }
 
     public toString(): string {
@@ -90,6 +90,12 @@ export interface IProgramItem {
 }
 
 export class Program {
+    public device: SprinklersDevice;
+
+    constructor(device: SprinklersDevice) {
+        this.device = device;
+    }
+
     @observable
     public name: string = "";
     @observable
@@ -103,6 +109,15 @@ export class Program {
 
     @observable
     public running: boolean = false;
+
+    public run() {
+        return this.device.runProgram(this);
+    }
+
+    public toString(): string {
+        return `Program{name="${this.name}", enabled=${this.enabled}, schedule=${this.schedule},
+         sequence=${this.sequence}, running=${this.running}}`;
+    }
 }
 
 export abstract class SprinklersDevice {
@@ -115,7 +130,9 @@ export abstract class SprinklersDevice {
     @observable
     public programs: IObservableArray<Program> = [] as IObservableArray<Program>;
 
-    public abstract runSection(section: number | Section, duration: Duration);
+    public abstract runSection(section: number | Section, duration: Duration): Promise<{}>;
+
+    public abstract runProgram(program: number | Program): Promise<{}>;
 
     abstract get id(): string;
 }

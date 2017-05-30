@@ -4,13 +4,14 @@ import {computed} from "mobx";
 import DevTools from "mobx-react-devtools";
 import {observer} from "mobx-react";
 import {SprinklersDevice, Section, Program, Duration, Schedule} from "./sprinklers";
-import {Item, Table, Header, Segment, Form, Input, Button, DropdownItemProps, DropdownProps} from "semantic-ui-react";
+import {Item, Table, Header, Segment, Form, Input, Button, DropdownItemProps, DropdownProps, Message} from "semantic-ui-react";
 import FontAwesome = require("react-fontawesome");
 import * as classNames from "classnames";
 
 import "semantic-ui-css/semantic.css";
 import "font-awesome/css/font-awesome.css";
 import "app/style/app.css";
+import {Message as UiMessage, UiStore} from "./ui";
 
 /* tslint:disable:object-literal-sort-keys */
 
@@ -139,7 +140,9 @@ class RunSectionForm extends React.Component<{
         e.preventDefault();
         const section: Section = this.props.sections[this.state.section];
         console.log(`should run section ${section} for ${this.state.duration}`);
-        section.run(this.state.duration);
+        section.run(this.state.duration)
+            .then((a) => console.log("ran section", a))
+            .catch((err) => console.error("error running section", err));
     }
 
     private get isValid(): boolean {
@@ -253,9 +256,30 @@ class DeviceView extends React.PureComponent<{ device: SprinklersDevice }, void>
 }
 
 @observer
-export default class App extends React.PureComponent<{ device: SprinklersDevice }, any> {
+class MessagesView extends React.PureComponent<{uiStore: UiStore}, void> {
+    public render() {
+        return <div>
+            {this.props.uiStore.messages.map(this.renderMessage)}
+        </div>;
+    }
+
+    private renderMessage = (message: UiMessage, index: number) => {
+        const {header, content, type} = message;
+        return <Message header={header} content={content} success={type === UiMessage.Type.Success}
+            info={type === UiMessage.Type.Info} warning={type === UiMessage.Type.Warning}
+                        error={type === UiMessage.Type.Error} onDismiss={() => this.dismiss(index)}/>;
+    }
+
+    private dismiss(index: number) {
+        this.props.uiStore.messages.splice(index, 1);
+    }
+}
+
+@observer
+export default class App extends React.PureComponent<{ device: SprinklersDevice, uiStore: UiStore }, any> {
     public render() {
         return <Item.Group divided>
+            <MessagesView uiStore={this.props.uiStore} />
             <DeviceView device={this.props.device}/>
             <DevTools />
         </Item.Group>;

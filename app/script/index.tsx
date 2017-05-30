@@ -4,22 +4,25 @@ import { AppContainer } from "react-hot-loader";
 
 import App from "./App";
 import { MqttApiClient } from "./mqtt";
+import {Message, UiStore} from "./ui";
 
 const client = new MqttApiClient();
 client.start();
 const device = client.getDevice("grinklers");
+const uiStore = new UiStore();
+uiStore.addMessage(new Message("asdf", "boo!", Message.Type.Error));
 
 const rootElem = document.getElementById("app");
 
 ReactDOM.render(<AppContainer>
-    <App device={device} />
+    <App device={device} uiStore={uiStore} />
 </AppContainer>, rootElem);
 
 if (module.hot) {
     module.hot.accept("./App", () => {
         const NextApp = require<any>("./App").default;
         ReactDOM.render(<AppContainer>
-            <NextApp device={device} />
+            <App device={device} uiStore={uiStore} />
         </AppContainer>, rootElem);
     });
 }
