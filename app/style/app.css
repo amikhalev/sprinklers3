@@ -39,3 +39,38 @@
 .durationInput--seconds > input {
     width: 70px !important;
 }
+
+.messages {
+    position: fixed;
+    top: 12px;
+    left: 12px;
+    right: 12px;
+    z-index: 1000;
+}
+
+.message-enter,
+.message-appear {
+    opacity: 0.01;
+}
+
+.message-enter.message-enter-active,
+.message-appear.message-appear-active {
+    opacity: 1;
+    transition: all 500ms ease-in;
+}
+
+.message-leave {
+    /*opacity: 1;*/
+    transform-origin: top;
+    overflow-y: hidden;
+}
+
+.message-leave.message-leave-active {
+    /*opacity: 0.01;*/
+    transform: scaleY(0.01);
+    /*height: 0;*/
+    margin-top: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+    transition: all 500ms ease-in;
+}

@@ -30,6 +30,7 @@
     "@types/react": "^15.0.26",
     "@types/react-dom": "^15.5.0",
     "@types/react-fontawesome": "^1.5.0",
+    "@types/react-transition-group": "^1.1.1",
     "classnames": "^2.2.5",
     "core-js": "^2.4.1",
     "font-awesome": "^4.7.0",
@@ -40,6 +41,7 @@
     "react": "^15.5.4",
     "react-dom": "^15.5.4",
     "react-fontawesome": "^1.6.1",
+    "react-transition-group": "^1.2.0",
     "semantic-ui-css": "^2.2.10",
     "semantic-ui-react": "^0.70.0",
     "webpack-merge": "^4.1.0"
@@ -53,9 +55,9 @@
     "mobx-react-devtools": "^4.2.13",
     "react-hot-loader": "^3.0.0-beta.6",
     "source-map-loader": "^0.2.1",
-    "style-loader": "^0.18.2",
+    "style-loader": "^0.18.1",
     "ts-loader": "^2.1.0",
-    "tslint": "^5.4.3",
+    "tslint": "^5.4.2",
     "typescript": "^2.3.4",
     "webpack": "^3.0.0",
     "webpack-dev-server": "^2.4.4"
