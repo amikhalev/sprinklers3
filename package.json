@@ -9,7 +9,7 @@
     "clean": "rm -rf ./dist ./build",
     "build": "webpack --config ./webpack/prod.config.js",
     "start": "webpack-dev-server --config ./webpack/dev.config.js",
-    "lint": "tslint app/script/**/* || :"
+    "lint": "tslint app/script/**/* --force"
   },
   "repository": {
     "type": "git",
