@@ -40,7 +40,8 @@
     "react-dom": "^15.5.4",
     "react-fontawesome": "^1.6.1",
     "semantic-ui-css": "^2.2.10",
-    "semantic-ui-react": "^0.68.5"
+    "semantic-ui-react": "^0.68.5",
+    "webpack-merge": "^4.1.0"
   },
   "devDependencies": {
     "@types/webpack-env": "^1.13.0",
