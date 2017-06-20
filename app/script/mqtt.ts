@@ -1,9 +1,9 @@
-import "paho-mqtt/mqttws31";
+import "paho-mqtt";
 import MQTT = Paho.MQTT;
 
 import {EventEmitter} from "events";
 import {
-    SprinklersDevice, ISprinklersApi, Section, Program, IProgramItem, Schedule, ITimeOfDay, Weekday, Duration,
+    SprinklersDevice, ISprinklersApi, Section, Program, Schedule, ITimeOfDay, Duration,
 } from "./sprinklers";
 import {checkedIndexOf} from "./utils";
 import * as Promise from "bluebird";
@@ -13,11 +13,11 @@ export class MqttApiClient extends EventEmitter implements ISprinklersApi {
         return "sprinklers3-MqttApiClient-" + Math.round(Math.random() * 1000);
     }
 
-    public client: MQTT.Client;
+    client: MQTT.Client;
 
-    public connected: boolean;
+    connected: boolean;
 
-    public devices: { [prefix: string]: MqttSprinklersDevice } = {};
+    devices: { [prefix: string]: MqttSprinklersDevice } = {};
 
     constructor() {
         super();
@@ -27,7 +27,7 @@ export class MqttApiClient extends EventEmitter implements ISprinklersApi {
         // (this.client as any).trace = (m => console.log(m));
     }
 
-    public start() {
+    start() {
         console.log("connecting to mqtt with client id %s", this.client.clientId);
         this.client.connect({
             onFailure: (e) => {
@@ -44,7 +44,7 @@ export class MqttApiClient extends EventEmitter implements ISprinklersApi {
         });
     }
 
-    public getDevice(prefix: string): SprinklersDevice {
+    getDevice(prefix: string): SprinklersDevice {
         if (/\//.test(prefix)) {
             throw new Error("Prefix cannot contain a /");
         }
@@ -57,7 +57,7 @@ export class MqttApiClient extends EventEmitter implements ISprinklersApi {
         return this.devices[prefix];
     }
 
-    public removeDevice(prefix: string) {
+    removeDevice(prefix: string) {
         const device = this.devices[prefix];
         if (!device) {
             return;
@@ -93,8 +93,8 @@ export class MqttApiClient extends EventEmitter implements ISprinklersApi {
 }
 
 class MqttSprinklersDevice extends SprinklersDevice {
-    public readonly apiClient: MqttApiClient;
-    public readonly prefix: string;
+    readonly apiClient: MqttApiClient;
+    readonly prefix: string;
 
     private responseCallbacks: {
         [rid: number]: ResponseCallback;
@@ -106,13 +106,13 @@ class MqttSprinklersDevice extends SprinklersDevice {
         this.prefix = prefix;
     }
 
-    public doSubscribe() {
+    doSubscribe() {
         const c = this.apiClient.client;
         this.subscriptions
             .forEach((filter) => c.subscribe(filter, {qos: 1}));
     }
 
-    public doUnsubscribe() {
+    doUnsubscribe() {
         const c = this.apiClient.client;
         this.subscriptions
             .forEach((filter) => c.unsubscribe(filter));
@@ -123,7 +123,7 @@ class MqttSprinklersDevice extends SprinklersDevice {
      * @param topic The topic, with prefix removed
      * @param payload The payload string
      */
-    public onMessage(topic: string, payload: string) {
+    onMessage(topic: string, payload: string) {
         if (topic === "connected") {
             this.connected = (payload === "true");
             // console.log(`MqttSprinklersDevice with prefix ${this.prefix}: ${this.connected}`)
@@ -131,6 +131,7 @@ class MqttSprinklersDevice extends SprinklersDevice {
         }
         let matches = topic.match(/^sections(?:\/(\d+)(?:\/?(.+))?)?$/);
         if (matches != null) {
+            //noinspection JSUnusedLocalSymbols
             const [_topic, secStr, subTopic] = matches;
             // console.log(`section: ${secStr}, topic: ${subTopic}, payload: ${payload}`);
             if (!secStr) { // new number of sections
@@ -147,6 +148,7 @@ class MqttSprinklersDevice extends SprinklersDevice {
         }
         matches = topic.match(/^programs(?:\/(\d+)(?:\/?(.+))?)?$/);
         if (matches != null) {
+            //noinspection JSUnusedLocalSymbols
             const [_topic, progStr, subTopic] = matches;
             // console.log(`program: ${progStr}, topic: ${subTopic}, payload: ${payload}`);
             if (!progStr) { // new number of programs
@@ -163,6 +165,7 @@ class MqttSprinklersDevice extends SprinklersDevice {
         }
         matches = topic.match(/^responses\/(\d+)$/);
         if (matches != null) {
+            //noinspection JSUnusedLocalSymbols
             const [_topic, respIdStr] = matches;
             console.log(`response: ${respIdStr}`);
             const respId = parseInt(respIdStr, 10);
@@ -180,7 +183,7 @@ class MqttSprinklersDevice extends SprinklersDevice {
         return this.prefix;
     }
 
-    public runSection(section: Section | number, duration: Duration) {
+    runSection(section: Section | number, duration: Duration) {
         const sectionNum = checkedIndexOf(section, this.sections, "Section");
         return this.makeRequest(`sections/${sectionNum}/run`,
             {
@@ -188,23 +191,20 @@ class MqttSprinklersDevice extends SprinklersDevice {
             } as IRunSectionJSON);
     }
 
-    public runProgram(program: Program | number) {
+    runProgram(program: Program | number) {
         const programNum = checkedIndexOf(program, this.programs, "Program");
         return this.makeRequest(`programs/${programNum}/run`, {});
     }
 
+    //noinspection JSMethodCanBeStatic
     private nextRequestId(): number {
         return Math.floor(Math.random() * 1000000000);
     }
 
     private makeRequest(topic: string, payload: object | string): Promise<IResponseData> {
         return new Promise<IResponseData>((resolve, reject) => {
-            let payloadStr: string;
-            if (typeof payload === "string") {
-                payloadStr = payload;
-            } else {
-                payloadStr = JSON.stringify(payload);
-            }
+            const payloadStr = (typeof payload === "string") ?
+                payload : JSON.stringify(payload);
             const message = new MQTT.Message(payloadStr);
             message.destinationName = this.prefix + "/" + topic;
             const requestId = this.nextRequestId();
@@ -250,7 +250,7 @@ interface IRunSectionJSON {
 }
 
 class MqttSection extends Section {
-    public onMessage(topic: string, payload: string) {
+    onMessage(topic: string, payload: string) {
         if (topic === "state") {
             this.state = (payload === "true");
         } else if (topic == null) {
@@ -289,7 +289,7 @@ interface IProgramJSON {
 }
 
 class MqttProgram extends Program {
-    public onMessage(topic: string, payload: string) {
+    onMessage(topic: string, payload: string) {
         if (topic === "running") {
             this.running = (payload === "true");
         } else if (topic == null) {
@@ -298,7 +298,7 @@ class MqttProgram extends Program {
         }
     }
 
-    public updateFromJSON(json: Partial<IProgramJSON>) {
+    updateFromJSON(json: Partial<IProgramJSON>) {
         if (json.name != null) {
             this.name = json.name;
         }

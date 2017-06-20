@@ -1,25 +1,25 @@
 {
-    "defaultSeverity": "error",
-    "extends": [
-        "tslint:recommended"
+  "defaultSeverity": "error",
+  "extends": [
+    "tslint:latest"
+  ],
+  "jsRules": {},
+  "rules": {
+    "no-console": [
+      false
     ],
-    "jsRules": {},
-    "rules": {
-        "no-console": [
-            false
-        ],
-        "max-classes-per-file": [
-            false
-        ],
-        "ordered-imports": [
-            false
-        ],
-        "variable-name": [
-            "allow-leading-underscore"
-        ],
-        "no-namespace": [
-            "allow-declarations"
-        ]
-    },
-    "rulesDirectory": []
+    "max-classes-per-file": [
+      false
+    ],
+    "ordered-imports": false,
+    "variable-name": [
+      "allow-leading-underscore"
+    ],
+    "no-namespace": [
+      "allow-declarations"
+    ],
+    "interface-name": false,
+    "member-access": [ true, "no-public" ]
+  },
+  "rulesDirectory": []
 }

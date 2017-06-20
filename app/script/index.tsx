@@ -2,7 +2,7 @@ import * as React from "react";
 import * as ReactDOM from "react-dom";
 import { AppContainer } from "react-hot-loader";
 
-import App from "./App";
+import App from "./components/App";
 import { MqttApiClient } from "./mqtt";
 import {Message, UiStore} from "./ui";
 
@@ -19,8 +19,8 @@ ReactDOM.render(<AppContainer>
 </AppContainer>, rootElem);
 
 if (module.hot) {
-    module.hot.accept("./App", () => {
-        const NextApp = require<any>("./App").default;
+    module.hot.accept("./components/App", () => {
+        const NextApp = require<any>("./components/App").default;
         ReactDOM.render(<AppContainer>
             <App device={device} uiStore={uiStore} />
         </AppContainer>, rootElem);

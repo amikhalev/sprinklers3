@@ -120,6 +120,10 @@ export class Program {
     }
 }
 
+export class SectionRunner {
+
+}
+
 export abstract class SprinklersDevice {
     @observable
     public connected: boolean = false;
