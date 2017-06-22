@@ -1,23 +1,23 @@
 import { observable, IObservableArray } from "mobx";
 
 export abstract class Section {
-    public device: SprinklersDevice;
+    device: SprinklersDevice;
 
     @observable
-    public name: string = "";
+    name: string = "";
 
     @observable
-    public state: boolean = false;
+    state: boolean = false;
 
     constructor(device: SprinklersDevice) {
         this.device = device;
     }
 
-    public run(duration: Duration) {
+    run(duration: Duration) {
         return this.device.runSection(this, duration);
     }
 
-    public toString(): string {
+    toString(): string {
         return `Section{name="${this.name}", state=${this.state}}`;
     }
 }
@@ -34,30 +34,30 @@ export enum Weekday {
 }
 
 export class Schedule {
-    public times: ITimeOfDay[] = [];
-    public weekdays: Weekday[] = [];
-    public from?: Date = null;
-    public to?: Date = null;
+    times: ITimeOfDay[] = [];
+    weekdays: Weekday[] = [];
+    from?: Date = null;
+    to?: Date = null;
 }
 
 export class Duration {
-    public static fromSeconds(seconds: number): Duration {
+    static fromSeconds(seconds: number): Duration {
         return new Duration(Math.floor(seconds / 60), seconds % 60);
     }
 
-    public minutes: number = 0;
-    public seconds: number = 0;
+    minutes: number = 0;
+    seconds: number = 0;
 
     constructor(minutes: number, seconds: number) {
         this.minutes = minutes;
         this.seconds = seconds;
     }
 
-    public toSeconds(): number {
+    toSeconds(): number {
         return this.minutes * 60 + this.seconds;
     }
 
-    public withSeconds(newSeconds: number): Duration {
+    withSeconds(newSeconds: number): Duration {
         let newMinutes = this.minutes;
         if (newSeconds >= 60) {
             newMinutes++;
@@ -70,14 +70,14 @@ export class Duration {
         return new Duration(newMinutes, newSeconds);
     }
 
-    public withMinutes(newMinutes: number): Duration {
+    withMinutes(newMinutes: number): Duration {
         if (newMinutes < 0) {
             newMinutes = 0;
         }
         return new Duration(newMinutes, this.seconds);
     }
 
-    public toString(): string {
+    toString(): string {
         return `${this.minutes}M ${this.seconds}S`;
     }
 }
@@ -90,31 +90,31 @@ export interface IProgramItem {
 }
 
 export class Program {
-    public device: SprinklersDevice;
+    device: SprinklersDevice;
+
+    @observable
+    name: string = "";
+    @observable
+    enabled: boolean = false;
+
+    @observable
+    schedule: Schedule = new Schedule();
+
+    @observable
+    sequence: IProgramItem[] = [];
+
+    @observable
+    running: boolean = false;
 
     constructor(device: SprinklersDevice) {
         this.device = device;
     }
 
-    @observable
-    public name: string = "";
-    @observable
-    public enabled: boolean = false;
-
-    @observable
-    public schedule: Schedule = new Schedule();
-
-    @observable
-    public sequence: IProgramItem[] = [];
-
-    @observable
-    public running: boolean = false;
-
-    public run() {
+    run() {
         return this.device.runProgram(this);
     }
 
-    public toString(): string {
+    toString(): string {
         return `Program{name="${this.name}", enabled=${this.enabled}, schedule=${this.schedule},
          sequence=${this.sequence}, running=${this.running}}`;
     }
@@ -126,17 +126,17 @@ export class SectionRunner {
 
 export abstract class SprinklersDevice {
     @observable
-    public connected: boolean = false;
+    connected: boolean = false;
 
     @observable
-    public sections: IObservableArray<Section> = [] as IObservableArray<Section>;
+    sections: IObservableArray<Section> = [] as IObservableArray<Section>;
 
     @observable
-    public programs: IObservableArray<Program> = [] as IObservableArray<Program>;
+    programs: IObservableArray<Program> = [] as IObservableArray<Program>;
 
-    public abstract runSection(section: number | Section, duration: Duration): Promise<{}>;
+    abstract runSection(section: number | Section, duration: Duration): Promise<{}>;
 
-    public abstract runProgram(program: number | Program): Promise<{}>;
+    abstract runProgram(program: number | Program): Promise<{}>;
 
     abstract get id(): string;
 }

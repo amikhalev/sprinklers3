@@ -185,10 +185,10 @@ class MqttSprinklersDevice extends SprinklersDevice {
 
     runSection(section: Section | number, duration: Duration) {
         const sectionNum = checkedIndexOf(section, this.sections, "Section");
-        return this.makeRequest(`sections/${sectionNum}/run`,
-            {
-                duration: duration.toSeconds(),
-            } as IRunSectionJSON);
+        const payload: IRunSectionJSON = {
+            duration: duration.toSeconds(),
+        };
+        return this.makeRequest(`sections/${sectionNum}/run`, payload);
     }
 
     runProgram(program: Program | number) {
