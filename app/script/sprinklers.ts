@@ -120,8 +120,33 @@ export class Program {
     }
 }
 
-export class SectionRunner {
+export interface ISectionRun {
+    id: number;
+    section: number;
+    duration: number;
+    startTime?: Date;
+}
 
+export class SectionRunner {
+    device: SprinklersDevice;
+
+    @observable
+    queue: IObservableArray<ISectionRun> = observable([]);
+
+    @observable
+    current: ISectionRun = null;
+
+    constructor(device: SprinklersDevice) {
+        this.device = device;
+    }
+
+    cancelRunById(id: number): Promise<void> {
+        return this.device.cancelSectionRunById(id);
+    }
+
+    toString(): string {
+        return `SectionRunner{queue="${this.queue}", current="${this.current}"}`;
+    }
 }
 
 export abstract class SprinklersDevice {
@@ -134,9 +159,14 @@ export abstract class SprinklersDevice {
     @observable
     programs: IObservableArray<Program> = [] as IObservableArray<Program>;
 
+    @observable
+    sectionRunner: SectionRunner;
+
     abstract runSection(section: number | Section, duration: Duration): Promise<{}>;
 
     abstract runProgram(program: number | Program): Promise<{}>;
+
+    abstract cancelSectionRunById(id: number): Promise<void>;
 
     abstract get id(): string;
 }

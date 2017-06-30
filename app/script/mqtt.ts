@@ -3,7 +3,7 @@ import MQTT = Paho.MQTT;
 
 import {EventEmitter} from "events";
 import {
-    SprinklersDevice, ISprinklersApi, Section, Program, Schedule, ITimeOfDay, Duration,
+    SprinklersDevice, ISprinklersApi, Section, Program, Schedule, ITimeOfDay, Duration, SectionRunner, ISectionRun,
 } from "./sprinklers";
 import {checkedIndexOf} from "./utils";
 import * as Promise from "bluebird";
@@ -104,6 +104,7 @@ class MqttSprinklersDevice extends SprinklersDevice {
         super();
         this.apiClient = apiClient;
         this.prefix = prefix;
+        this.sectionRunner = new MqttSectionRunner(this);
     }
 
     doSubscribe() {
@@ -163,6 +164,10 @@ class MqttSprinklersDevice extends SprinklersDevice {
             }
             return;
         }
+        matches = topic.match(/^section_runner$/);
+        if (matches != null) {
+            (this.sectionRunner as MqttSectionRunner).onMessage(null, payload);
+        }
         matches = topic.match(/^responses\/(\d+)$/);
         if (matches != null) {
             //noinspection JSUnusedLocalSymbols
@@ -194,6 +199,10 @@ class MqttSprinklersDevice extends SprinklersDevice {
     runProgram(program: Program | number) {
         const programNum = checkedIndexOf(program, this.programs, "Program");
         return this.makeRequest(`programs/${programNum}/run`, {});
+    }
+
+    cancelSectionRunById(id: number) {
+        return this.makeRequest(`section_runner/cancel_id`, { id });
     }
 
     //noinspection JSMethodCanBeStatic
@@ -228,6 +237,7 @@ class MqttSprinklersDevice extends SprinklersDevice {
             `${this.prefix}/programs`,
             `${this.prefix}/programs/+/#`,
             `${this.prefix}/responses/+`,
+            `${this.prefix}/section_runner`,
         ];
     }
 }
@@ -315,5 +325,22 @@ class MqttProgram extends Program {
         if (json.sched != null) {
             this.schedule = scheduleFromJSON(json.sched);
         }
+    }
+}
+
+interface ISectionRunnerJSON {
+    queue: ISectionRun[];
+    current?: ISectionRun;
+}
+
+class MqttSectionRunner extends SectionRunner {
+    onMessage(topic: string, payload: string) {
+        const json = JSON.parse(payload) as ISectionRunnerJSON;
+        this.updateFromJSON(json);
+    }
+
+    updateFromJSON(json: ISectionRunnerJSON) {
+        this.queue.replace(json.queue);
+        this.current = json.current;
     }
 }
