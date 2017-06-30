@@ -1,10 +1,10 @@
-import * as React from "react";
-import {SyntheticEvent} from "react";
 import {computed} from "mobx";
 import {observer} from "mobx-react";
-import {Duration, Section} from "../sprinklers";
-import {Segment, Header, Form, DropdownProps, DropdownItemProps} from "semantic-ui-react";
+import * as React from "react";
+import {SyntheticEvent} from "react";
+import {DropdownItemProps, DropdownProps, Form, Header, Segment} from "semantic-ui-react";
 import {DurationInput} from ".";
+import {Duration, Section} from "../sprinklers";
 
 @observer
 export default class RunSectionForm extends React.Component<{

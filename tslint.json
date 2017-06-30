@@ -11,15 +11,22 @@
     "max-classes-per-file": [
       false
     ],
-    "ordered-imports": false,
+    "ordered-imports": true,
     "variable-name": [
       "allow-leading-underscore"
     ],
-    "no-namespace": [
-      "allow-declarations"
-    ],
+    "no-namespace": false,
     "interface-name": false,
-    "member-access": [ true, "no-public" ]
+    "member-access": [
+      true,
+      "no-public"
+    ],
+    "member-ordering": [
+      true,
+      {
+        "order": "fields-first"
+      }
+    ]
   },
   "rulesDirectory": []
 }

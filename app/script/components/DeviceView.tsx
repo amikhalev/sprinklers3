@@ -1,11 +1,11 @@
-import * as React from "react";
-import {observer} from "mobx-react";
-import {Item, Header} from "semantic-ui-react";
-import FontAwesome = require("react-fontawesome");
 import * as classNames from "classnames";
+import {observer} from "mobx-react";
+import * as React from "react";
+import {Header, Item} from "semantic-ui-react";
+import {ProgramTable, RunSectionForm, SectionTable} from ".";
 
 import {SprinklersDevice} from "../sprinklers";
-import {SectionTable, RunSectionForm, ProgramTable} from ".";
+import FontAwesome = require("react-fontawesome");
 
 const ConnectionState = ({connected}: { connected: boolean }) =>
     <span className={classNames({

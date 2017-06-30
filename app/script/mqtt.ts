@@ -1,21 +1,22 @@
-import "paho-mqtt";
-import MQTT = Paho.MQTT;
-
 import {EventEmitter} from "events";
+import "paho-mqtt";
 import {
-    SprinklersDevice, ISprinklersApi, Section, Program, Schedule, ITimeOfDay, Duration, SectionRunner, ISectionRun,
+    Duration,
+    ISectionRun,
+    ISprinklersApi,
+    ITimeOfDay,
+    Program,
+    Schedule,
+    Section,
+    SectionRunner,
+    SprinklersDevice,
 } from "./sprinklers";
 import {checkedIndexOf} from "./utils";
+import MQTT = Paho.MQTT;
 
 export class MqttApiClient extends EventEmitter implements ISprinklersApi {
-    private static newClientId() {
-        return "sprinklers3-MqttApiClient-" + Math.round(Math.random() * 1000);
-    }
-
     client: MQTT.Client;
-
     connected: boolean;
-
     devices: { [prefix: string]: MqttSprinklersDevice } = {};
 
     constructor() {
@@ -24,6 +25,10 @@ export class MqttApiClient extends EventEmitter implements ISprinklersApi {
         this.client.onMessageArrived = (m) => this.onMessageArrived(m);
         this.client.onConnectionLost = (e) => this.onConnectionLost(e);
         // (this.client as any).trace = (m => console.log(m));
+    }
+
+    private static newClientId() {
+        return "sprinklers3-MqttApiClient-" + Math.round(Math.random() * 1000);
     }
 
     start() {
@@ -106,6 +111,22 @@ class MqttSprinklersDevice extends SprinklersDevice {
         this.sectionRunner = new MqttSectionRunner(this);
     }
 
+    get id(): string {
+        return this.prefix;
+    }
+
+    private get subscriptions() {
+        return [
+            `${this.prefix}/connected`,
+            `${this.prefix}/sections`,
+            `${this.prefix}/sections/+/#`,
+            `${this.prefix}/programs`,
+            `${this.prefix}/programs/+/#`,
+            `${this.prefix}/responses/+`,
+            `${this.prefix}/section_runner`,
+        ];
+    }
+
     doSubscribe() {
         const c = this.apiClient.client;
         this.subscriptions
@@ -184,10 +205,6 @@ class MqttSprinklersDevice extends SprinklersDevice {
         console.warn(`MqttSprinklersDevice recieved invalid topic: ${topic}`);
     }
 
-    get id(): string {
-        return this.prefix;
-    }
-
     runSection(section: Section | number, duration: Duration) {
         const sectionNum = checkedIndexOf(section, this.sections, "Section");
         const payload: IRunSectionJSON = {
@@ -202,7 +219,7 @@ class MqttSprinklersDevice extends SprinklersDevice {
     }
 
     cancelSectionRunById(id: number) {
-        return this.makeRequest(`section_runner/cancel_id`, { id });
+        return this.makeRequest(`section_runner/cancel_id`, {id});
     }
 
     //noinspection JSMethodCanBeStatic
@@ -228,23 +245,12 @@ class MqttSprinklersDevice extends SprinklersDevice {
         });
 
     }
-
-    private get subscriptions() {
-        return [
-            `${this.prefix}/connected`,
-            `${this.prefix}/sections`,
-            `${this.prefix}/sections/+/#`,
-            `${this.prefix}/programs`,
-            `${this.prefix}/programs/+/#`,
-            `${this.prefix}/responses/+`,
-            `${this.prefix}/section_runner`,
-        ];
-    }
 }
 
 interface IResponseData {
     reqTopic: string;
     error?: string;
+
     [key: string]: any;
 }
 

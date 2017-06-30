@@ -1,14 +1,14 @@
-import * as React from "react";
-import DevTools from "mobx-react-devtools";
+import "app/style/app.css";
+import "font-awesome/css/font-awesome.css";
 import {observer} from "mobx-react";
-import {SprinklersDevice} from "../sprinklers";
-import {Item} from "semantic-ui-react";
-import {UiStore} from "../ui";
-import {MessagesView, DeviceView} from ".";
+import DevTools from "mobx-react-devtools";
+import * as React from "react";
 
 import "semantic-ui-css/semantic.css";
-import "font-awesome/css/font-awesome.css";
-import "app/style/app.css";
+import {Item} from "semantic-ui-react";
+import {DeviceView, MessagesView} from ".";
+import {SprinklersDevice} from "../sprinklers";
+import {UiStore} from "../ui";
 
 @observer
 export default class App extends React.PureComponent<{ device: SprinklersDevice, uiStore: UiStore }, any> {
@@ -16,7 +16,7 @@ export default class App extends React.PureComponent<{ device: SprinklersDevice,
         return <Item.Group divided>
             <MessagesView uiStore={this.props.uiStore}/>
             <DeviceView device={this.props.device}/>
-            <DevTools />
+            <DevTools/>
         </Item.Group>;
     }
 }

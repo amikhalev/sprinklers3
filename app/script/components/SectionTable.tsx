@@ -1,10 +1,10 @@
-import * as React from "react";
-import {observer} from "mobx-react";
 import * as classNames from "classnames";
+import {observer} from "mobx-react";
+import * as React from "react";
 import {Table} from "semantic-ui-react";
-import FontAwesome = require("react-fontawesome");
 
 import {Section} from "../sprinklers";
+import FontAwesome = require("react-fontawesome");
 
 /* tslint:disable:object-literal-sort-keys */
 

@@ -1,7 +1,7 @@
-import * as React from "react";
 import {observer} from "mobx-react";
-import {Program, Schedule} from "../sprinklers";
+import * as React from "react";
 import {Table} from "semantic-ui-react";
+import {Program, Schedule} from "../sprinklers";
 
 @observer
 export class ScheduleView extends React.PureComponent<{ schedule: Schedule }, {}> {

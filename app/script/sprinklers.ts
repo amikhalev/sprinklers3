@@ -1,4 +1,4 @@
-import { observable, IObservableArray } from "mobx";
+import {IObservableArray, observable} from "mobx";
 
 export abstract class Section {
     device: SprinklersDevice;
@@ -41,16 +41,16 @@ export class Schedule {
 }
 
 export class Duration {
-    static fromSeconds(seconds: number): Duration {
-        return new Duration(Math.floor(seconds / 60), seconds % 60);
-    }
-
     minutes: number = 0;
     seconds: number = 0;
 
     constructor(minutes: number, seconds: number) {
         this.minutes = minutes;
         this.seconds = seconds;
+    }
+
+    static fromSeconds(seconds: number): Duration {
+        return new Duration(Math.floor(seconds / 60), seconds % 60);
     }
 
     toSeconds(): number {
@@ -162,17 +162,18 @@ export abstract class SprinklersDevice {
     @observable
     sectionRunner: SectionRunner;
 
+    abstract get id(): string;
+
     abstract runSection(section: number | Section, duration: Duration): Promise<{}>;
 
     abstract runProgram(program: number | Program): Promise<{}>;
 
     abstract cancelSectionRunById(id: number): Promise<{}>;
-
-    abstract get id(): string;
 }
 
 export interface ISprinklersApi {
     start();
+
     getDevice(id: string): SprinklersDevice;
 
     removeDevice(id: string);
