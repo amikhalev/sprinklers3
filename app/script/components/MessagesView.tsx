@@ -5,7 +5,7 @@ import {UiStore, Message as UiMessage} from "../ui";
 import {Message} from "semantic-ui-react";
 
 @observer
-class MessagesView extends React.PureComponent<{ uiStore: UiStore }, {}> {
+export default class MessagesView extends React.PureComponent<{ uiStore: UiStore }, {}> {
     render() {
         return <div className="messages">
             <CSSTransitionGroup transitionName="message" transitionAppear={true} transitionAppearTimeout={500}
