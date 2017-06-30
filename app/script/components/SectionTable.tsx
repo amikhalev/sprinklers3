@@ -9,7 +9,7 @@ import {Section} from "../sprinklers";
 /* tslint:disable:object-literal-sort-keys */
 
 @observer
-export default class SectionTable extends React.PureComponent<{ sections: Section[] }, void> {
+export default class SectionTable extends React.PureComponent<{ sections: Section[] }, {}> {
     private static renderRow(section: Section, index: number) {
         if (!section) {
             return null;

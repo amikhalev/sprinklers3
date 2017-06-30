@@ -19,7 +19,7 @@ const ConnectionState = ({connected}: { connected: boolean }) =>
     </span>;
 
 @observer
-export default class DeviceView extends React.PureComponent<{ device: SprinklersDevice }, void> {
+export default class DeviceView extends React.PureComponent<{ device: SprinklersDevice }, {}> {
     render() {
         const {id, connected, sections, programs} = this.props.device;
         return (

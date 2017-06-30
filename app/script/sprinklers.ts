@@ -140,7 +140,7 @@ export class SectionRunner {
         this.device = device;
     }
 
-    cancelRunById(id: number): Promise<void> {
+    cancelRunById(id: number): Promise<{}> {
         return this.device.cancelSectionRunById(id);
     }
 
@@ -166,7 +166,7 @@ export abstract class SprinklersDevice {
 
     abstract runProgram(program: number | Program): Promise<{}>;
 
-    abstract cancelSectionRunById(id: number): Promise<void>;
+    abstract cancelSectionRunById(id: number): Promise<{}>;
 
     abstract get id(): string;
 }

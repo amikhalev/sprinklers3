@@ -4,7 +4,7 @@ import {UiStore, Message as UiMessage} from "../ui";
 import {Message} from "semantic-ui-react";
 
 @observer
-export default class MessagesView extends React.PureComponent<{ uiStore: UiStore }, void> {
+export default class MessagesView extends React.PureComponent<{ uiStore: UiStore }, {}> {
     render() {
         return <div>
             {this.props.uiStore.messages.map(this.renderMessage)}

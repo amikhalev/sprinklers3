@@ -6,7 +6,6 @@ import {
     SprinklersDevice, ISprinklersApi, Section, Program, Schedule, ITimeOfDay, Duration, SectionRunner, ISectionRun,
 } from "./sprinklers";
 import {checkedIndexOf} from "./utils";
-import * as Promise from "bluebird";
 
 export class MqttApiClient extends EventEmitter implements ISprinklersApi {
     private static newClientId() {
@@ -167,6 +166,7 @@ class MqttSprinklersDevice extends SprinklersDevice {
         matches = topic.match(/^section_runner$/);
         if (matches != null) {
             (this.sectionRunner as MqttSectionRunner).onMessage(null, payload);
+            return;
         }
         matches = topic.match(/^responses\/(\d+)$/);
         if (matches != null) {
@@ -340,7 +340,11 @@ class MqttSectionRunner extends SectionRunner {
     }
 
     updateFromJSON(json: ISectionRunnerJSON) {
-        this.queue.replace(json.queue);
+        if (!json.queue) { // null means empty queue
+            this.queue.clear();
+        } else {
+            this.queue.replace(json.queue);
+        }
         this.current = json.current;
     }
 }

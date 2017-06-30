@@ -17,7 +17,8 @@ module.exports = {
     module: {
         rules: [
             { test: /\.css$/, loader: "style-loader!css-loader" },
-            { test: /\.(ttf|eot|svg|woff(2)?|png|jpg)(\?[a-z0-9=&.]+)?$/, loader: "file-loader" }
+            { test: /\.(ttf|eot|svg|woff(2)?|png|jpg)(\?[a-z0-9=&.]+)?$/, loader: "file-loader" },
+            { test: /\.tsx?$/, loader: "awesome-typescript-loader" },
         ]
     },
     plugins: [

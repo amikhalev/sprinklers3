@@ -4,7 +4,7 @@ import {Program, Schedule} from "../sprinklers";
 import {Table} from "semantic-ui-react";
 
 @observer
-export class ScheduleView extends React.PureComponent<{ schedule: Schedule }, void> {
+export class ScheduleView extends React.PureComponent<{ schedule: Schedule }, {}> {
     render() {
         return (
             <div>{JSON.stringify(this.props.schedule)}</div>
@@ -13,7 +13,7 @@ export class ScheduleView extends React.PureComponent<{ schedule: Schedule }, vo
 }
 
 @observer
-export default class ProgramTable extends React.PureComponent<{ programs: Program[] }, void> {
+export default class ProgramTable extends React.PureComponent<{ programs: Program[] }, {}> {
     private static renderRow(program: Program, i: number): JSX.Element[] {
         if (!program) {
             return null;

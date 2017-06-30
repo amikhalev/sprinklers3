@@ -5,7 +5,7 @@ import {Input} from "semantic-ui-react";
 export default class DurationInput extends React.Component<{
     duration: Duration,
     onDurationChange?: (newDuration: Duration) => void;
-}, void> {
+}, {}> {
     render() {
         const duration = this.props.duration;
         // const editing = this.props.onDurationChange != null;
