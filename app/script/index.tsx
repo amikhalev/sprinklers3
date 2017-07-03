@@ -20,9 +20,9 @@ ReactDOM.render(<AppContainer>
 
 if (module.hot) {
     module.hot.accept("./components/App", () => {
-        const NextApp = require<any>("./components/App").default;
+        const NextApp = require<any>("./components/App").default as typeof App;
         ReactDOM.render(<AppContainer>
-            <App device={device} uiStore={uiStore}/>
+            <NextApp device={device} uiStore={uiStore}/>
         </AppContainer>, rootElem);
     });
 }
