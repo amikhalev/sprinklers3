@@ -1,7 +1,6 @@
 import {computed} from "mobx";
 import {observer} from "mobx-react";
 import * as React from "react";
-import {SyntheticEvent} from "react";
 import {DropdownItemProps, DropdownProps, Form, Header, Segment} from "semantic-ui-react";
 import {DurationInput} from ".";
 import {Duration, Section} from "../sprinklers";
@@ -37,7 +36,7 @@ export default class RunSectionForm extends React.Component<{
         </Segment>;
     }
 
-    private onSectionChange = (e: SyntheticEvent<HTMLElement>, v: DropdownProps) => {
+    private onSectionChange = (e: React.SyntheticEvent<HTMLElement>, v: DropdownProps) => {
         this.setState({section: v.value as number});
     }
 
@@ -45,10 +44,13 @@ export default class RunSectionForm extends React.Component<{
         this.setState({duration: newDuration});
     }
 
-    private run = (e: SyntheticEvent<HTMLElement>) => {
+    private run = (e: React.SyntheticEvent<HTMLElement>) => {
         e.preventDefault();
+        if (typeof this.state.section !== "number") {
+            return;
+        }
         const section: Section = this.props.sections[this.state.section];
-        console.log(`should run section ${section} for ${this.state.duration}`);
+        console.log(`running section ${section} for ${this.state.duration}`);
         section.run(this.state.duration)
             .then((a) => console.log("ran section", a))
             .catch((err) => console.error("error running section", err));

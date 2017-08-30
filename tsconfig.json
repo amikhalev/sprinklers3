@@ -5,7 +5,8 @@
         "experimentalDecorators": true,
         "target": "es5",
         "lib": ["es6", "dom"],
-        "typeRoots": ["node_modules/@types"]
+        "typeRoots": ["node_modules/@types"],
+        "strict": true
     },
     "files": [
         "./node_modules/@types/webpack-env/index.d.ts",

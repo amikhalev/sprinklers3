@@ -8,7 +8,7 @@
     "clean": "rm -rf ./dist ./build",
     "build": "webpack --config ./webpack/prod.config.js",
     "start": "webpack-dev-server --config ./webpack/dev.config.js",
-    "lint": "tslint \"app/script/**/*\" --force"
+    "lint": "tslint --project . --force"
   },
   "repository": {
     "type": "git",
@@ -29,6 +29,7 @@
     "@types/react": "^16",
     "@types/react-dom": "^15.5.0",
     "@types/react-fontawesome": "^1.5.0",
+    "@types/react-hot-loader": "^3.0.4",
     "@types/react-transition-group": "^1.1.1",
     "classnames": "^2.2.5",
     "core-js": "^2.4.1",

@@ -1,4 +1,4 @@
-import {IObservableArray, observable} from "mobx";
+import { IObservableArray, observable } from "mobx";
 
 export abstract class Section {
     device: SprinklersDevice;
@@ -22,11 +22,22 @@ export abstract class Section {
     }
 }
 
-export interface ITimeOfDay {
+export class TimeOfDay {
     hour: number;
     minute: number;
     second: number;
     millisecond: number;
+
+    constructor(hour: number, minute: number = 0, second: number = 0, millisecond: number = 0) {
+        this.hour = hour;
+        this.minute = minute;
+        this.second = second;
+        this.millisecond = millisecond;
+    }
+
+    static fromDate(date: Date): TimeOfDay {
+        return new TimeOfDay(date.getHours(), date.getMinutes(), date.getSeconds(), date.getMilliseconds());
+    }
 }
 
 export enum Weekday {
@@ -34,17 +45,17 @@ export enum Weekday {
 }
 
 export class Schedule {
-    times: ITimeOfDay[] = [];
+    times: TimeOfDay[] = [];
     weekdays: Weekday[] = [];
-    from?: Date = null;
-    to?: Date = null;
+    from: Date | null = null;
+    to: Date | null = null;
 }
 
 export class Duration {
     minutes: number = 0;
     seconds: number = 0;
 
-    constructor(minutes: number, seconds: number) {
+    constructor(minutes: number = 0, seconds: number = 0) {
         this.minutes = minutes;
         this.seconds = seconds;
     }
@@ -82,11 +93,16 @@ export class Duration {
     }
 }
 
-export interface IProgramItem {
+export class ProgramItem {
     // the section number
     section: number;
     // duration of the run
     duration: Duration;
+
+    constructor(section: number, duration: Duration) {
+        this.section = section;
+        this.duration = duration;
+    }
 }
 
 export class Program {
@@ -101,7 +117,7 @@ export class Program {
     schedule: Schedule = new Schedule();
 
     @observable
-    sequence: IProgramItem[] = [];
+    sequence: ProgramItem[] = [];
 
     @observable
     running: boolean = false;
@@ -120,21 +136,38 @@ export class Program {
     }
 }
 
-export interface ISectionRun {
+export class SectionRun {
     id: number;
     section: number;
-    duration: number;
-    startTime?: Date;
+    duration: Duration;
+    startTime: Date | null;
+    pauseTime: Date | null;
+
+    constructor(id: number = 0, section: number = 0, duration: Duration = new Duration()) {
+        this.id = id;
+        this.section = section;
+        this.duration = duration;
+        this.startTime = null;
+        this.pauseTime = null;
+    }
+
+    toString() {
+        return `SectionRun{id=${this.id}, section=${this.section}, duration=${this.duration},` +
+            ` startTime=${this.startTime}, pauseTime=${this.pauseTime}}`;
+    }
 }
 
 export class SectionRunner {
     device: SprinklersDevice;
 
     @observable
-    queue: IObservableArray<ISectionRun> = observable([]);
+    queue: IObservableArray<SectionRun> = observable([]);
 
     @observable
-    current: ISectionRun = null;
+    current: SectionRun | null = null;
+
+    @observable
+    paused: boolean = false;
 
     constructor(device: SprinklersDevice) {
         this.device = device;
@@ -145,7 +178,7 @@ export class SectionRunner {
     }
 
     toString(): string {
-        return `SectionRunner{queue="${this.queue}", current="${this.current}"}`;
+        return `SectionRunner{queue="${this.queue}", current="${this.current}", paused=${this.paused}}`;
     }
 }
 
@@ -154,10 +187,10 @@ export abstract class SprinklersDevice {
     connected: boolean = false;
 
     @observable
-    sections: IObservableArray<Section> = [] as IObservableArray<Section>;
+    sections: IObservableArray<Section> = observable.array<Section>();
 
     @observable
-    programs: IObservableArray<Program> = [] as IObservableArray<Program>;
+    programs: IObservableArray<Program> = observable.array<Program>();
 
     @observable
     sectionRunner: SectionRunner;
@@ -169,12 +202,16 @@ export abstract class SprinklersDevice {
     abstract runProgram(program: number | Program): Promise<{}>;
 
     abstract cancelSectionRunById(id: number): Promise<{}>;
+
+    abstract pauseSectionRunner(): Promise<{}>;
+
+    abstract unpauseSectionRunner(): Promise<{}>;
 }
 
 export interface ISprinklersApi {
-    start();
+    start(): void;
 
     getDevice(id: string): SprinklersDevice;
 
-    removeDevice(id: string);
+    removeDevice(id: string): void;
 }

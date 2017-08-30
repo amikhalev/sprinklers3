@@ -14,7 +14,7 @@ export class ScheduleView extends React.PureComponent<{ schedule: Schedule }, {}
 
 @observer
 export default class ProgramTable extends React.PureComponent<{ programs: Program[] }, {}> {
-    private static renderRow(program: Program, i: number): JSX.Element[] {
+    private static renderRows(program: Program, i: number): JSX.Element[] | null {
         if (!program) {
             return null;
         }
@@ -57,7 +57,7 @@ export default class ProgramTable extends React.PureComponent<{ programs: Progra
                 </Table.Header>
                 <Table.Body>
                     {
-                        Array.prototype.concat.apply([], this.props.programs.map(ProgramTable.renderRow))
+                        Array.prototype.concat.apply([], this.props.programs.map(ProgramTable.renderRows))
                     }
                 </Table.Body>
             </Table>

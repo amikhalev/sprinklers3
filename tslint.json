@@ -26,6 +26,13 @@
       {
         "order": "fields-first"
       }
+    ],
+    "object-literal-sort-keys": [
+      false
+    ],
+    "no-submodule-imports": false,
+    "no-unused-variable": [
+      true
     ]
   },
   "rulesDirectory": []

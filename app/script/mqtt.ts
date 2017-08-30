@@ -1,26 +1,26 @@
-import {EventEmitter} from "events";
+import { EventEmitter } from "events";
 import "paho-mqtt";
 import {
     Duration,
-    ISectionRun,
     ISprinklersApi,
-    ITimeOfDay,
     Program,
+    ProgramItem,
     Schedule,
     Section,
+    SectionRun,
     SectionRunner,
     SprinklersDevice,
+    TimeOfDay,
 } from "./sprinklers";
-import {checkedIndexOf} from "./utils";
+import { checkedIndexOf } from "./utils";
 import MQTT = Paho.MQTT;
 
-export class MqttApiClient extends EventEmitter implements ISprinklersApi {
+export class MqttApiClient implements ISprinklersApi {
     client: MQTT.Client;
     connected: boolean;
     devices: { [prefix: string]: MqttSprinklersDevice } = {};
 
     constructor() {
-        super();
         this.client = new MQTT.Client(location.hostname, 1884, MqttApiClient.newClientId());
         this.client.onMessageArrived = (m) => this.onMessageArrived(m);
         this.client.onConnectionLost = (e) => this.onConnectionLost(e);
@@ -80,6 +80,10 @@ export class MqttApiClient extends EventEmitter implements ISprinklersApi {
 
     private processMessage(m: MQTT.Message) {
         // console.log("message arrived: ", m);
+        if (m.destinationName == null) {
+            console.warn(`revieved invalid message: ${m}`);
+            return;
+        }
         const topicIdx = m.destinationName.indexOf("/"); // find the first /
         const prefix = m.destinationName.substr(0, topicIdx); // assume prefix does not contain a /
         const topic = m.destinationName.substr(topicIdx + 1);
@@ -130,7 +134,7 @@ class MqttSprinklersDevice extends SprinklersDevice {
     doSubscribe() {
         const c = this.apiClient.client;
         this.subscriptions
-            .forEach((filter) => c.subscribe(filter, {qos: 1}));
+            .forEach((filter) => c.subscribe(filter, { qos: 1 }));
     }
 
     doUnsubscribe() {
@@ -186,7 +190,7 @@ class MqttSprinklersDevice extends SprinklersDevice {
         }
         matches = topic.match(/^section_runner$/);
         if (matches != null) {
-            (this.sectionRunner as MqttSectionRunner).onMessage(null, payload);
+            (this.sectionRunner as MqttSectionRunner).onMessage(payload);
             return;
         }
         matches = topic.match(/^responses\/(\d+)$/);
@@ -219,7 +223,15 @@ class MqttSprinklersDevice extends SprinklersDevice {
     }
 
     cancelSectionRunById(id: number) {
-        return this.makeRequest(`section_runner/cancel_id`, {id});
+        return this.makeRequest(`section_runner/cancel_id`, { id });
+    }
+
+    pauseSectionRunner() {
+        return this.makeRequest(`section_runner/pause`);
+    }
+
+    unpauseSectionRunner() {
+        return this.makeRequest(`section_runner/unpause`);
     }
 
     //noinspection JSMethodCanBeStatic
@@ -227,7 +239,7 @@ class MqttSprinklersDevice extends SprinklersDevice {
         return Math.floor(Math.random() * 1000000000);
     }
 
-    private makeRequest(topic: string, payload: object | string): Promise<IResponseData> {
+    private makeRequest(topic: string, payload: object | string = {}): Promise<IResponseData> {
         return new Promise<IResponseData>((resolve, reject) => {
             const payloadStr = (typeof payload === "string") ?
                 payload : JSON.stringify(payload);
@@ -254,7 +266,7 @@ interface IResponseData {
     [key: string]: any;
 }
 
-type ResponseCallback = (IResponseData) => void;
+type ResponseCallback = (data: IResponseData) => void;
 
 interface ISectionJSON {
     name: string;
@@ -276,8 +288,19 @@ class MqttSection extends Section {
     }
 }
 
+interface ITimeOfDayJSON {
+    hour: number;
+    minute: number;
+    second: number;
+    millisecond: number;
+}
+
+function timeOfDayFromJSON(json: ITimeOfDayJSON): TimeOfDay {
+    return new TimeOfDay(json.hour, json.minute, json.second, json.millisecond);
+}
+
 interface IScheduleJSON {
-    times: ITimeOfDay[];
+    times: ITimeOfDayJSON[];
     weekdays: number[];
     from?: string;
     to?: string;
@@ -285,7 +308,7 @@ interface IScheduleJSON {
 
 function scheduleFromJSON(json: IScheduleJSON): Schedule {
     const sched = new Schedule();
-    sched.times = json.times;
+    sched.times = json.times.map(timeOfDayFromJSON);
     sched.weekdays = json.weekdays;
     sched.from = json.from == null ? null : new Date(json.from);
     sched.to = json.to == null ? null : new Date(json.to);
@@ -322,11 +345,10 @@ class MqttProgram extends Program {
             this.enabled = json.enabled;
         }
         if (json.sequence != null) {
-            // tslint:disable:object-literal-sort-keys
-            this.sequence = json.sequence.map((item) => ({
-                section: item.section,
-                duration: Duration.fromSeconds(item.duration),
-            }));
+            this.sequence = json.sequence.map((item) => (new ProgramItem(
+                item.section,
+                Duration.fromSeconds(item.duration),
+            )));
         }
         if (json.sched != null) {
             this.schedule = scheduleFromJSON(json.sched);
@@ -334,23 +356,42 @@ class MqttProgram extends Program {
     }
 }
 
+export interface ISectionRunJSON {
+    id: number;
+    section: number;
+    duration: number;
+    startTime?: number;
+    pauseTime?: number;
+}
+
+function sectionRunFromJSON(json: ISectionRunJSON) {
+    const run = new SectionRun();
+    run.id = json.id;
+    run.section = json.section;
+    run.duration = Duration.fromSeconds(json.duration);
+    run.startTime = json.startTime == null ? null : new Date(json.startTime);
+    run.pauseTime = json.pauseTime == null ? null : new Date(json.pauseTime);
+    return run;
+}
+
 interface ISectionRunnerJSON {
-    queue: ISectionRun[];
-    current?: ISectionRun;
+    queue: ISectionRunJSON[];
+    current: ISectionRunJSON | null;
+    paused: boolean;
 }
 
 class MqttSectionRunner extends SectionRunner {
-    onMessage(topic: string, payload: string) {
+    onMessage(payload: string) {
         const json = JSON.parse(payload) as ISectionRunnerJSON;
         this.updateFromJSON(json);
     }
 
     updateFromJSON(json: ISectionRunnerJSON) {
-        if (!json.queue) { // null means empty queue
+        if (!json.queue || !json.queue.length) { // null means empty queue
             this.queue.clear();
         } else {
-            this.queue.replace(json.queue);
+            this.queue.replace(json.queue.map(sectionRunFromJSON));
         }
-        this.current = json.current;
+        this.current = json.current == null ? null : sectionRunFromJSON(json.current);
     }
 }
