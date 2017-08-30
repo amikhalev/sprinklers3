@@ -1,4 +1,5 @@
 import {observable} from "mobx";
+import { getRandomId } from "./utils";
 
 export class Message {
     id: string;
@@ -7,7 +8,7 @@ export class Message {
     type: Message.Type = Message.Type.Default;
 
     constructor(header: string, content: string = "", type: Message.Type = Message.Type.Default) {
-        this.id = "" + Math.floor(Math.random() * 1000000000);
+        this.id = "" + getRandomId();
         this.header = header;
         this.content = content;
         this.type = type;

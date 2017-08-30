@@ -7,19 +7,22 @@ import { ProgramTable, RunSectionForm, SectionRunnerView, SectionTable } from ".
 import { SprinklersDevice } from "../sprinklers";
 import FontAwesome = require("react-fontawesome");
 
-const ConnectionState = ({ connected }: { connected: boolean }) =>
-    <span className={classNames({
+const ConnectionState = ({ connected }: { connected: boolean }) => {
+    const classes = classNames({
         "device--connectionState": true,
         "device--connectionState-connected": connected,
         "device--connectionState-disconnected": !connected,
-    })}>
-        <FontAwesome name={connected ? "plug" : "chain-broken"} />
-        &nbsp;
-        {connected ? "Connected" : "Disconnected"}
-    </span>;
+    });
+    return (
+        <span className={classes}>
+            <FontAwesome name={connected ? "plug" : "chain-broken"} />&nbsp;
+            {connected ? "Connected" : "Disconnected"}
+        </span>
+    );
+};
 
 @observer
-export default class DeviceView extends React.PureComponent<{ device: SprinklersDevice }, {}> {
+export default class DeviceView extends React.Component<{ device: SprinklersDevice }> {
     render() {
         const { id, connected, sections, programs, sectionRunner } = this.props.device;
         return (
@@ -31,7 +34,7 @@ export default class DeviceView extends React.PureComponent<{ device: Sprinklers
                         <ConnectionState connected={connected} />
                     </Header>
                     <Item.Meta>
-
+                        Raspberry Pi Grinklers Instance
                     </Item.Meta>
                     <SectionRunnerView sectionRunner={sectionRunner} />
                     <SectionTable sections={sections} />

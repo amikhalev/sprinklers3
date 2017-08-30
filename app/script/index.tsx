@@ -14,15 +14,19 @@ uiStore.addMessage(new Message("asdf", "boo!", Message.Type.Error));
 
 const rootElem = document.getElementById("app");
 
-ReactDOM.render(<AppContainer>
-    <App device={device} uiStore={uiStore} />
-</AppContainer>, rootElem);
+const doRender = (Component: typeof App) => {
+    ReactDOM.render((
+        <AppContainer>
+            <Component device={device} uiStore={uiStore} />
+        </AppContainer>
+    ), rootElem);
+};
+
+doRender(App);
 
 if (module.hot) {
     module.hot.accept("./components/App", () => {
         const NextApp = require<any>("./components/App").default as typeof App;
-        ReactDOM.render(<AppContainer>
-            <NextApp device={device} uiStore={uiStore} />
-        </AppContainer>, rootElem);
+        doRender(NextApp);
     });
 }

@@ -7,3 +7,7 @@ export function checkedIndexOf<T>(o: T | number, arr: T[], type: string = "objec
     }
     return idx;
 }
+
+export function getRandomId() {
+    return Math.floor(Math.random() * 1000000000);
+}
