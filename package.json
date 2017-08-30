@@ -3,7 +3,6 @@
   "version": "1.0.0",
   "private": true,
   "description": "A frontend for mqtt based IoT sprinklers systems",
-  "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "clean": "rm -rf ./dist ./build",
@@ -61,6 +60,5 @@
     "typescript": "^2.3.4",
     "webpack": "^3.0.0",
     "webpack-dev-server": "^2.4.4"
-  },
-  "false": {}
+  }
 }
