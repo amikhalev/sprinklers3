@@ -2,7 +2,7 @@ const path = require("path");
 const webpack = require("webpack");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 
-const rootDir = path.resolve(__dirname, "..");
+const rootDir = path.resolve(__dirname, "..", "..");
 
 module.exports = {
     entry: [
@@ -10,7 +10,7 @@ module.exports = {
         "./app/index.tsx"
     ],
     output: {
-        path: path.resolve(rootDir, "build"),
+        path: path.resolve(rootDir, "public"),
         filename: "bundle.js"
     },
     resolve: {

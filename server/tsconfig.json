@@ -1,7 +1,7 @@
 {
     "compilerOptions": {
+        "outDir": "../dist",
         "sourceMap": true,
-        "jsx": "react",
         "experimentalDecorators": true,
         "target": "es5",
         "lib": [
@@ -12,15 +12,9 @@
             "webpack-env",
             "node"
         ],
-        "strict": true,
-        "baseUrl": ".",
-        "paths": {
-            "@common/*": [
-                "../common/*"
-            ],
-            "@app/*": [
-                "./*"
-            ]
-        }
-    }
+        "strict": true
+    },
+    "files": [
+        "./index.ts"
+    ]
 }
