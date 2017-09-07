@@ -23,18 +23,32 @@ export default class RunSectionForm extends React.Component<{
 
     render() {
         const { section, duration } = this.state;
-        return <Segment>
-            <Header>Run Section</Header>
-            <Form>
-                <Form.Group>
-                    <Form.Select label="Section" placeholder="Section" options={this.sectionOptions} value={section}
-                        onChange={this.onSectionChange} />
-                    <DurationInput duration={duration} onDurationChange={this.onDurationChange} />
-                    {/*Label must be &nbsp; to align it properly*/}
-                    <Form.Button label="&nbsp;" primary onClick={this.run} disabled={!this.isValid}>Run</Form.Button>
-                </Form.Group>
-            </Form>
-        </Segment>;
+        return (
+            <Segment>
+                <Header>Run Section</Header>
+                <Form>
+                    <Form.Group>
+                        <Form.Select
+                            label="Section"
+                            placeholder="Section"
+                            options={this.sectionOptions}
+                            value={section}
+                            onChange={this.onSectionChange}
+                        />
+                        <DurationInput duration={duration} onDurationChange={this.onDurationChange} />
+                        {/*Label must be &nbsp; to align it properly*/}
+                        <Form.Button
+                            label="&nbsp;"
+                            primary
+                            onClick={this.run}
+                            disabled={!this.isValid}
+                        >
+                            Run
+                        </Form.Button>
+                    </Form.Group>
+                </Form>
+            </Segment>
+        );
     }
 
     private onSectionChange = (e: React.SyntheticEvent<HTMLElement>, v: DropdownProps) => {
