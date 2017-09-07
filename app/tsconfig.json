@@ -5,16 +5,16 @@
         "experimentalDecorators": true,
         "target": "es5",
         "lib": ["es6", "dom"],
-        "typeRoots": ["node_modules/@types"],
+        // "typeRoots": ["node_modules/@types"],
         "strict": true,
-        "baseUrl": "..",
+        "baseUrl": ".",
         "paths": {
-            "common/*": [ "../common/*" ],
-            "app/*": [ "./*" ]
+            "@common/*": [ "../common/*" ],
+            "@app/*": [ "./*" ]
         }
     },
     "files": [
-        "./node_modules/@types/webpack-env/index.d.ts",
+        "../node_modules/@types/webpack-env/index.d.ts",
         "./app/script/index.tsx"
     ]
 }

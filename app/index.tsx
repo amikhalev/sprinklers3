@@ -2,9 +2,9 @@ import * as React from "react";
 import * as ReactDOM from "react-dom";
 import { AppContainer } from "react-hot-loader";
 
-import App from "./components/App";
-import { MqttApiClient } from "./mqtt";
-import { Message, UiStore } from "./ui";
+import App from "@app/components/App";
+import { MqttApiClient } from "@app/mqtt";
+import { Message, UiStore } from "@app/ui";
 
 const client = new MqttApiClient();
 client.start();
@@ -25,8 +25,8 @@ const doRender = (Component: typeof App) => {
 doRender(App);
 
 if (module.hot) {
-    module.hot.accept("app/components/App", () => {
-        const NextApp = require<any>("app/components/App").default as typeof App;
+    module.hot.accept("@app/components/App", () => {
+        const NextApp = require<any>("@app/components/App").default as typeof App;
         doRender(NextApp);
     });
 }

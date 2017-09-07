@@ -4,7 +4,7 @@ import * as React from "react";
 import FontAwesome = require("react-fontawesome");
 import { Table } from "semantic-ui-react";
 
-import { Section } from "common/sprinklers";
+import { Section } from "@common/sprinklers";
 
 /* tslint:disable:object-literal-sort-keys */
 

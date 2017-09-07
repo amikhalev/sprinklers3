@@ -13,8 +13,8 @@ import {
     SectionRunner,
     SprinklersDevice,
     TimeOfDay,
-} from "common/sprinklers";
-import { checkedIndexOf, getRandomId } from "common/utils";
+} from "@common/sprinklers";
+import { checkedIndexOf, getRandomId } from "@common/utils";
 
 export class MqttApiClient implements ISprinklersApi {
     client: MQTT.Client;

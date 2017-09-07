@@ -2,18 +2,17 @@ const webpack = require("webpack");
 const webpackMerge = require("webpack-merge");
 const base = require("./base.config");
 
-module.exports = webpackMerge.smart(base, {
+module.exports = webpackMerge.strategy({
+    entry: "prepend",
+})(base, {
+    devtool: "eval-source-map",
     entry: [
         "react-hot-loader/patch",
         "webpack-dev-server/client?http://localhost:8080",
         "webpack/hot/only-dev-server",
-        "core-js",
-        "./app/script/index.tsx"
     ],
-    devtool: "eval-source-map",
     plugins: [
-        new webpack.NamedModulesPlugin(),
-        // new webpack.HotModuleReplacementPlugin(),
+        new webpack.HotModuleReplacementPlugin(),
     ],
     devServer: {
         hot: true

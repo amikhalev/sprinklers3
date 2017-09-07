@@ -2,27 +2,32 @@ const path = require("path");
 const webpack = require("webpack");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 
+const rootDir = path.resolve(__dirname, "..");
+
 module.exports = {
-    devtool: "eval-source-map",
+    entry: [
+        "core-js",
+        "./app/index.tsx"
+    ],
     output: {
-        path: path.resolve(__dirname, "..", "build"),
+        path: path.resolve(rootDir, "build"),
         filename: "bundle.js"
     },
     resolve: {
-        extensions: [".ts", ".tsx", ".js"],
+        extensions: [".ts", ".tsx", ".js", ".json"],
         alias: {
-            app: path.resolve(__dirname, "..", "app"),
-            common: path.resolve(__dirname, "..", "common"),
+            "@app": path.resolve(rootDir, "app"),
+            "@common": path.resolve(rootDir, "common"),
         }
     },
     module: {
         rules: [
-            { test: /\.css$/, use: "style-loader!css-loader" },
+            { test: /\.css$/, use: ["style-loader", "css-loader"] },
             { test: /\.(ttf|eot|svg|woff(2)?|png|jpg)(\?[a-z0-9=&.]+)?$/, use: "file-loader" },
             {
                 test: /\.tsx?$/, use: {
                     loader: "awesome-typescript-loader",
-                    options: { configFileName: path.resolve(__dirname, "..", "app", "tsconfig.json") }
+                    options: { configFileName: path.resolve(rootDir, "app", "tsconfig.json") }
                 },
             },
         ]
@@ -32,9 +37,5 @@ module.exports = {
             template: "./app/index.html"
         }),
         new webpack.NamedModulesPlugin(),
-        new webpack.HotModuleReplacementPlugin()
     ],
-    devServer: {
-        hot: true
-    }
 };
