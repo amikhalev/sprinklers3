@@ -1,5 +1,7 @@
 import { EventEmitter } from "events";
 import "paho-mqtt";
+import MQTT = Paho.MQTT;
+
 import {
     Duration,
     ISprinklersApi,
@@ -11,9 +13,8 @@ import {
     SectionRunner,
     SprinklersDevice,
     TimeOfDay,
-} from "./sprinklers";
-import { checkedIndexOf } from "./utils";
-import MQTT = Paho.MQTT;
+} from "common/sprinklers";
+import { checkedIndexOf, getRandomId } from "common/utils";
 
 export class MqttApiClient implements ISprinklersApi {
     client: MQTT.Client;

@@ -10,7 +10,7 @@ module.exports = webpackMerge.smart(base, {
         "core-js",
         "./app/script/index.tsx"
     ],
-    devtool: "inline-source-map",
+    devtool: "eval-source-map",
     plugins: [
         new webpack.NamedModulesPlugin(),
         // new webpack.HotModuleReplacementPlugin(),

@@ -6,7 +6,12 @@
         "target": "es5",
         "lib": ["es6", "dom"],
         "typeRoots": ["node_modules/@types"],
-        "strict": true
+        "strict": true,
+        "baseUrl": "..",
+        "paths": {
+            "common/*": [ "../common/*" ],
+            "app/*": [ "./*" ]
+        }
     },
     "files": [
         "./node_modules/@types/webpack-env/index.d.ts",

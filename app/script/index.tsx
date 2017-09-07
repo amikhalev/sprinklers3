@@ -25,8 +25,8 @@ const doRender = (Component: typeof App) => {
 doRender(App);
 
 if (module.hot) {
-    module.hot.accept("./components/App", () => {
-        const NextApp = require<any>("./components/App").default as typeof App;
+    module.hot.accept("app/components/App", () => {
+        const NextApp = require<any>("app/components/App").default as typeof App;
         doRender(NextApp);
     });
 }

@@ -2,8 +2,9 @@ import {computed} from "mobx";
 import {observer} from "mobx-react";
 import * as React from "react";
 import {DropdownItemProps, DropdownProps, Form, Header, Segment} from "semantic-ui-react";
+
+import {Duration, Section} from "common/sprinklers";
 import {DurationInput} from ".";
-import {Duration, Section} from "../sprinklers";
 
 @observer
 export default class RunSectionForm extends React.Component<{

@@ -3,7 +3,7 @@ const webpack = require("webpack");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 
 module.exports = {
-    devtool: "inline-source-map",
+    devtool: "eval-source-map",
     output: {
         path: path.resolve(__dirname, "..", "build"),
         filename: "bundle.js"
@@ -11,14 +11,20 @@ module.exports = {
     resolve: {
         extensions: [".ts", ".tsx", ".js"],
         alias: {
-            app: path.resolve(__dirname, "..", "app")
+            app: path.resolve(__dirname, "..", "app"),
+            common: path.resolve(__dirname, "..", "common"),
         }
     },
     module: {
         rules: [
-            { test: /\.css$/, loader: "style-loader!css-loader" },
-            { test: /\.(ttf|eot|svg|woff(2)?|png|jpg)(\?[a-z0-9=&.]+)?$/, loader: "file-loader" },
-            { test: /\.tsx?$/, loader: "awesome-typescript-loader" },
+            { test: /\.css$/, use: "style-loader!css-loader" },
+            { test: /\.(ttf|eot|svg|woff(2)?|png|jpg)(\?[a-z0-9=&.]+)?$/, use: "file-loader" },
+            {
+                test: /\.tsx?$/, use: {
+                    loader: "awesome-typescript-loader",
+                    options: { configFileName: path.resolve(__dirname, "..", "app", "tsconfig.json") }
+                },
+            },
         ]
     },
     plugins: [

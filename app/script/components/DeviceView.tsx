@@ -1,11 +1,11 @@
 import * as classNames from "classnames";
 import { observer } from "mobx-react";
 import * as React from "react";
+import FontAwesome = require("react-fontawesome");
 import { Header, Item } from "semantic-ui-react";
 import { ProgramTable, RunSectionForm, SectionRunnerView, SectionTable } from ".";
 
-import { SprinklersDevice } from "../sprinklers";
-import FontAwesome = require("react-fontawesome");
+import { SprinklersDevice } from "common/sprinklers";
 
 const ConnectionState = ({ connected }: { connected: boolean }) => {
     const classes = classNames({

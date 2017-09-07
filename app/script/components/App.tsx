@@ -1,11 +1,11 @@
 import { observer } from "mobx-react";
 import DevTools from "mobx-react-devtools";
 import * as React from "react";
-
 import { Item } from "semantic-ui-react";
+
+import { UiStore } from "app/ui";
+import { SprinklersDevice } from "common/sprinklers";
 import { DeviceView, MessagesView } from ".";
-import { SprinklersDevice } from "../sprinklers";
-import { UiStore } from "../ui";
 
 import "app/style/app.css";
 import "font-awesome/css/font-awesome.css";

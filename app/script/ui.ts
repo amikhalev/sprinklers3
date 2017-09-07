@@ -1,5 +1,6 @@
 import {observable} from "mobx";
-import { getRandomId } from "./utils";
+
+import { getRandomId } from "common/utils";
 
 export class Message {
     id: string;
