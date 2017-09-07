@@ -4,17 +4,26 @@
         "jsx": "react",
         "experimentalDecorators": true,
         "target": "es5",
-        "lib": ["es6", "dom"],
+        "lib": [
+            "es6",
+            "dom"
+        ],
         // "typeRoots": ["node_modules/@types"],
+        "types": [
+            "webpack-env"
+        ],
         "strict": true,
         "baseUrl": ".",
         "paths": {
-            "@common/*": [ "../common/*" ],
-            "@app/*": [ "./*" ]
+            "@common/*": [
+                "../common/*"
+            ],
+            "@app/*": [
+                "./*"
+            ]
         }
     },
     "files": [
-        "../node_modules/@types/webpack-env/index.d.ts",
         "./app/script/index.tsx"
     ]
 }
