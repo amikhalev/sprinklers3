@@ -1,4 +1,3 @@
-import { EventEmitter } from "events";
 import "paho-mqtt";
 import MQTT = Paho.MQTT;
 
@@ -14,7 +13,7 @@ import {
     SprinklersDevice,
     TimeOfDay,
 } from "@common/sprinklers";
-import { checkedIndexOf, getRandomId } from "@common/utils";
+import { checkedIndexOf } from "@common/utils";
 
 export class MqttApiClient implements ISprinklersApi {
     client: MQTT.Client;
@@ -158,6 +157,7 @@ class MqttSprinklersDevice extends SprinklersDevice {
         let matches = topic.match(/^sections(?:\/(\d+)(?:\/?(.+))?)?$/);
         if (matches != null) {
             //noinspection JSUnusedLocalSymbols
+            /* tslint:disable-next-line:no-unused-variable */
             const [_topic, secStr, subTopic] = matches;
             // console.log(`section: ${secStr}, topic: ${subTopic}, payload: ${payload}`);
             if (!secStr) { // new number of sections
@@ -175,6 +175,7 @@ class MqttSprinklersDevice extends SprinklersDevice {
         matches = topic.match(/^programs(?:\/(\d+)(?:\/?(.+))?)?$/);
         if (matches != null) {
             //noinspection JSUnusedLocalSymbols
+            /* tslint:disable-next-line:no-unused-variable */
             const [_topic, progStr, subTopic] = matches;
             // console.log(`program: ${progStr}, topic: ${subTopic}, payload: ${payload}`);
             if (!progStr) { // new number of programs
@@ -197,6 +198,7 @@ class MqttSprinklersDevice extends SprinklersDevice {
         matches = topic.match(/^responses\/(\d+)$/);
         if (matches != null) {
             //noinspection JSUnusedLocalSymbols
+            /* tslint:disable-next-line:no-unused-variable */
             const [_topic, respIdStr] = matches;
             console.log(`response: ${respIdStr}`);
             const respId = parseInt(respIdStr, 10);

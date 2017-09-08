@@ -1,6 +1,6 @@
 import { observer } from "mobx-react";
 import * as React from "react";
-import { Message, MessageList, TransitionGroup } from "semantic-ui-react";
+import { Message, TransitionGroup } from "semantic-ui-react";
 
 import { Message as UiMessage, UiStore } from "@app/ui";
 
@@ -11,7 +11,7 @@ class MessageView extends React.Component<{
 }> {
 
     render() {
-        const { id, header, content, type } = this.props.message;
+        const { header, content, type } = this.props.message;
         return (
             <Message
                 header={header}

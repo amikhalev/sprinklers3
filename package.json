@@ -12,8 +12,8 @@
     "watch:server": "yarn build:server --watch",
     "start:dev-server": "webpack-dev-server --config ./app/webpack/dev.config.js",
     "start": "node dist/index.js",
-    "lint:app": "tslint --project app --force",
-    "lint:server": "tslint --project server --force",
+    "lint:app": "tslint --project app --force --format verbose",
+    "lint:server": "tslint --project server --force --format verbose",
     "lint": "run-p lint:*"
   },
   "repository": {

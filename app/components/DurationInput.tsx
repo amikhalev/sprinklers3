@@ -10,17 +10,30 @@ export default class DurationInput extends React.Component<{
     render() {
         const duration = this.props.duration;
         // const editing = this.props.onDurationChange != null;
-        return <div className="field durationInput">
-            <label>Duration</label>
-            <div className="fields">
-                <Input type="number" className="field durationInput--minutes"
-                    value={duration.minutes} onChange={this.onMinutesChange}
-                    label="M" labelPosition="right" />
-                <Input type="number" className="field durationInput--seconds"
-                    value={duration.seconds} onChange={this.onSecondsChange} max="60"
-                    label="S" labelPosition="right" />
+        return (
+            <div className="field durationInput">
+                <label>Duration</label>
+                <div className="fields">
+                    <Input
+                        type="number"
+                        className="field durationInput--minutes"
+                        value={duration.minutes}
+                        onChange={this.onMinutesChange}
+                        label="M"
+                        labelPosition="right"
+                    />
+                    <Input
+                        type="number"
+                        className="field durationInput--seconds"
+                        value={duration.seconds}
+                        onChange={this.onSecondsChange}
+                        max="60"
+                        label="S"
+                        labelPosition="right"
+                    />
+                </div>
             </div>
-        </div>;
+        );
     }
 
     private onMinutesChange = (e: React.SyntheticEvent<any>, { value }: InputOnChangeData) => {
