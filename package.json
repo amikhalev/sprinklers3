@@ -38,6 +38,7 @@
     "@types/react-fontawesome": "^1.5.0",
     "@types/react-hot-loader": "^3.0.4",
     "@types/react-transition-group": "^1.1.1",
+    "@types/webpack-hot-middleware": "^2.16.0",
     "classnames": "^2.2.5",
     "core-js": "^2.4.1",
     "express": "^4.15.4",
@@ -52,6 +53,7 @@
     "react-transition-group": "^1.2.0",
     "semantic-ui-css": "^2.2.10",
     "semantic-ui-react": "^0.72.0",
+    "webpack-hot-middleware": "^2.19.1",
     "webpack-merge": "^4.1.0"
   },
   "devDependencies": {

@@ -11,7 +11,8 @@ module.exports = {
     ],
     output: {
         path: path.resolve(rootDir, "public"),
-        filename: "bundle.js"
+        filename: "bundle.js",
+        publicPath: "/",
     },
     resolve: {
         extensions: [".ts", ".tsx", ".js", ".json"],
@@ -36,6 +37,5 @@ module.exports = {
         new HtmlWebpackPlugin({
             template: "./app/index.html"
         }),
-        new webpack.NamedModulesPlugin(),
     ],
 };

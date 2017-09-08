@@ -4,6 +4,6 @@ import serveApp from "./serveApp";
 
 const app = express();
 
-app.use(serveApp());
+serveApp(app);
 
 export default app;

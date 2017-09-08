@@ -8,10 +8,11 @@ module.exports = webpackMerge.strategy({
     devtool: "eval-source-map",
     entry: [
         "react-hot-loader/patch",
-        "webpack-dev-server/client?http://localhost:8080",
+        "webpack-hot-middleware/client",
         "webpack/hot/only-dev-server",
     ],
     plugins: [
+        new webpack.NamedModulesPlugin(),
         new webpack.HotModuleReplacementPlugin(),
     ],
     devServer: {
