@@ -28,7 +28,7 @@
   "homepage": "https://github.com/amikhalev/sprinklers3#readme",
   "dependencies": {
     "@types/classnames": "^2.2.0",
-    "@types/core-js": "^0.9.42",
+    "@types/core-js": "^0.9.43",
     "@types/express": "^4.0.37",
     "@types/node": "^8.0.6",
     "@types/object-assign": "^4.0.30",

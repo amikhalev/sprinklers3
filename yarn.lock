@@ -12,7 +12,7 @@
   dependencies:
     "@types/node" "*"
 
-"@types/core-js@^0.9.42":
+"@types/core-js@^0.9.43":
   version "0.9.43"
   resolved "https://registry.yarnpkg.com/@types/core-js/-/core-js-0.9.43.tgz#65d646c5e8c0cd1bdee37065799f9d3d48748253"
 

@@ -6,10 +6,13 @@
         "target": "es5",
         "lib": [
             "es6",
-            "dom"
+            "dom",
+            "scripthost"
         ],
+        "module": "commonjs",
         "types": [
             "webpack-env",
+            "core-js",
             "node"
         ],
         "strict": true,
