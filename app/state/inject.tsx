@@ -30,7 +30,7 @@ export class ProvideState extends React.Component<{
 type Diff<T extends string, U extends string> = ({[P in T]: P } & {[P in U]: never } & { [x: string]: never })[T];
 type Omit<T, K extends keyof T> = {[P in Diff<keyof T, K>]: T[P]};
 
-export function injectState<P extends { "state": State }, T extends React.ComponentClass<P>>(Component: T) {
+export function injectState<P extends { "state": State }>(Component: React.ComponentType<P>) {
     return class extends React.Component<Omit<P, "state">> {
         static contextTypes = providedStateContextTypes;
         context: IProvidedStateContext;

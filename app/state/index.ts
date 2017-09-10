@@ -5,18 +5,21 @@ import { UiMessage, UiStore } from "./ui";
 export { UiMessage, UiStore };
 export * from "./inject";
 
-export class State {
-    client: ISprinklersApi = new MqttApiClient();
-    device: SprinklersDevice;
+export interface IState {
+    sprinklersApi: ISprinklersApi;
+    uiStore: UiStore;
+}
+
+export class State implements IState {
+    sprinklersApi: ISprinklersApi = new MqttApiClient();
     uiStore = new UiStore();
 
     constructor() {
-        this.device = this.client.getDevice("grinklers");
         this.uiStore.addMessage({ header: "asdf", content: "boo!", error: true });
     }
 
     start() {
-        this.client.start();
+        this.sprinklersApi.start();
     }
 }
 
