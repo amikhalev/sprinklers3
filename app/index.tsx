@@ -3,13 +3,19 @@ import * as ReactDOM from "react-dom";
 import { AppContainer } from "react-hot-loader";
 
 import App from "@app/components/App";
+import { ProvideState, State } from "@app/state";
+
+const state = new State();
+state.start();
 
 const rootElem = document.getElementById("app");
 
-const doRender = (Component: typeof App) => {
+const doRender = (Component: React.ComponentType) => {
     ReactDOM.render((
         <AppContainer>
-            <Component device={device} uiStore={uiStore} />
+            <ProvideState state={state}>
+                <Component />
+            </ProvideState>
         </AppContainer>
     ), rootElem);
 };

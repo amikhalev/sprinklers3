@@ -2,8 +2,9 @@ import { observer } from "mobx-react";
 import * as React from "react";
 import { Message, MessageProps, TransitionGroup } from "semantic-ui-react";
 
-import { Message as UiMessage, UiStore } from "@app/ui";
+import { injectState, State, UiMessage, UiStore } from "@app/state/";
 
+@observer
 class MessageView extends React.Component<{
     uiStore: UiStore,
     message: UiMessage,
@@ -20,7 +21,7 @@ class MessageView extends React.Component<{
         );
     }
 
-    private dismiss = (event: React.MouseEvent<HTMLElement>, data: MessageProps) => {
+    private dismiss: MessageProps["onDismiss"] = (event, data) => {
         const { uiStore, index } = this.props;
         uiStore.messages.splice(index, 1);
         if (this.props.message.onDismiss) {
@@ -29,18 +30,20 @@ class MessageView extends React.Component<{
     }
 }
 
-@observer
-export default class MessagesView extends React.Component<{ uiStore: UiStore }> {
+class MessagesView extends React.Component<{ state: State }> {
     render() {
-        const messages = this.props.uiStore.messages.map((message, index) => (
-            <MessageView key={message.id} uiStore={this.props.uiStore} message={message} index={index} />
+        const { uiStore } = this.props.state;
+        const messages = uiStore.messages.map((message, index) => (
+            <MessageView key={message.id} uiStore={uiStore} message={message} index={index} />
         ));
         return (
             <div className="messages" >
-            <TransitionGroup  animation="scale" duration={200}>
-                {messages}
-            </TransitionGroup>
+                <TransitionGroup animation="scale" duration={200}>
+                    {messages}
+                </TransitionGroup>
             </div>
         );
     }
 }
+
+export default injectState(observer(MessagesView));

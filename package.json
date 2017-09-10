@@ -5,7 +5,7 @@
   "description": "A frontend for mqtt based IoT sprinklers systems",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "clean": "rm -rf ./dist ./build",
+    "clean": "rm -rf ./dist ./build ./public",
     "build:app": "webpack --config ./app/webpack/prod.config.js",
     "build:server": "tsc --project server",
     "watch:app": "yarn build:app --watch",

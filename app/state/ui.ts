@@ -3,13 +3,12 @@ import { MessageProps } from "semantic-ui-react";
 
 import { getRandomId } from "@common/utils";
 
-export interface Message extends MessageProps {
+export interface UiMessage extends MessageProps {
     id: number;
 }
 
 export class UiStore {
-    @observable
-    messages: IObservableArray<Message> = observable.array();
+    messages: IObservableArray<UiMessage> = observable.array();
 
     addMessage(message: MessageProps) {
         this.messages.push(observable({

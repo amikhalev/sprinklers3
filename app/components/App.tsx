@@ -3,23 +3,22 @@ import DevTools from "mobx-react-devtools";
 import * as React from "react";
 import { Item } from "semantic-ui-react";
 
-import { UiStore } from "@app/ui";
-import { SprinklersDevice } from "@common/sprinklers";
-import { DeviceView, MessagesView } from ".";
+import { DevicesView, MessagesView } from "@app/components";
 
 import "@app/styles/app.css";
 import "font-awesome/css/font-awesome.css";
 import "semantic-ui-css/semantic.css";
 
-@observer
-export default class App extends React.Component<{ device: SprinklersDevice, uiStore: UiStore }> {
+class App extends React.Component {
     render() {
         return (
             <Item.Group divided>
-                <MessagesView uiStore={this.props.uiStore} />
-                <DeviceView device={this.props.device} />
+                <MessagesView />
+                <DevicesView />
                 <DevTools />
             </Item.Group>
         );
     }
 }
+
+export default observer(App);

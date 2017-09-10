@@ -21,8 +21,7 @@ const ConnectionState = ({ connected }: { connected: boolean }) => {
     );
 };
 
-@observer
-export default class DeviceView extends React.Component<{ device: SprinklersDevice }> {
+class DeviceView extends React.Component<{ device: SprinklersDevice }> {
     render() {
         const { id, connected, sections, programs, sectionRunner } = this.props.device;
         return (
@@ -45,3 +44,5 @@ export default class DeviceView extends React.Component<{ device: SprinklersDevi
         );
     }
 }
+
+export default observer(DeviceView);
