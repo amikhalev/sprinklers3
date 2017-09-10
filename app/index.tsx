@@ -3,14 +3,6 @@ import * as ReactDOM from "react-dom";
 import { AppContainer } from "react-hot-loader";
 
 import App from "@app/components/App";
-import { MqttApiClient } from "@app/mqtt";
-import { Message, UiStore } from "@app/ui";
-
-const client = new MqttApiClient();
-client.start();
-const device = client.getDevice("grinklers");
-const uiStore = new UiStore();
-uiStore.addMessage(new Message("asdf", "boo!", Message.Type.Error));
 
 const rootElem = document.getElementById("app");
 

@@ -1,32 +1,20 @@
-import {observable} from "mobx";
+import { IObservableArray, observable } from "mobx";
+import { MessageProps } from "semantic-ui-react";
 
 import { getRandomId } from "@common/utils";
 
-export class Message {
-    id: string;
-    header: string = "";
-    content: string = "";
-    type: Message.Type = Message.Type.Default;
-
-    constructor(header: string, content: string = "", type: Message.Type = Message.Type.Default) {
-        this.id = "" + getRandomId();
-        this.header = header;
-        this.content = content;
-        this.type = type;
-    }
-}
-
-export namespace Message {
-    export enum Type {
-        Default, Success, Info, Warning, Error,
-    }
+export interface Message extends MessageProps {
+    id: number;
 }
 
 export class UiStore {
     @observable
-    messages: Message[] = [];
+    messages: IObservableArray<Message> = observable.array();
 
-    addMessage(message: Message) {
-        this.messages.push(message);
+    addMessage(message: MessageProps) {
+        this.messages.push(observable({
+            ...message,
+            id: getRandomId(),
+        }));
     }
 }

@@ -1,6 +1,6 @@
 import { observer } from "mobx-react";
 import * as React from "react";
-import { Message, TransitionGroup } from "semantic-ui-react";
+import { Message, MessageProps, TransitionGroup } from "semantic-ui-react";
 
 import { Message as UiMessage, UiStore } from "@app/ui";
 
@@ -11,23 +11,21 @@ class MessageView extends React.Component<{
 }> {
 
     render() {
-        const { header, content, type } = this.props.message;
+        const { id, ...messageProps } = this.props.message;
         return (
             <Message
-                header={header}
-                content={content}
-                success={type === UiMessage.Type.Success}
-                info={type === UiMessage.Type.Info}
-                warning={type === UiMessage.Type.Warning}
-                error={type === UiMessage.Type.Error}
+                {...messageProps}
                 onDismiss={this.dismiss}
             />
         );
     }
 
-    private dismiss = () => {
+    private dismiss = (event: React.MouseEvent<HTMLElement>, data: MessageProps) => {
         const { uiStore, index } = this.props;
         uiStore.messages.splice(index, 1);
+        if (this.props.message.onDismiss) {
+            this.props.message.onDismiss(event, data);
+        }
     }
 }
 
