@@ -1,5 +1,5 @@
 import * as React from "react";
-import { Input, InputOnChangeData } from "semantic-ui-react";
+import { Input, InputProps } from "semantic-ui-react";
 
 import { Duration } from "@common/sprinklers";
 
@@ -36,7 +36,7 @@ export default class DurationInput extends React.Component<{
         );
     }
 
-    private onMinutesChange = (e: React.SyntheticEvent<any>, { value }: InputOnChangeData) => {
+    private onMinutesChange: InputProps["onChange"] = (e, { value }) => {
         if (value.length === 0 || isNaN(Number(value))) {
             return;
         }
@@ -44,7 +44,7 @@ export default class DurationInput extends React.Component<{
         this.props.onDurationChange(this.props.duration.withMinutes(newMinutes));
     }
 
-    private onSecondsChange = (e: React.SyntheticEvent<any>, { value }: InputOnChangeData) => {
+    private onSecondsChange: InputProps["onChange"] = (e, { value }) => {
         if (value.length === 0 || isNaN(Number(value))) {
             return;
         }
