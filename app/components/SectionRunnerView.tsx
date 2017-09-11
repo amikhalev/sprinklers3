@@ -10,6 +10,7 @@ export default class SectionRunnerView extends React.Component<{ sectionRunner: 
         return (
             <Segment>
                 <h4>Section Runner Queue</h4>
+                {this.props.sectionRunner.toString()}
             </Segment>
         );
     }

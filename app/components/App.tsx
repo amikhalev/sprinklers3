@@ -1,7 +1,6 @@
 import { observer } from "mobx-react";
 import DevTools from "mobx-react-devtools";
 import * as React from "react";
-import { Item } from "semantic-ui-react";
 
 import { DevicesView, MessagesView } from "@app/components";
 
@@ -12,11 +11,11 @@ import "semantic-ui-css/semantic.css";
 class App extends React.Component {
     render() {
         return (
-            <Item.Group divided>
+            <div>
                 <MessagesView />
                 <DevicesView />
                 <DevTools />
-            </Item.Group>
+            </div>
         );
     }
 }

@@ -37,11 +37,9 @@ class MessagesView extends React.Component<{ state: State }> {
             <MessageView key={message.id} uiStore={uiStore} message={message} index={index} />
         ));
         return (
-            <div className="messages" >
-                <TransitionGroup animation="scale" duration={200}>
-                    {messages}
-                </TransitionGroup>
-            </div>
+            <TransitionGroup className="messages" animation="scale" duration={200}>
+                {messages}
+            </TransitionGroup>
         );
     }
 }
