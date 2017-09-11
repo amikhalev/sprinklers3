@@ -7,13 +7,22 @@ export interface UiMessage extends MessageProps {
     id: number;
 }
 
+export interface UiMessageProps extends MessageProps {
+    timeout?: number;
+}
+
 export class UiStore {
     messages: IObservableArray<UiMessage> = observable.array();
 
-    addMessage(message: MessageProps) {
-        this.messages.push(observable({
-            ...message,
+    addMessage(message: UiMessageProps) {
+        const { timeout, ...otherProps } = message;
+        const msg = observable({
+            ...otherProps,
             id: getRandomId(),
-        }));
+        });
+        this.messages.push(msg);
+        if (timeout) {
+            setTimeout(() => this.messages.remove(msg), timeout);
+        }
     }
 }
