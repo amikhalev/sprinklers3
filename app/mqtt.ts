@@ -100,6 +100,16 @@ export class MqttApiClient implements ISprinklersApi {
     }
 }
 
+const subscriptions =  [
+    "/connected",
+    "/sections",
+    "/sections/+/#",
+    "/programs",
+    "/programs/+/#",
+    "/responses/+",
+    "/section_runner",
+];
+
 class MqttSprinklersDevice extends SprinklersDevice {
     readonly apiClient: MqttApiClient;
     readonly prefix: string;
@@ -119,28 +129,16 @@ class MqttSprinklersDevice extends SprinklersDevice {
         return this.prefix;
     }
 
-    private get subscriptions() {
-        return [
-            `${this.prefix}/connected`,
-            `${this.prefix}/sections`,
-            `${this.prefix}/sections/+/#`,
-            `${this.prefix}/programs`,
-            `${this.prefix}/programs/+/#`,
-            `${this.prefix}/responses/+`,
-            `${this.prefix}/section_runner`,
-        ];
-    }
-
     doSubscribe() {
         const c = this.apiClient.client;
-        this.subscriptions
-            .forEach((filter) => c.subscribe(filter, { qos: 1 }));
+        subscriptions
+            .forEach((filter) => c.subscribe(this.prefix + filter, { qos: 1 }));
     }
 
     doUnsubscribe() {
         const c = this.apiClient.client;
-        this.subscriptions
-            .forEach((filter) => c.unsubscribe(filter));
+        subscriptions
+            .forEach((filter) => c.unsubscribe(this.prefix + filter));
     }
 
     /**
@@ -200,7 +198,7 @@ class MqttSprinklersDevice extends SprinklersDevice {
             //noinspection JSUnusedLocalSymbols
             /* tslint:disable-next-line:no-unused-variable */
             const [_topic, respIdStr] = matches;
-            console.log(`response: ${respIdStr}`);
+            // console.log(`response: ${respIdStr}`);
             const respId = parseInt(respIdStr, 10);
             const data = JSON.parse(payload) as IResponseData;
             const cb = this.responseCallbacks[respId];
