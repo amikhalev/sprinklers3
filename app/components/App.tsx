@@ -14,10 +14,10 @@ class App extends React.Component {
     render() {
         return (
             <Container>
-                <MessageTest />
+                {/* <MessageTest /> */}
                 <DevicesView />
                 <MessagesView />
-                <DevTools />
+                {/* <DevTools /> */}
             </Container>
         );
     }
