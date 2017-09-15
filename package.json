@@ -52,7 +52,7 @@
     "react-dom": ">=15.6.1 <16",
     "react-fontawesome": "^1.6.1",
     "semantic-ui-css": "^2.2.10",
-    "semantic-ui-react": "^0.72.0",
+    "semantic-ui-react": "^0.73.0",
     "webpack-hot-middleware": "^2.19.1",
     "webpack-merge": "^4.1.0"
   },
