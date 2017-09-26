@@ -14,7 +14,7 @@
         ],
         "strict": true
     },
-    "files": [
-        "./index.ts"
+    "include": [
+        "./**/*.ts"
     ]
 }
