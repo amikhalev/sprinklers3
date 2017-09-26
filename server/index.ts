@@ -2,6 +2,16 @@ import { Server } from "http";
 import app from "./app";
 import log from "./log";
 
+import * as mqtt from "mqtt";
+
+const mqttClient = mqtt.connect("mqtt://localhost:1882");
+mqttClient.on("connect", () => {
+    log.info("mqtt connected");
+});
+mqttClient.on("error", (err) => {
+    log.error("mqtt error: ", err);
+});
+
 const server = new Server(app);
 
 const port = +(process.env.PORT || 8080);

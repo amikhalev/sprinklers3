@@ -16,13 +16,13 @@
             "node"
         ],
         "strict": true,
-        "baseUrl": ".",
+        "baseUrl": "..",
         "paths": {
             "@common/*": [
-                "../common/*"
+                "./common/*"
             ],
             "@app/*": [
-                "./*"
+                "./app/*"
             ]
         }
     }

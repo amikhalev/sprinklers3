@@ -1,5 +1,4 @@
-import "paho-mqtt";
-import MQTT = Paho.MQTT;
+import * as mqtt from "../node_modules/mqtt";
 
 import {
     Duration,
@@ -16,14 +15,11 @@ import {
 import { checkedIndexOf } from "@common/utils";
 
 export class MqttApiClient implements ISprinklersApi {
-    client: MQTT.Client;
+    client: mqtt.Client;
     connected: boolean;
     devices: { [prefix: string]: MqttSprinklersDevice } = {};
 
     constructor() {
-        this.client = new MQTT.Client(location.hostname, 1884, MqttApiClient.newClientId());
-        this.client.onMessageArrived = (m) => this.onMessageArrived(m);
-        this.client.onConnectionLost = (e) => this.onConnectionLost(e);
         // (this.client as any).trace = (m => console.log(m));
     }
 
@@ -32,19 +28,25 @@ export class MqttApiClient implements ISprinklersApi {
     }
 
     start() {
-        console.log("connecting to mqtt with client id %s", this.client.clientId);
-        this.client.connect({
-            onFailure: (e) => {
-                console.log("mqtt error: ", e.errorMessage);
-            },
-            onSuccess: () => {
-                console.log("mqtt connected");
-                this.connected = true;
-                for (const prefix of Object.keys(this.devices)) {
-                    const device = this.devices[prefix];
-                    device.doSubscribe();
-                }
-            },
+        const clientId = MqttApiClient.newClientId();
+        console.log("connecting to mqtt with client id %s", clientId);
+        this.client = mqtt.connect(`ws://${location.hostname}:1884`, {
+            clientId,
+        });
+        this.client.on("message", this.onMessageArrived.bind(this));
+        this.client.on("offline", () => {
+            this.connected = false;
+        });
+        this.client.on("error", (e) => {
+            console.error("mqtt error: ", e);
+        });
+        this.client.on("connect", () => {
+            console.log("mqtt connected");
+            this.connected = true;
+            for (const prefix of Object.keys(this.devices)) {
+                const device = this.devices[prefix];
+                device.doSubscribe();
+            }
         });
     }
 
@@ -70,37 +72,29 @@ export class MqttApiClient implements ISprinklersApi {
         delete this.devices[prefix];
     }
 
-    private onMessageArrived(m: MQTT.Message) {
+    private onMessageArrived(topic: string, payload: Buffer, packet: mqtt.Packet) {
         try {
-            this.processMessage(m);
+            this.processMessage(topic, payload, packet);
         } catch (e) {
             console.error("error while processing mqtt message", e);
         }
     }
 
-    private processMessage(m: MQTT.Message) {
-        // console.log("message arrived: ", m);
-        if (m.destinationName == null) {
-            console.warn(`revieved invalid message: ${m}`);
-            return;
-        }
-        const topicIdx = m.destinationName.indexOf("/"); // find the first /
-        const prefix = m.destinationName.substr(0, topicIdx); // assume prefix does not contain a /
-        const topic = m.destinationName.substr(topicIdx + 1);
+    private processMessage(topic: string, payload: Buffer, packet: mqtt.Packet) {
+        console.log("message arrived: ", { topic, payload });
+        const topicIdx = topic.indexOf("/"); // find the first /
+        const prefix = topic.substr(0, topicIdx); // assume prefix does not contain a /
+        const topicSuffix = topic.substr(topicIdx + 1);
         const device = this.devices[prefix];
         if (!device) {
             console.warn(`received message for unknown device. prefix: ${prefix}`);
             return;
         }
-        device.onMessage(topic, m.payloadString);
-    }
-
-    private onConnectionLost(e: MQTT.MQTTError) {
-        this.connected = false;
+        device.onMessage(topicSuffix, payload);
     }
 }
 
-const subscriptions =  [
+const subscriptions = [
     "/connected",
     "/sections",
     "/sections/+/#",
@@ -130,23 +124,22 @@ class MqttSprinklersDevice extends SprinklersDevice {
     }
 
     doSubscribe() {
-        const c = this.apiClient.client;
-        subscriptions
-            .forEach((filter) => c.subscribe(this.prefix + filter, { qos: 1 }));
+        const topics = subscriptions.map((filter) => this.prefix + filter);
+        this.apiClient.client.subscribe(topics, { qos: 1 });
     }
 
     doUnsubscribe() {
-        const c = this.apiClient.client;
-        subscriptions
-            .forEach((filter) => c.unsubscribe(this.prefix + filter));
+        const topics = subscriptions.map((filter) => this.prefix + filter);
+        this.apiClient.client.unsubscribe(topics);
     }
 
     /**
      * Updates this device with the specified message
      * @param topic The topic, with prefix removed
-     * @param payload The payload string
+     * @param payload The payload buffer
      */
-    onMessage(topic: string, payload: string) {
+    onMessage(topic: string, payloadBuf: Buffer) {
+        const payload = payloadBuf.toString("utf8");
         if (topic === "connected") {
             this.connected = (payload === "true");
             // console.log(`MqttSprinklersDevice with prefix ${this.prefix}: ${this.connected}`)
@@ -240,13 +233,11 @@ class MqttSprinklersDevice extends SprinklersDevice {
         return Math.floor(Math.random() * 1000000000);
     }
 
-    private makeRequest(topic: string, payload: object | string = {}): Promise<IResponseData> {
+    private makeRequest(topic: string, payload: any = {}): Promise<IResponseData> {
         return new Promise<IResponseData>((resolve, reject) => {
-            const payloadStr = (typeof payload === "string") ?
-                payload : JSON.stringify(payload);
-            const message = new MQTT.Message(payloadStr);
-            message.destinationName = this.prefix + "/" + topic;
-            const requestId = this.nextRequestId();
+            const requestId = payload.rid = this.nextRequestId();
+            const payloadStr = JSON.stringify(payload);
+            const fullTopic = this.prefix + "/" + topic;
             this.responseCallbacks[requestId] = (data) => {
                 if (data.error != null) {
                     reject(data);
@@ -254,7 +245,7 @@ class MqttSprinklersDevice extends SprinklersDevice {
                     resolve(data);
                 }
             };
-            this.apiClient.client.send(message);
+            this.apiClient.client.publish(fullTopic, payloadStr, { qos: 1 });
         });
 
     }
