@@ -11,7 +11,7 @@ export interface IState {
 }
 
 export class State implements IState {
-    sprinklersApi: ISprinklersApi = new MqttApiClient();
+    sprinklersApi: ISprinklersApi = new MqttApiClient(`ws://${location.hostname}:1884`);
     uiStore = new UiStore();
 
     constructor() {

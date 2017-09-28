@@ -1,16 +1,14 @@
 import { Server } from "http";
+import log, { setLogger } from "../common/logger";
 import app from "./app";
-import log from "./log";
 
-import * as mqtt from "mqtt";
+setLogger(log.child({ name: "sprinklers3/server" }));
 
-const mqttClient = mqtt.connect("mqtt://localhost:1882");
-mqttClient.on("connect", () => {
-    log.info("mqtt connected");
-});
-mqttClient.on("error", (err) => {
-    log.error("mqtt error: ", err);
-});
+import * as mqtt from "../common/mqtt";
+
+const mqttClient = new mqtt.MqttApiClient("mqtt://localhost:1882");
+
+mqttClient.start();
 
 const server = new Server(app);
 

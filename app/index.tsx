@@ -4,6 +4,9 @@ import { AppContainer } from "react-hot-loader";
 
 import App from "@app/components/App";
 import { ProvideState, State } from "@app/state";
+import log, { setLogger } from "@common/log";
+
+setLogger(log.child({ name: "sprinklers3/app" }));
 
 const state = new State();
 state.start();

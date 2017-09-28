@@ -3,7 +3,7 @@ import * as webpack from "webpack";
 import * as webpackMiddleware from "webpack-dev-middleware";
 import * as webpackHotMiddleware from "webpack-hot-middleware";
 
-import logger from "../log";
+import logger from "../../common/logger";
 const log = logger.child({ source: "webpack" });
 
 /* tslint:disable-next-line:no-var-requires */

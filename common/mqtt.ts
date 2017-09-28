@@ -11,16 +11,17 @@ import {
     SectionRunner,
     SprinklersDevice,
     TimeOfDay,
-} from "@common/sprinklers";
-import { checkedIndexOf } from "@common/utils";
+} from "./sprinklers";
+import { checkedIndexOf } from "./utils";
 
 export class MqttApiClient implements ISprinklersApi {
+    readonly mqttUri: string;
     client: mqtt.Client;
     connected: boolean;
     devices: { [prefix: string]: MqttSprinklersDevice } = {};
 
-    constructor() {
-        // (this.client as any).trace = (m => console.log(m));
+    constructor(mqttUri: string) {
+        this.mqttUri = mqttUri;
     }
 
     private static newClientId() {
@@ -30,7 +31,7 @@ export class MqttApiClient implements ISprinklersApi {
     start() {
         const clientId = MqttApiClient.newClientId();
         console.log("connecting to mqtt with client id %s", clientId);
-        this.client = mqtt.connect(`ws://${location.hostname}:1884`, {
+        this.client = mqtt.connect(this.mqttUri, {
             clientId,
         });
         this.client.on("message", this.onMessageArrived.bind(this));
