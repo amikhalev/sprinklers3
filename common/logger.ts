@@ -1,8 +1,8 @@
 import * as pino from "pino";
 
-type Level = "default" | 60 | 50 | 40 | 30 | 20 | 10;
+type Level = "default" | "60" | "50" | "40" | "30" | "20" | "10";
 
-const levels = {
+const levels: {[level in Level]: string } = {
     default: "USERLVL",
     60: "FATAL",
     50: "ERROR",
@@ -12,7 +12,7 @@ const levels = {
     10: "TRACE",
 };
 
-const levelColors = {
+const levelColors: {[level in Level]: string } = {
     default: "text-decoration: underline; color: #000000;",
     60: "text-decoration: underline; background-color: #FF0000;",
     50: "text-decoration: underline; color: #FF0000;",
@@ -40,7 +40,7 @@ function concatColored(...coloredStrings: ColoredString[]): ColoredString {
 
 const standardKeys = ["pid", "hostname", "name", "level", "time", "v", "source", "msg"];
 
-function formatter(value: any) {
+function write(value: any) {
     let line = concatColored(
         // makeColored(formatTime(value, " ")),
         formatSource(value),
@@ -53,12 +53,10 @@ function formatter(value: any) {
             str: "%c" + value.msg, args: ["color: #00FFFF"],
         });
     }
-    let args = [line.str].concat(line.args);
-    if (value.type === "Error") {
-        args = args.concat([value.stack]);
-    } else {
-        args = args.concat([filter(value)]);
-    }
+    const args = [line.str].concat(line.args)
+        .concat([
+            (value.type === "Error") ? value.stack : filter(value),
+        ]);
     let fn;
     if (value.level >= 50) {
         fn = console.error;
@@ -118,7 +116,7 @@ function formatSource(value: any): { str: string, args: any[] } {
 
 function formatLevel(value: any): ColoredString {
     const level = value.level as Level;
-    if (levelColors.hasOwnProperty(level as string)) {
+    if (levelColors.hasOwnProperty(level)) {
         return {
             str: "%c" + levels[level] + "%c",
             args: [levelColors[level], ""],
@@ -132,7 +130,7 @@ function formatLevel(value: any): ColoredString {
 }
 
 let logger: pino.Logger = pino({
-    browser: { write: formatter },
+    browser: { write },
     level: "trace",
 });
 
