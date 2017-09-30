@@ -23,6 +23,16 @@
                     }
                 ]
             }
+        },
+        {
+            "type": "npm",
+            "script": "watch:server",
+            "problemMatcher": []
+        },
+        {
+            "type": "npm",
+            "script": "start:pretty",
+            "problemMatcher": []
         }
     ]
 }
