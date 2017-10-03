@@ -229,6 +229,11 @@ const getConfig = module.exports = (env) => {
         plugins: plugins,
         devServer: {
             hot: true,
+            port: 8081,
+            proxy: [{
+                context: ["/api"], // TODO: update when there is actually an api
+                target: paths.publicUrl,
+            }],
         },
     }
 };
