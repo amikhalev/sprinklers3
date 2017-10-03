@@ -1,5 +1,4 @@
 import * as chalk from "chalk";
-
 import pretty = require("pino/pretty");
 
 type Level = "default" | 60 | 50 | 40 | 30 | 20 | 10;
@@ -37,7 +36,13 @@ function formatter(value: any) {
     // }
     // line += value.pid + " on " + value.hostname + ")";
 
+    const isRequest = value.req && value.res;
+
     line += ": ";
+    if (isRequest) {
+        line += chalk.reset(formatRequest(value));
+        return line;
+    }
     if (value.msg) {
         line += chalk.cyan(value.msg);
     }
@@ -48,6 +53,14 @@ function formatter(value: any) {
         line += filter(value);
     }
     return line;
+}
+
+function formatRequest(value: any): string {
+    const matches = /Content-Length: (\d+)/.exec(value.res.header);
+    const contentLength = matches ? matches[1] : null;
+    return `${value.req.remoteAddress} - ` +
+        `"${value.req.method} ${value.req.url} ${value.res.statusCode}" ` +
+        `${value.responseTime} ms - ${contentLength}`;
 }
 
 function withSpaces(value: string): string {
