@@ -1,4 +1,4 @@
-import * as mqtt from "../node_modules/mqtt";
+import * as mqtt from "mqtt";
 
 import logger from "./logger";
 import {

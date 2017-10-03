@@ -1,13 +1,14 @@
 import { Express } from "express";
+import * as paths from "paths";
 import * as webpack from "webpack";
 import * as webpackMiddleware from "webpack-dev-middleware";
 import * as webpackHotMiddleware from "webpack-hot-middleware";
 
-import logger from "../../common/logger";
+import logger from "@common/logger";
 const log = logger.child({ source: "webpack" });
 
 /* tslint:disable-next-line:no-var-requires */
-const webpackConfig = require("../../app/webpack/config.js");
+const webpackConfig = require(paths.appWebpackConfig)("dev");
 
 export default function serveApp(app: Express) {
     const compiler = webpack(webpackConfig);

@@ -3,6 +3,7 @@ import { observer } from "mobx-react";
 import * as React from "react";
 import { DropdownItemProps, DropdownProps, Form, Header, Segment } from "semantic-ui-react";
 
+import log from "@common/logger";
 import { Duration, Section } from "@common/sprinklers";
 import DurationInput from "./DurationInput";
 
@@ -65,10 +66,11 @@ export default class RunSectionForm extends React.Component<{
             return;
         }
         const section: Section = this.props.sections[this.state.section];
-        console.log(`running section ${section} for ${this.state.duration}`);
-        section.run(this.state.duration)
-            .then((a) => console.log("ran section", a))
-            .catch((err) => console.error("error running section", err));
+        const { duration } = this.state;
+        log.debug({ section, duration }, "running section");
+        section.run(duration)
+            .then((a) => log.debug("ran section", a))
+            .catch((err) => log.error(err, "error running section"));
     }
 
     private get isValid(): boolean {

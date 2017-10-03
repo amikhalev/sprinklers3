@@ -206,6 +206,13 @@ export abstract class SprinklersDevice {
     abstract pauseSectionRunner(): Promise<{}>;
 
     abstract unpauseSectionRunner(): Promise<{}>;
+
+    toString(): string {
+        return `SprinklersDevice{id="${this.id}", connected=${this.connected},
+    sections=${this.sections},
+    programs=${this.programs},
+    sectionRunner=${this.sectionRunner} }`;
+    }
 }
 
 export interface ISprinklersApi {

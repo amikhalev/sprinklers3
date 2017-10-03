@@ -12,7 +12,17 @@
             "webpack-env",
             "node"
         ],
-        "strict": true
+        "strict": true,
+        "allowJs": true,
+        "baseUrl": "..",
+        "paths": {
+            "@common/*": [
+                "./common/*"
+            ],
+            "@app/*": [
+                "./app/*"
+            ]
+        }
     },
     "include": [
         "./**/*.ts"
