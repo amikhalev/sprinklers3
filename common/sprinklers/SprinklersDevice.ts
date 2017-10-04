@@ -30,9 +30,9 @@ export abstract class SprinklersDevice {
     abstract unpauseSectionRunner(): Promise<{}>;
 
     toString(): string {
-        return `SprinklersDevice{id="${this.id}", connected=${this.connected},
-    sections=${this.sections},
-    programs=${this.programs},
-    sectionRunner=${this.sectionRunner} }`;
+        return `SprinklersDevice{id="${this.id}", connected=${this.connected}, ` +
+            `sections=[${this.sections}], ` +
+            `programs=[${this.programs}], ` +
+            `sectionRunner=${this.sectionRunner} }`;
     }
 }

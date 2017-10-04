@@ -41,7 +41,7 @@ export class Program {
     }
 
     toString(): string {
-        return `Program{name="${this.name}", enabled=${this.enabled}, schedule=${this.schedule},
-         sequence=${this.sequence}, running=${this.running}}`;
+        return `Program{name="${this.name}", enabled=${this.enabled}, schedule=${this.schedule}, ` +
+         `sequence=${this.sequence}, running=${this.running}}`;
     }
 }
