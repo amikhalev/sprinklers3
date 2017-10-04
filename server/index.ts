@@ -11,15 +11,13 @@ const mqttClient = new mqtt.MqttApiClient("mqtt://localhost:1883");
 
 mqttClient.start();
 
+import * as sjson from "@common/sprinklers/json";
 import { autorun } from "mobx";
 const device = mqttClient.getDevice("grinklers");
-autorun(() => log.info("device: ", device.toString()));
 
-import * as json from "@common/sprinklers/json";
-
-app.get("/grinklers", (req, res) => {
-    const j = json.sprinklersDeviceToJSON(device);
-    console.dir(device);
+app.get("/api/grinklers", (req, res) => {
+    const j = sjson.sprinklersDeviceToJSON(device);
+    log.trace(j);
     res.send(j);
 });
 
