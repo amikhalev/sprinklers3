@@ -106,11 +106,15 @@ export interface ISectionRunJSON {
 const sectionRunProps = ["id", "section", "duration", "startTime", "pauseTime"];
 
 export function sectionRunToJSON(sectionRun: s.SectionRun): ISectionRunJSON {
-    return pick(sectionRun, sectionRunProps);
+    return {
+        ...pick(sectionRun, sectionRunProps),
+        duration: sectionRun.duration.toSeconds(),
+    };
 }
 
 export function sectionRunFromJSON(sectionRun: s.SectionRun, json: ISectionRunJSON) {
     assign(sectionRun, pick(json, sectionRunProps));
+    sectionRun.duration = s.Duration.fromSeconds(json.duration);
 }
 
 interface ISectionRunnerJSON {
