@@ -33,6 +33,16 @@
             "type": "npm",
             "script": "start:pretty",
             "problemMatcher": []
+        },
+        {
+            "type": "npm",
+            "script": "start:dev",
+            "problemMatcher": []
+        },
+        {
+            "type": "npm",
+            "script": "start:watch",
+            "problemMatcher": []
         }
     ]
 }

@@ -3,17 +3,25 @@ import "./configureAlias";
 import "env";
 
 import log from "@common/logger";
-import * as mqtt from "@common/mqtt";
+import * as mqtt from "@common/sprinklers/mqtt";
 import { Server } from "http";
 import app from "./app";
 
-const mqttClient = new mqtt.MqttApiClient("mqtt://localhost:1882");
+const mqttClient = new mqtt.MqttApiClient("mqtt://localhost:1883");
 
 mqttClient.start();
 
 import { autorun } from "mobx";
 const device = mqttClient.getDevice("grinklers");
 autorun(() => log.info("device: ", device.toString()));
+
+import * as json from "@common/sprinklers/json";
+
+app.get("/grinklers", (req, res) => {
+    const j = json.sprinklersDeviceToJSON(device);
+    console.dir(device);
+    res.send(j);
+});
 
 const server = new Server(app);
 

@@ -1,5 +1,5 @@
-import { MqttApiClient } from "@common/mqtt";
 import { ISprinklersApi } from "@common/sprinklers";
+import { MqttApiClient } from "@common/sprinklers/mqtt";
 
 import { UiMessage, UiStore } from "./ui";
 export { UiMessage, UiStore };

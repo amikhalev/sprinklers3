@@ -1,6 +1,6 @@
 import * as mqtt from "mqtt";
 
-import logger from "./logger";
+import logger from "@common/logger";
 import {
     Duration,
     ISprinklersApi,
@@ -12,8 +12,8 @@ import {
     SectionRunner,
     SprinklersDevice,
     TimeOfDay,
-} from "./sprinklers";
-import { checkedIndexOf } from "./utils";
+} from "@common/sprinklers";
+import { checkedIndexOf } from "@common/utils";
 
 const log = logger.child({ source: "mqtt" });
 
