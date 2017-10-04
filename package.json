@@ -15,7 +15,7 @@
     "start:pretty": "yarn start | node dist/server/logging/prettyPrint.js",
     "start:nodemon": "NODE_ENV=development nodemon --exec \"node dist/server/index.js | node dist/server/logging/prettyPrint.js\"",
     "start:watch": "run-p watch:server start:nodemon",
-    "start:all": "run-p start:dev-server start:watch",
+    "start:dev": "run-p start:dev-server start:watch",
     "lint:app": "tslint --project app --force --format verbose",
     "lint:server": "tslint --project server --force --format verbose",
     "lint": "run-p lint:*"
