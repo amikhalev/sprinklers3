@@ -9,7 +9,7 @@ export class ProgramItem {
     // duration of the run
     readonly duration: Duration;
 
-    constructor(section: number, duration: Duration) {
+    constructor(section: number = 0, duration: Duration = new Duration()) {
         this.section = section;
         this.duration = duration;
     }

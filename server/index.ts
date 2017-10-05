@@ -1,6 +1,7 @@
+/* tslint:disable:ordered-imports */
 import "./configureAlias";
-
 import "env";
+import "./configureLogger";
 
 import log from "@common/logger";
 import * as mqtt from "@common/sprinklers/mqtt";
@@ -11,12 +12,13 @@ const mqttClient = new mqtt.MqttApiClient("mqtt://localhost:1883");
 
 mqttClient.start();
 
-import * as sjson from "@common/sprinklers/json";
+import { sprinklersDeviceSchema } from "@common/sprinklers/json";
 import { autorun } from "mobx";
+import { serialize } from "serializr";
 const device = mqttClient.getDevice("grinklers");
 
 app.get("/api/grinklers", (req, res) => {
-    const j = sjson.sprinklersDeviceToJSON(device);
+    const j = serialize(sprinklersDeviceSchema, device);
     log.trace(j);
     res.send(j);
 });

@@ -135,7 +135,7 @@ let logger: pino.Logger = pino({
 });
 
 export function setLogger(newLogger: pino.Logger) {
-    logger = newLogger;
+    exports.default = logger = newLogger;
 }
 
 export default logger;

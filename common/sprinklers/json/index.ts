@@ -1,175 +1,108 @@
+/* tslint:disable:ordered-imports */
 import { assign, pick } from "lodash";
+import {
+    createSimpleSchema, createModelSchema, primitive, object, date, custom,
+    ModelSchema, PropSchema,
+} from "serializr";
+import list from "./list";
 import * as s from "..";
 
-export interface ISectionJSON {
-    name: string;
-    state: boolean;
-}
-const sectionProps = ["name", "state"];
+export const durationSchema: PropSchema = {
+    serializer: (duration: s.Duration | null) =>
+        duration != null ? duration.toSeconds() : null,
+    deserializer: (json: any) =>
+        typeof json === "number" ? s.Duration.fromSeconds(json) : null,
+};
 
-export function sectionToJSON(sec: s.Section): ISectionJSON {
-    return pick(sec, sectionProps);
-}
+export const dateSchema: PropSchema = {
+    serializer: (jsDate: Date | null) => jsDate != null ?
+        jsDate.toISOString() : null,
+    deserializer: (json: any) => typeof json === "string" ?
+        new Date(json) : null,
+};
 
-export function sectionFromJSON(sec: s.Section, json: ISectionJSON) {
-    assign(sec, pick(json, sectionProps));
-}
+export const dateOfYearSchema: ModelSchema<s.DateOfYear> = {
+    factory: () => new s.DateOfYear(),
+    props: {
+        year: primitive(),
+        month: primitive(), // this only works if it is represented as a # from 0-12
+        day: primitive(),
+    },
+};
 
-export interface ITimeOfDayJSON {
-    hour: number;
-    minute: number;
-    second: number;
-    millisecond: number;
-}
-const timeOfDayProps = ["hour", "minute", "second", "millisecond"];
+export const timeOfDaySchema: ModelSchema<s.TimeOfDay> = {
+    factory: () => new s.TimeOfDay(),
+    props: {
+        hour: primitive(),
+        minute: primitive(),
+        second: primitive(),
+        millisecond: primitive(),
+    },
+};
 
-export function timeOfDayToJSON(timeOfDay: s.TimeOfDay): ITimeOfDayJSON {
-    return pick(timeOfDay, timeOfDayProps);
-}
+export const sectionSchema: ModelSchema<s.Section> = {
+    factory: (c) => new (c.parentContext.target as s.SprinklersDevice).sectionConstructor(
+        c.parentContext.target, c.json.id),
+    props: {
+        name: primitive(),
+        state: primitive(),
+    },
+};
 
-export function timeOfDayFromJSON(timeOfDay: s.TimeOfDay, json: ITimeOfDayJSON) {
-    assign(timeOfDay, pick(json, timeOfDayProps));
-}
+export const sectionRunSchema: ModelSchema<s.SectionRun> = {
+    factory: (c) => new s.SectionRun(c.json.id),
+    props: {
+        id: primitive(),
+        section: primitive(),
+        duration: durationSchema,
+        startTime: dateSchema,
+        endTime: dateSchema,
+    },
+};
 
-export interface IScheduleJSON {
-    times: ITimeOfDayJSON[];
-    weekdays: number[];
-    from?: string;
-    to?: string;
-}
-const scheduleProps = ["weekdays", "from", "to"];
+export const sectionRunnerSchema: ModelSchema<s.SectionRunner> = {
+    factory: (c) => new (c.parentContext.target as s.SprinklersDevice).sectionRunnerConstructor(
+        c.parentContext.target),
+    props: {
+        queue: list(object(sectionRunSchema)),
+        current: object(sectionRunSchema),
+        paused: primitive(),
+    },
+};
 
-export function scheduleToJSON(schedule: s.Schedule): IScheduleJSON {
-    return {
-        ...pick(schedule, scheduleProps),
-        times: schedule.times.map(timeOfDayToJSON),
-    };
-}
+export const scheduleSchema: ModelSchema<s.Schedule> = {
+    factory: () => new s.Schedule(),
+    props: {
+        times: list(object(timeOfDaySchema)),
+        weekdays: list(primitive()),
+        from: object(dateOfYearSchema),
+        to: object(dateOfYearSchema),
+    },
+};
 
-export function scheduleFromJSON(schedule: s.Schedule, json: IScheduleJSON) {
-    assign(schedule, pick(json, scheduleProps));
-    schedule.times.length = json.times.length;
-    schedule.times.forEach((timeOfDay, i) =>
-        timeOfDayFromJSON(timeOfDay, json.times[i]));
-}
+export const programItemSchema: ModelSchema<s.ProgramItem> = {
+    factory: () => new s.ProgramItem(),
+    props: {
+        section: primitive(),
+        duration: durationSchema,
+    },
+};
 
-export interface IProgramItemJSON {
-    section: number;
-    duration: number;
-}
-const programItemProps = ["section"];
+export const programSchema: ModelSchema<s.Program> = {
+    factory: (c) => new (c.parentContext.target as s.SprinklersDevice).programConstructor(
+        c.parentContext.target, c.json.id),
+    props: {
+        name: primitive(),
+        enabled: primitive(),
+        schedule: object(scheduleSchema),
+        sequence: list(object(programItemSchema)),
+        running: primitive(),
+    },
+};
 
-export function programItemToJSON(programItem: s.ProgramItem): IProgramItemJSON {
-    return {
-        ...pick(programItem, programItemProps),
-        duration: programItem.duration.toSeconds(),
-    };
-}
-
-export function programItemFromJSON(json: IProgramItemJSON): s.ProgramItem {
-    const duration = s.Duration.fromSeconds(json.duration);
-    return new s.ProgramItem(json.section, duration);
-}
-
-export interface IProgramJSON {
-    name: string;
-    enabled: boolean;
-    sequence: IProgramItemJSON[];
-    schedule: IScheduleJSON;
-    running: boolean;
-}
-const programProps = ["name", "enabled", "running"];
-
-export function programToJSON(program: s.Program): IProgramJSON {
-    return {
-        ...pick(program, programProps),
-        sequence: program.sequence.map(programItemToJSON),
-        schedule: scheduleToJSON(program.schedule),
-    };
-}
-
-export function programFromJSON(program: s.Program, json: IProgramJSON) {
-    assign(program, pick(json, programProps));
-    program.sequence = json.sequence.map((programItemJson) =>
-        programItemFromJSON(programItemJson));
-    scheduleFromJSON(program.schedule, json.schedule);
-}
-
-export interface ISectionRunJSON {
-    id: number;
-    section: number;
-    duration: number;
-    startTime?: number;
-    pauseTime?: number;
-}
-const sectionRunProps = ["id", "section", "duration", "startTime", "pauseTime"];
-
-export function sectionRunToJSON(sectionRun: s.SectionRun): ISectionRunJSON {
-    return {
-        ...pick(sectionRun, sectionRunProps),
-        duration: sectionRun.duration.toSeconds(),
-    };
-}
-
-export function sectionRunFromJSON(sectionRun: s.SectionRun, json: ISectionRunJSON) {
-    assign(sectionRun, pick(json, sectionRunProps));
-    sectionRun.duration = s.Duration.fromSeconds(json.duration);
-}
-
-interface ISectionRunnerJSON {
-    queue: ISectionRunJSON[];
-    current: ISectionRunJSON | null;
-    paused: boolean;
-}
-const sectionRunnerProps = ["paused"];
-
-export function sectionRunnerToJSON(sectionRunner: s.SectionRunner): ISectionRunnerJSON {
-    return {
-        ...pick(sectionRunner, sectionRunnerProps),
-        queue: sectionRunner.queue.map(sectionRunToJSON),
-        current: sectionRunner.current ? sectionRunToJSON(sectionRunner.current) : null,
-    };
-}
-
-export function sectionRunnerFromJSON(sectionRunner: s.SectionRunner, json: ISectionRunnerJSON) {
-    assign(sectionRunner, pick(json, sectionRunnerProps));
-    sectionRunner.queue.length = json.queue.length;
-    sectionRunner.queue.forEach((sectionRun, i) =>
-        sectionRunFromJSON(sectionRun, json.queue[i]));
-    if (json.current == null) {
-        sectionRunner.current = null;
-    } else {
-        if (sectionRunner.current == null) {
-            sectionRunner.current = new s.SectionRun();
-        }
-        sectionRunFromJSON(sectionRunner.current, json.current);
-    }
-}
-
-interface ISprinklersDeviceJSON {
-    connected: boolean;
-    sections: ISectionJSON[];
-    sectionRunner: ISectionRunnerJSON;
-    programs: IProgramJSON[];
-}
-const sprinklersDeviceProps = ["connected"];
-
-export function sprinklersDeviceToJSON(sprinklersDevice: s.SprinklersDevice): ISprinklersDeviceJSON {
-    return {
-        ...pick(sprinklersDevice, sprinklersDeviceProps),
-        sections: sprinklersDevice.sections.map(sectionToJSON),
-        sectionRunner: sectionRunnerToJSON(sprinklersDevice.sectionRunner),
-        programs: sprinklersDevice.programs.map(programToJSON),
-    };
-}
-
-export function sprinklersDeviceFromJSON(sprinklersDevice: s.SprinklersDevice, json: ISprinklersDeviceJSON) {
-    assign(sprinklersDevice, pick(json, sprinklersDeviceProps));
-    sprinklersDevice.sections.length = json.sections.length;
-    sprinklersDevice.sections.forEach((section, i) =>
-        sectionFromJSON(section, json.sections[i]));
-    sectionRunnerFromJSON(sprinklersDevice.sectionRunner, json.sectionRunner);
-    sprinklersDevice.programs.length = json.programs.length;
-    sprinklersDevice.programs.forEach((program, i) =>
-        programFromJSON(program, json.programs[i]));
-}
+export const sprinklersDeviceSchema = createSimpleSchema({
+    connected: primitive(),
+    sections: list(object(sectionSchema)),
+    sectionRunner: object(sectionRunnerSchema),
+    programs: list(object(programSchema)),
+});
