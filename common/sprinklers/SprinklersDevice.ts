@@ -10,6 +10,10 @@ export abstract class SprinklersDevice {
     @observable programs: Program[] = [];
     @observable sectionRunner: SectionRunner;
 
+    constructor() {
+        this.sectionRunner = new (this.sectionRunnerConstructor)(this);
+    }
+
     abstract get id(): string;
     abstract runSection(section: number | Section, duration: Duration): Promise<{}>;
     abstract runProgram(program: number | Program): Promise<{}>;
@@ -17,9 +21,15 @@ export abstract class SprinklersDevice {
     abstract pauseSectionRunner(): Promise<{}>;
     abstract unpauseSectionRunner(): Promise<{}>;
 
-    abstract get sectionConstructor(): typeof Section;
-    abstract get sectionRunnerConstructor(): typeof SectionRunner;
-    abstract get programConstructor(): typeof Program;
+    get sectionConstructor(): typeof Section {
+        return Section;
+    }
+    get sectionRunnerConstructor(): typeof SectionRunner {
+        return SectionRunner;
+    }
+    get programConstructor(): typeof Program {
+        return Program;
+    }
 
     toString(): string {
         return `SprinklersDevice{id="${this.id}", connected=${this.connected}, ` +

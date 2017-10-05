@@ -1,10 +1,10 @@
 import * as React from "react";
 import { Button, Segment } from "semantic-ui-react";
 
-import { injectState, State } from "@app/state";
+import { injectState, MqttApiState } from "@app/state";
 import { getRandomId } from "@common/utils";
 
-class MessageTest extends React.Component<{ state: State }> {
+class MessageTest extends React.Component<{ state: MqttApiState }> {
     render() {
         return (
             <Segment>

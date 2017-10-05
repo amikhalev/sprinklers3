@@ -13,13 +13,17 @@ const mqttClient = new mqtt.MqttApiClient("mqtt://localhost:1883");
 mqttClient.start();
 
 import { sprinklersDeviceSchema } from "@common/sprinklers/json";
-import { autorun } from "mobx";
+import { autorunAsync } from "mobx";
 import { serialize } from "serializr";
 const device = mqttClient.getDevice("grinklers");
 
+autorunAsync(() => {
+    const j = serialize(sprinklersDeviceSchema, device);
+    log.info({ device: j });
+}, 0);
+
 app.get("/api/grinklers", (req, res) => {
     const j = serialize(sprinklersDeviceSchema, device);
-    log.trace(j);
     res.send(j);
 });
 

@@ -4,7 +4,7 @@ import * as React from "react";
 import FontAwesome = require("react-fontawesome");
 import { Header, Item } from "semantic-ui-react";
 
-import { injectState, State } from "@app/state";
+import { injectState, MqttApiState } from "@app/state";
 import { SprinklersDevice } from "@common/sprinklers";
 import { ProgramTable, RunSectionForm, SectionRunnerView, SectionTable } from ".";
 
@@ -24,7 +24,7 @@ const ConnectionState = ({ connected }: { connected: boolean }) => {
 
 interface DeviceViewProps {
     deviceId: string;
-    state: State;
+    state: MqttApiState;
 }
 
 class DeviceView extends React.Component<DeviceViewProps> {

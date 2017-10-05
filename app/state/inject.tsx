@@ -1,10 +1,10 @@
 import * as PropTypes from "prop-types";
 import * as React from "react";
 
-import { State } from "@app/state";
+import { StateBase } from "@app/state";
 
 interface IProvidedStateContext {
-    providedState: State;
+    providedState: StateBase;
 }
 
 const providedStateContextTypes: PropTypes.ValidationMap<any> = {
@@ -12,7 +12,7 @@ const providedStateContextTypes: PropTypes.ValidationMap<any> = {
 };
 
 export class ProvideState extends React.Component<{
-    state: State,
+    state: StateBase,
 }> implements React.ChildContextProvider<IProvidedStateContext> {
     static childContextTypes = providedStateContextTypes;
 
@@ -30,7 +30,7 @@ export class ProvideState extends React.Component<{
 type Diff<T extends string, U extends string> = ({[P in T]: P } & {[P in U]: never } & { [x: string]: never })[T];
 type Omit<T, K extends keyof T> = {[P in Diff<keyof T, K>]: T[P]};
 
-export function injectState<P extends { "state": State }>(Component: React.ComponentType<P>) {
+export function injectState<P extends { "state": StateBase }>(Component: React.ComponentType<P>) {
     return class extends React.Component<Omit<P, "state">> {
         static contextTypes = providedStateContextTypes;
         context: IProvidedStateContext;

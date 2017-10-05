@@ -1,17 +1,13 @@
 import { ISprinklersApi } from "@common/sprinklers";
 import { MqttApiClient } from "@common/sprinklers/mqtt";
+import { WebApiClient } from "./web";
 
 import { UiMessage, UiStore } from "./ui";
 export { UiMessage, UiStore };
 export * from "./inject";
 
-export interface IState {
-    sprinklersApi: ISprinklersApi;
-    uiStore: UiStore;
-}
-
-export class State implements IState {
-    sprinklersApi: ISprinklersApi = new MqttApiClient(`ws://${location.hostname}:1884`);
+export abstract class StateBase {
+    abstract readonly sprinklersApi: ISprinklersApi;
     uiStore = new UiStore();
 
     constructor() {
@@ -21,6 +17,14 @@ export class State implements IState {
     start() {
         this.sprinklersApi.start();
     }
+}
+
+export class MqttApiState extends StateBase {
+    sprinklersApi = new MqttApiClient(`ws://${location.hostname}:1884`);
+}
+
+export class WebApiState extends StateBase {
+    sprinklersApi = new WebApiClient();
 }
 
 // const state = new State();

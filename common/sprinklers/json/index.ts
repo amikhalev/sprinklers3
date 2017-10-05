@@ -8,15 +8,28 @@ import * as s from "..";
 export const durationSchema: PropSchema = {
     serializer: (duration: s.Duration | null) =>
         duration != null ? duration.toSeconds() : null,
-    deserializer: (json: any) =>
-        typeof json === "number" ? s.Duration.fromSeconds(json) : null,
+    deserializer: (json: any, done) => {
+        if (typeof json === "number") {
+            done(null, s.Duration.fromSeconds(json));
+        } else {
+            done(new Error(`Duration expects a number, not ${json}`), undefined);
+        }
+    },
 };
 
 export const dateSchema: PropSchema = {
     serializer: (jsDate: Date | null) => jsDate != null ?
         jsDate.toISOString() : null,
-    deserializer: (json: any) => typeof json === "string" ?
-        new Date(json) : null,
+    deserializer: (json: any, done) => {
+        if (json === null) {
+            done(null, null);
+        }
+        try {
+            done(null, new Date(json));
+        } catch (e) {
+            done(e, undefined);
+        }
+    },
 };
 
 export const dateOfYearSchema: ModelSchema<s.DateOfYear> = {
