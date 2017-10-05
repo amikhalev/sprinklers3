@@ -1,4 +1,3 @@
-import { IObservableArray, observable } from "mobx";
 export * from "./Duration";
 export * from "./ISprinklersApi";
 export * from "./Program";

@@ -1,4 +1,4 @@
-import { IObservableArray, observable } from "mobx";
+import { observable } from "mobx";
 import { Duration } from "./Duration";
 import { SprinklersDevice } from "./SprinklersDevice";
 

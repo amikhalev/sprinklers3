@@ -68,14 +68,6 @@ function write(value: any) {
     fn.apply(null, args);
 }
 
-function withSpaces(value: string): string {
-    const lines = value.split("\n");
-    for (let i = 1; i < lines.length; i++) {
-        lines[i] = "    " + lines[i];
-    }
-    return lines.join("\n");
-}
-
 function filter(value: any) {
     const keys = Object.keys(value);
     const result: any = {};
@@ -91,19 +83,6 @@ function filter(value: any) {
 
 function asISODate(time: string) {
     return new Date(time).toISOString();
-}
-
-function formatTime(value: any, after?: string) {
-    after = after || "";
-    try {
-        if (!value || !value.time) {
-            return "";
-        } else {
-            return "[" + asISODate(value.time) + "]" + after;
-        }
-    } catch (_) {
-        return "";
-    }
 }
 
 function formatSource(value: any): { str: string, args: any[] } {

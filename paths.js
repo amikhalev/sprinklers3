@@ -5,17 +5,16 @@ const url = require("url");
 exports.rootDir = fs.realpathSync(process.cwd());
 const resolveRoot = (p) => path.resolve(exports.rootDir, p);
 
-function ensureSlash(path, needsSlash) {
-  const hasSlash = path.endsWith("/");
+function ensureSlash(p, needsSlash) {
+  const hasSlash = p.endsWith("/");
   if (hasSlash && !needsSlash) {
-    return path.substr(path, path.length - 1);
+    return p.substr(p, p.length - 1);
   } else if (!hasSlash && needsSlash) {
-    return `${path}/`;
+    return `${p}/`;
   } else {
-    return path;
+    return p;
   }
 }
-
 
 exports.dotenv = resolveRoot(".env");
 exports.nodeModulesDir = resolveRoot("node_modules");
@@ -35,4 +34,3 @@ exports.publicDir = exports.appBuildDir;
 
 exports.serverDir = resolveRoot("server");
 exports.serverBuildDir = resolveRoot("dist");
-

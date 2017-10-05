@@ -1,8 +1,6 @@
 /* tslint:disable:ordered-imports */
-import { assign, pick } from "lodash";
 import {
-    createSimpleSchema, createModelSchema, primitive, object, date, custom,
-    ModelSchema, PropSchema,
+    createSimpleSchema, primitive, object, ModelSchema, PropSchema,
 } from "serializr";
 import list from "./list";
 import * as s from "..";

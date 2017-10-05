@@ -1,6 +1,5 @@
-import { cloneDeep } from "lodash";
 import * as mqtt from "mqtt";
-import { deserialize, update } from "serializr";
+import { update } from "serializr";
 
 import logger from "@common/logger";
 import * as s from "@common/sprinklers";
@@ -259,11 +258,6 @@ interface IResponseData {
 }
 
 type ResponseCallback = (data: IResponseData) => void;
-
-interface ISectionJSON {
-    name: string;
-    pin: number;
-}
 
 interface IRunSectionJSON {
     duration: number;
