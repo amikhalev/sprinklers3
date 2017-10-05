@@ -1,8 +1,10 @@
+import { observable } from "mobx";
+
 export class TimeOfDay {
-    hour: number;
-    minute: number;
-    second: number;
-    millisecond: number;
+    readonly hour: number;
+    readonly minute: number;
+    readonly second: number;
+    readonly millisecond: number;
 
     constructor(hour: number, minute: number = 0, second: number = 0, millisecond: number = 0) {
         this.hour = hour;
@@ -21,8 +23,8 @@ export enum Weekday {
 }
 
 export class Schedule {
-    times: TimeOfDay[] = [];
-    weekdays: Weekday[] = [];
-    from: Date | null = null;
-    to: Date | null = null;
+    @observable times: TimeOfDay[] = [];
+    @observable weekdays: Weekday[] = [];
+    @observable from: Date | null = null;
+    @observable to: Date | null = null;
 }

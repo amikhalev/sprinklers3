@@ -5,28 +5,16 @@ import { Section } from "./Section";
 import { SectionRunner } from "./SectionRunner";
 
 export abstract class SprinklersDevice {
-    @observable
-    connected: boolean = false;
-
-    @observable
-    sections: IObservableArray<Section> = observable.array<Section>();
-
-    @observable
-    programs: IObservableArray<Program> = observable.array<Program>();
-
-    @observable
-    sectionRunner: SectionRunner;
+    @observable connected: boolean = false;
+    @observable sections: Section[] = [];
+    @observable programs: Program[] = [];
+    @observable sectionRunner: SectionRunner;
 
     abstract get id(): string;
-
     abstract runSection(section: number | Section, duration: Duration): Promise<{}>;
-
     abstract runProgram(program: number | Program): Promise<{}>;
-
     abstract cancelSectionRunById(id: number): Promise<{}>;
-
     abstract pauseSectionRunner(): Promise<{}>;
-
     abstract unpauseSectionRunner(): Promise<{}>;
 
     toString(): string {

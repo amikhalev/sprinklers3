@@ -3,16 +3,15 @@ import { Duration } from "./Duration";
 import { SprinklersDevice } from "./SprinklersDevice";
 
 export class Section {
-    device: SprinklersDevice;
+    readonly device: SprinklersDevice;
+    readonly id: number;
 
-    @observable
-    name: string = "";
+    @observable name: string = "";
+    @observable state: boolean = false;
 
-    @observable
-    state: boolean = false;
-
-    constructor(device: SprinklersDevice) {
+    constructor(device: SprinklersDevice, id: number) {
         this.device = device;
+        this.id = id;
     }
 
     run(duration: Duration) {
@@ -20,6 +19,6 @@ export class Section {
     }
 
     toString(): string {
-        return `Section{name="${this.name}", state=${this.state}}`;
+        return `Section{id=${this.id}, name="${this.name}", state=${this.state}}`;
     }
 }

@@ -66,9 +66,9 @@ export function programItemToJSON(programItem: s.ProgramItem): IProgramItemJSON 
     };
 }
 
-export function programItemFromJSON(programItem: s.ProgramItem, json: IProgramItemJSON) {
-    assign(programItem, pick(json, programItemProps));
-    programItem.duration = s.Duration.fromSeconds(json.duration);
+export function programItemFromJSON(json: IProgramItemJSON): s.ProgramItem {
+    const duration = s.Duration.fromSeconds(json.duration);
+    return new s.ProgramItem(json.section, duration);
 }
 
 export interface IProgramJSON {
@@ -90,9 +90,8 @@ export function programToJSON(program: s.Program): IProgramJSON {
 
 export function programFromJSON(program: s.Program, json: IProgramJSON) {
     assign(program, pick(json, programProps));
-    program.sequence.length = json.sequence.length;
-    program.sequence.forEach((programItem, i) =>
-        programItemFromJSON(programItem, json.sequence[i]));
+    program.sequence = json.sequence.map((programItemJson) =>
+        programItemFromJSON(programItemJson));
     scheduleFromJSON(program.schedule, json.schedule);
 }
 

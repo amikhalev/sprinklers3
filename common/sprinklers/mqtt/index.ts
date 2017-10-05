@@ -161,7 +161,7 @@ class MqttSprinklersDevice extends SprinklersDevice {
                 const secNum = Number(secStr);
                 let section = this.sections[secNum];
                 if (!section) {
-                    this.sections[secNum] = section = new MqttSection(this);
+                    this.sections[secNum] = section = new MqttSection(this, secNum);
                 }
                 (section as MqttSection).onMessage(subTopic, payload);
             }
@@ -179,7 +179,7 @@ class MqttSprinklersDevice extends SprinklersDevice {
                 const progNum = Number(progStr);
                 let program = this.programs[progNum];
                 if (!program) {
-                    this.programs[progNum] = program = new MqttProgram(this);
+                    this.programs[progNum] = program = new MqttProgram(this, progNum);
                 }
                 (program as MqttProgram).onMessage(subTopic, payload);
             }
@@ -361,8 +361,7 @@ export interface ISectionRunJSON {
 }
 
 function sectionRunFromJSON(json: ISectionRunJSON) {
-    const run = new SectionRun();
-    run.id = json.id;
+    const run = new SectionRun(json.id);
     run.section = json.section;
     run.duration = Duration.fromSeconds(json.duration);
     run.startTime = json.startTime == null ? null : new Date(json.startTime);
@@ -383,11 +382,11 @@ class MqttSectionRunner extends SectionRunner {
     }
 
     updateFromJSON(json: ISectionRunnerJSON) {
-        if (!json.queue || !json.queue.length) { // null means empty queue
-            this.queue.clear();
-        } else {
-            this.queue.replace(json.queue.map(sectionRunFromJSON));
+        this.queue.length = 0;
+        if (json.queue && json.queue.length) { // null means empty queue
+            this.queue.push.apply(this.queue, json.queue.map(sectionRunFromJSON));
         }
         this.current = json.current == null ? null : sectionRunFromJSON(json.current);
+        this.paused = json.paused;
     }
 }

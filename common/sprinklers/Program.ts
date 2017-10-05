@@ -5,9 +5,9 @@ import { SprinklersDevice } from "./SprinklersDevice";
 
 export class ProgramItem {
     // the section number
-    section: number;
+    readonly section: number;
     // duration of the run
-    duration: Duration;
+    readonly duration: Duration;
 
     constructor(section: number, duration: Duration) {
         this.section = section;
@@ -16,24 +16,18 @@ export class ProgramItem {
 }
 
 export class Program {
-    device: SprinklersDevice;
+    readonly device: SprinklersDevice;
+    readonly id: number;
 
-    @observable
-    name: string = "";
-    @observable
-    enabled: boolean = false;
+    @observable name: string = "";
+    @observable enabled: boolean = false;
+    @observable schedule: Schedule = new Schedule();
+    @observable.shallow sequence: ProgramItem[] = [];
+    @observable running: boolean = false;
 
-    @observable
-    schedule: Schedule = new Schedule();
-
-    @observable
-    sequence: ProgramItem[] = [];
-
-    @observable
-    running: boolean = false;
-
-    constructor(device: SprinklersDevice) {
+    constructor(device: SprinklersDevice, id: number) {
         this.device = device;
+        this.id = id;
     }
 
     run() {

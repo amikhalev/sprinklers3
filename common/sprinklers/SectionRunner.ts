@@ -3,7 +3,7 @@ import { Duration } from "./Duration";
 import { SprinklersDevice } from "./SprinklersDevice";
 
 export class SectionRun {
-    id: number;
+    readonly id: number;
     section: number;
     duration: Duration;
     startTime: Date | null;
@@ -24,16 +24,11 @@ export class SectionRun {
 }
 
 export class SectionRunner {
-    device: SprinklersDevice;
+    readonly device: SprinklersDevice;
 
-    @observable
-    queue: IObservableArray<SectionRun> = observable([]);
-
-    @observable
-    current: SectionRun | null = null;
-
-    @observable
-    paused: boolean = false;
+    @observable queue: SectionRun[] = [];
+    @observable current: SectionRun | null = null;
+    @observable paused: boolean = false;
 
     constructor(device: SprinklersDevice) {
         this.device = device;
