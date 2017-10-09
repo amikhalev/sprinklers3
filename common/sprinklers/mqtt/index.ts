@@ -3,7 +3,7 @@ import { update } from "serializr";
 
 import logger from "@common/logger";
 import * as s from "@common/sprinklers";
-import * as schema from "@common/sprinklers/json";
+import * as schema from "@common/sprinklers/schema";
 import { checkedIndexOf } from "@common/utils";
 
 const log = logger.child({ source: "mqtt" });
@@ -273,7 +273,7 @@ class MqttSection extends s.Section {
     }
 
     updateFromJSON(json: any) {
-        update(schema.sectionSchema, this, json);
+        update(schema.section, this, json);
     }
 }
 
@@ -287,7 +287,7 @@ class MqttProgram extends s.Program {
     }
 
     updateFromJSON(json: any) {
-        update(schema.programSchema, this, json);
+        update(schema.program, this, json);
     }
 }
 
@@ -297,6 +297,6 @@ class MqttSectionRunner extends s.SectionRunner {
     }
 
     updateFromJSON(json: any) {
-        update(schema.sectionRunnerSchema, this, json);
+        update(schema.sectionRunner, this, json);
     }
 }

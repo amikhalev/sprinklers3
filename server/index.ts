@@ -13,14 +13,14 @@ const mqttClient = new mqtt.MqttApiClient("mqtt://localhost:1883");
 mqttClient.start();
 
 import * as s from "@common/sprinklers";
-import { sprinklersDeviceSchema } from "@common/sprinklers/json";
+import * as schema from "@common/sprinklers/schema";
 import * as ws from "@common/sprinklers/websocketData";
 import { autorunAsync } from "mobx";
 import { serialize } from "serializr";
 const device = mqttClient.getDevice("grinklers");
 
 app.get("/api/grinklers", (req, res) => {
-    const j = serialize(sprinklersDeviceSchema, device);
+    const j = serialize(schema.sprinklersDevice, device);
     res.send(j);
 });
 
@@ -62,7 +62,7 @@ async function deviceCallRequest(socket: WebSocket, data: ws.IDeviceCallRequest)
 
 function webSocketHandler(socket: WebSocket) {
     const stop = autorunAsync(() => {
-        const json = serialize(sprinklersDeviceSchema, device);
+        const json = serialize(schema.sprinklersDevice, device);
         log.info({ device: json });
         const data = { type: "deviceUpdate", name: "grinklers", data: json };
         socket.send(JSON.stringify(data));

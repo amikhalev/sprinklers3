@@ -1,13 +1,13 @@
-/* tslint:disable:ordered-imports */
+/* tslint:disable:ordered-imports object-literal-shorthand */
 import {
     createSimpleSchema, primitive, object, ModelSchema, PropSchema,
 } from "serializr";
 import list from "./list";
 import * as s from "..";
 
-export const durationSchema: PropSchema = {
-    serializer: (duration: s.Duration | null) =>
-        duration != null ? duration.toSeconds() : null,
+export const duration: PropSchema = {
+    serializer: (d: s.Duration | null) =>
+        d != null ? d.toSeconds() : null,
     deserializer: (json: any, done) => {
         if (typeof json === "number") {
             done(null, s.Duration.fromSeconds(json));
@@ -17,7 +17,7 @@ export const durationSchema: PropSchema = {
     },
 };
 
-export const dateSchema: PropSchema = {
+export const date: PropSchema = {
     serializer: (jsDate: Date | null) => jsDate != null ?
         jsDate.toISOString() : null,
     deserializer: (json: any, done) => {
@@ -32,7 +32,7 @@ export const dateSchema: PropSchema = {
     },
 };
 
-export const dateOfYearSchema: ModelSchema<s.DateOfYear> = {
+export const dateOfYear: ModelSchema<s.DateOfYear> = {
     factory: () => new s.DateOfYear(),
     props: {
         year: primitive(),
@@ -41,7 +41,7 @@ export const dateOfYearSchema: ModelSchema<s.DateOfYear> = {
     },
 };
 
-export const timeOfDaySchema: ModelSchema<s.TimeOfDay> = {
+export const timeOfDay: ModelSchema<s.TimeOfDay> = {
     factory: () => new s.TimeOfDay(),
     props: {
         hour: primitive(),
@@ -51,7 +51,7 @@ export const timeOfDaySchema: ModelSchema<s.TimeOfDay> = {
     },
 };
 
-export const sectionSchema: ModelSchema<s.Section> = {
+export const section: ModelSchema<s.Section> = {
     factory: (c) => new (c.parentContext.target as s.SprinklersDevice).sectionConstructor(
         c.parentContext.target, c.json.id),
     props: {
@@ -60,60 +60,60 @@ export const sectionSchema: ModelSchema<s.Section> = {
     },
 };
 
-export const sectionRunSchema: ModelSchema<s.SectionRun> = {
+export const sectionRun: ModelSchema<s.SectionRun> = {
     factory: (c) => new s.SectionRun(c.json.id),
     props: {
         id: primitive(),
         section: primitive(),
-        duration: durationSchema,
-        startTime: dateSchema,
-        endTime: dateSchema,
+        duration: duration,
+        startTime: date,
+        endTime: date,
     },
 };
 
-export const sectionRunnerSchema: ModelSchema<s.SectionRunner> = {
+export const sectionRunner: ModelSchema<s.SectionRunner> = {
     factory: (c) => new (c.parentContext.target as s.SprinklersDevice).sectionRunnerConstructor(
         c.parentContext.target),
     props: {
-        queue: list(object(sectionRunSchema)),
-        current: object(sectionRunSchema),
+        queue: list(object(sectionRun)),
+        current: object(sectionRun),
         paused: primitive(),
     },
 };
 
-export const scheduleSchema: ModelSchema<s.Schedule> = {
+export const schedule: ModelSchema<s.Schedule> = {
     factory: () => new s.Schedule(),
     props: {
-        times: list(object(timeOfDaySchema)),
+        times: list(object(timeOfDay)),
         weekdays: list(primitive()),
-        from: object(dateOfYearSchema),
-        to: object(dateOfYearSchema),
+        from: object(dateOfYear),
+        to: object(dateOfYear),
     },
 };
 
-export const programItemSchema: ModelSchema<s.ProgramItem> = {
+export const programItem: ModelSchema<s.ProgramItem> = {
     factory: () => new s.ProgramItem(),
     props: {
         section: primitive(),
-        duration: durationSchema,
+        duration: duration,
     },
 };
 
-export const programSchema: ModelSchema<s.Program> = {
+export const program: ModelSchema<s.Program> = {
     factory: (c) => new (c.parentContext.target as s.SprinklersDevice).programConstructor(
         c.parentContext.target, c.json.id),
     props: {
         name: primitive(),
         enabled: primitive(),
-        schedule: object(scheduleSchema),
-        sequence: list(object(programItemSchema)),
+        schedule: object(schedule),
+        sequence: list(object(programItem)),
         running: primitive(),
     },
 };
 
-export const sprinklersDeviceSchema = createSimpleSchema({
+export const sprinklersDevice = createSimpleSchema({
     connected: primitive(),
-    sections: list(object(sectionSchema)),
-    sectionRunner: object(sectionRunnerSchema),
-    programs: list(object(programSchema)),
+    sections: list(object(section)),
+    sectionRunner: object(sectionRunner),
+    programs: list(object(program)),
 });
