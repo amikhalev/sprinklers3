@@ -46,6 +46,7 @@
     "@types/react-dom": "^15.5.0",
     "@types/react-fontawesome": "^1.5.0",
     "@types/react-hot-loader": "^3.0.4",
+    "@types/ws": "^3.2.0",
     "async": "^2.5.0",
     "autoprefixer": "^7.1.4",
     "case-sensitive-paths-webpack-plugin": "^2.1.1",
@@ -75,7 +76,8 @@
     "serializr": "^1.1.13",
     "tslint-loader": "^3.5.3",
     "uglifyjs-webpack-plugin": "^0.4.6",
-    "url-loader": "^0.5.9"
+    "url-loader": "^0.5.9",
+    "ws": "^3.2.0"
   },
   "devDependencies": {
     "@types/webpack-env": "^1.13.0",

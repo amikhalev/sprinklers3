@@ -43,6 +43,11 @@
             "type": "npm",
             "script": "start:watch",
             "problemMatcher": []
+        },
+        {
+            "type": "npm",
+            "script": "start:dev-server",
+            "problemMatcher": []
         }
     ]
 }

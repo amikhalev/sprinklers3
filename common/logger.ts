@@ -108,13 +108,9 @@ function formatLevel(value: any): ColoredString {
     }
 }
 
-let logger: pino.Logger = pino({
+const logger: pino.Logger = pino({
     browser: { write },
     level: "trace",
 });
-
-export function setLogger(newLogger: pino.Logger) {
-    exports.default = logger = newLogger;
-}
 
 export default logger;

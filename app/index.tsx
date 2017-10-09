@@ -3,10 +3,10 @@ import * as ReactDOM from "react-dom";
 import { AppContainer } from "react-hot-loader";
 
 import App from "@app/components/App";
-import { ProvideState, MqttApiState, WebApiState } from "@app/state";
-import log, { setLogger } from "@common/logger";
+import { MqttApiState, ProvideState, WebApiState } from "@app/state";
+import log from "@common/logger";
 
-setLogger(log.child({ name: "sprinklers3/app" }));
+Object.assign(log, { name: "sprinklers3/app", level: "debug" });
 
 // const state = new MqttApiState();
 const state = new WebApiState();

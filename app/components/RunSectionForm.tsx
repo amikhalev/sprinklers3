@@ -67,9 +67,8 @@ export default class RunSectionForm extends React.Component<{
         }
         const section: Section = this.props.sections[this.state.section];
         const { duration } = this.state;
-        log.debug({ section, duration }, "running section");
         section.run(duration)
-            .then((a) => log.debug("ran section", a))
+            .then((result) => log.debug({ result }, "requested section run"))
             .catch((err) => log.error(err, "error running section"));
     }
 

@@ -22,7 +22,7 @@ export const dateSchema: PropSchema = {
         jsDate.toISOString() : null,
     deserializer: (json: any, done) => {
         if (json === null) {
-            done(null, null);
+            return done(null, null);
         }
         try {
             done(null, new Date(json));

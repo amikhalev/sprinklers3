@@ -1,5 +1,5 @@
-import log, { setLogger } from "@common/logger";
-setLogger(log.child({
+import log from "@common/logger";
+Object.assign(log, {
     name: "sprinklers3/server",
     level: "debug",
-}));
+});

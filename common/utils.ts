@@ -1,7 +1,12 @@
 export function checkedIndexOf<T>(o: T | number, arr: T[], type: string = "object"): number {
-    const idx = (typeof o === "number")
-        ? o
-        : arr.indexOf(o);
+    let idx: number;
+    if (typeof o === "number") {
+        idx = o;
+    } else if (typeof (o as any).id === "number") {
+        idx = (o as any).id;
+    } else {
+        idx = arr.indexOf(o);
+    }
     if (idx < 0 || idx > arr.length) {
         throw new Error(`Invalid ${type} specified: ${o}`);
     }

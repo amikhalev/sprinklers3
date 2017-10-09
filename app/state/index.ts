@@ -1,6 +1,6 @@
 import { ISprinklersApi } from "@common/sprinklers";
 import { MqttApiClient } from "@common/sprinklers/mqtt";
-import { WebApiClient } from "./web";
+import { WebApiClient } from "./websocket";
 
 import { UiMessage, UiStore } from "./ui";
 export { UiMessage, UiStore };
@@ -19,14 +19,14 @@ export abstract class StateBase {
     }
 }
 
+const isDev = process.env.NODE_ENV === "development";
+
 export class MqttApiState extends StateBase {
     sprinklersApi = new MqttApiClient(`ws://${location.hostname}:1884`);
 }
 
 export class WebApiState extends StateBase {
-    sprinklersApi = new WebApiClient();
+    sprinklersApi = new WebApiClient(isDev ?
+        `ws://${location.hostname}:8080` :
+        `ws://${location.host}`);
 }
-
-// const state = new State();
-
-// export default state;
