@@ -47,8 +47,8 @@ function formatter(value: any) {
         line += chalk.cyan(value.msg);
     }
     line += "\n";
-    if (value.type === "Error") {
-        line += "    " + withSpaces(value.stack) + "\n";
+    if (value.err) {
+        line += "    " + withSpaces(value.err.stack) + "\n";
     } else {
         line += filter(value);
     }
