@@ -20,6 +20,9 @@
     "lint:server": "tslint --project server --force --format verbose",
     "lint": "run-p lint:*"
   },
+  "files": [
+    "dist", "public"
+  ],
   "repository": {
     "type": "git",
     "url": "git+https://github.com/amikhalev/sprinklers3.git"
