@@ -31,7 +31,15 @@ export class Program {
     }
 
     run() {
-        return this.device.runProgram(this);
+        return this.device.runProgram({ programId: this.id });
+    }
+
+    cancel() {
+        return this.device.cancelProgram({ programId: this.id });
+    }
+
+    update(data: any) {
+        return this.device.updateProgram({ programId: this.id, data });
     }
 
     toString(): string {

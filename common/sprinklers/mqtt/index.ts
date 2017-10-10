@@ -3,10 +3,15 @@ import { update } from "serializr";
 
 import logger from "@common/logger";
 import * as s from "@common/sprinklers";
+import * as requests from "@common/sprinklers/requests";
 import * as schema from "@common/sprinklers/schema";
-import { checkedIndexOf } from "@common/utils";
+import { seralizeRequest } from "@common/sprinklers/schema/requests";
 
 const log = logger.child({ source: "mqtt" });
+
+interface WithRid {
+    rid: number;
+}
 
 export class MqttApiClient implements s.ISprinklersApi {
     readonly mqttUri: string;
@@ -97,7 +102,7 @@ const subscriptions = [
     "/sections/+/#",
     "/programs",
     "/programs/+/#",
-    "/responses/+",
+    "/responses",
     "/section_runner",
 ];
 
@@ -163,50 +168,26 @@ class MqttSprinklersDevice extends s.SprinklersDevice {
         log.warn({ topic }, "MqttSprinklersDevice recieved message on invalid topic");
     }
 
-    runSection(section: s.Section | number, duration: s.Duration) {
-        const sectionNum = checkedIndexOf(section, this.sections, "Section");
-        const payload: IRunSectionJSON = {
-            duration: duration.toSeconds(),
-        };
-        return this.makeRequest(`sections/${sectionNum}/run`, payload);
-    }
-
-    runProgram(program: s.Program | number) {
-        const programNum = checkedIndexOf(program, this.programs, "Program");
-        return this.makeRequest(`programs/${programNum}/run`);
-    }
-
-    cancelSectionRunById(id: number) {
-        return this.makeRequest(`section_runner/cancel_id`, { id });
-    }
-
-    pauseSectionRunner() {
-        return this.makeRequest(`section_runner/pause`);
-    }
-
-    unpauseSectionRunner() {
-        return this.makeRequest(`section_runner/unpause`);
-    }
-
-    private getRequestId(): number {
-        return this.nextRequestId++;
-    }
-
-    private makeRequest(topic: string, payload: any = {}): Promise<IResponseData> {
-        return new Promise<IResponseData>((resolve, reject) => {
-            const requestId = payload.rid = this.getRequestId();
-            const payloadStr = JSON.stringify(payload);
-            const fullTopic = this.prefix + "/" + topic;
+    makeRequest(request: requests.Request): Promise<requests.Response> {
+        return new Promise<requests.Response>((resolve, reject) => {
+            const topic = this.prefix + "/requests";
+            const json = seralizeRequest(request);
+            const requestId = json.rid = this.getRequestId();
+            const payloadStr = JSON.stringify(json);
             this.responseCallbacks.set(requestId, (data) => {
-                if (data.error != null) {
+                if (data.result === "error") {
                     reject(data);
                 } else {
                     resolve(data);
                 }
                 this.responseCallbacks.delete(requestId);
             });
-            this.apiClient.client.publish(fullTopic, payloadStr, { qos: 1 });
+            this.apiClient.client.publish(topic, payloadStr, { qos: 1 });
         });
+    }
+
+    private getRequestId(): number {
+        return this.nextRequestId++;
     }
 
     /* tslint:disable:no-unused-variable */
@@ -252,31 +233,20 @@ class MqttSprinklersDevice extends s.SprinklersDevice {
         (this.sectionRunner as MqttSectionRunner).onMessage(payload);
     }
 
-    @handler(/^responses\/(\d+)$/)
-    private handleResponse(payload: string, responseIdStr: string) {
-        log.trace({ response: responseIdStr }, "handling request response");
-        const respId = parseInt(responseIdStr, 10);
-        const data = JSON.parse(payload) as IResponseData;
-        const cb = this.responseCallbacks.get(respId);
+    @handler(/^responses$/)
+    private handleResponse(payload: string) {
+        const data = JSON.parse(payload) as requests.Response & WithRid;
+        log.trace({ rid: data.rid }, "handling request response");
+        const cb = this.responseCallbacks.get(data.rid);
         if (typeof cb === "function") {
+            delete data.rid;
             cb(data);
         }
     }
     /* tslint:enable:no-unused-variable */
 }
 
-interface IResponseData {
-    reqTopic: string;
-    error?: string;
-
-    [key: string]: any;
-}
-
-type ResponseCallback = (data: IResponseData) => void;
-
-interface IRunSectionJSON {
-    duration: number;
-}
+type ResponseCallback = (response: requests.Response) => void;
 
 class MqttSection extends s.Section {
     onMessage(payload: string, topic: string | undefined) {

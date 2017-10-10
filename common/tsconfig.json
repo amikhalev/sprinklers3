@@ -8,6 +8,7 @@
         "types": [
             "node"
         ],
+        "module": "commonjs",
         "strict": true,
         "allowJs": true,
         "baseUrl": "..",

@@ -2,9 +2,10 @@ import { update } from "serializr";
 
 import logger from "@common/logger";
 import * as s from "@common/sprinklers";
+import * as requests from "@common/sprinklers/requests";
 import * as schema from "@common/sprinklers/schema";
+import { seralizeRequest } from "@common/sprinklers/schema/requests";
 import * as ws from "@common/sprinklers/websocketData";
-import { checkedIndexOf } from "@common/utils";
 
 const log = logger.child({ source: "websocket" });
 
@@ -20,26 +21,8 @@ export class WebSprinklersDevice extends s.SprinklersDevice {
         return "grinklers";
     }
 
-    runSection(section: number | s.Section, duration: s.Duration): Promise<{}> {
-        const secNum = checkedIndexOf(section, this.sections, "Section");
-        const dur = duration.toSeconds();
-        return this.makeCall("runSection", secNum, dur);
-    }
-    async runProgram(program: number | s.Program): Promise<{}> {
-        return {};
-    }
-    async cancelSectionRunById(id: number): Promise<{}> {
-        return {};
-    }
-    async pauseSectionRunner(): Promise<{}> {
-        return {};
-    }
-    async unpauseSectionRunner(): Promise<{}> {
-        return {};
-    }
-
-    private makeCall(method: string, ...args: any[]) {
-        return this.api.makeDeviceCall(this.id, method, ...args);
+    makeRequest(request: requests.Request): Promise<requests.Response> {
+        return this.api.makeDeviceCall(this.id, request);
     }
 }
 
@@ -77,15 +60,16 @@ export class WebApiClient implements s.ISprinklersApi {
     }
 
     // args must all be JSON serializable
-    makeDeviceCall(deviceName: string, method: string, ...args: any[]): Promise<any> {
+    makeDeviceCall(deviceName: string, request: requests.Request): Promise<requests.Response> {
+        const requestData = seralizeRequest(request);
         const id = this.nextDeviceRequestId++;
         const data: ws.IDeviceCallRequest = {
             type: "deviceCallRequest",
-            id, deviceName, method, args,
+            id, deviceName, data: requestData,
         };
-        const promise = new Promise((resolve, reject) => {
+        const promise = new Promise<requests.Response>((resolve, reject) => {
             this.deviceResponseCallbacks[id] = (resData) => {
-                if (resData.result === "success") {
+                if (resData.data.result === "success") {
                     resolve(resData.data);
                 } else {
                     reject(resData.data);

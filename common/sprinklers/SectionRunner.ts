@@ -3,18 +3,21 @@ import { Duration } from "./Duration";
 import { SprinklersDevice } from "./SprinklersDevice";
 
 export class SectionRun {
+    readonly sectionRunner: SectionRunner;
     readonly id: number;
     section: number;
-    duration: Duration;
-    startTime: Date | null;
-    pauseTime: Date | null;
+    duration: Duration = new Duration();
+    startTime: Date | null = null;
+    pauseTime: Date | null = null;
 
-    constructor(id: number = 0, section: number = 0, duration: Duration = new Duration()) {
+    constructor(sectionRunner: SectionRunner, id: number = 0, section: number = 0) {
+        this.sectionRunner = sectionRunner;
         this.id = id;
         this.section = section;
-        this.duration = duration;
-        this.startTime = null;
-        this.pauseTime = null;
+    }
+
+    cancel() {
+        return this.sectionRunner.cancelRunById(this.id);
     }
 
     toString() {
@@ -34,8 +37,8 @@ export class SectionRunner {
         this.device = device;
     }
 
-    cancelRunById(id: number): Promise<{}> {
-        return this.device.cancelSectionRunById(id);
+    cancelRunById(runId: number) {
+        return this.device.cancelSectionRunId({ runId });
     }
 
     toString(): string {

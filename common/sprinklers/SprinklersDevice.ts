@@ -1,6 +1,6 @@
 import { observable } from "mobx";
-import { Duration } from "./Duration";
 import { Program } from "./Program";
+import * as requests from "./requests";
 import { Section } from "./Section";
 import { SectionRunner } from "./SectionRunner";
 
@@ -15,11 +15,35 @@ export abstract class SprinklersDevice {
     }
 
     abstract get id(): string;
-    abstract runSection(section: number | Section, duration: Duration): Promise<{}>;
-    abstract runProgram(program: number | Program): Promise<{}>;
-    abstract cancelSectionRunById(id: number): Promise<{}>;
-    abstract pauseSectionRunner(): Promise<{}>;
-    abstract unpauseSectionRunner(): Promise<{}>;
+    abstract makeRequest(request: requests.Request): Promise<requests.Response>;
+
+    runProgram(opts: requests.WithProgram) {
+        return this.makeRequest({ ...opts, type: "runProgram" });
+    }
+
+    cancelProgram(opts: requests.WithProgram) {
+        return this.makeRequest({ ...opts, type: "cancelProgram" });
+    }
+
+    updateProgram(opts: requests.UpdateProgramData): Promise<requests.UpdateProgramResponse> {
+        return this.makeRequest({ ...opts, type: "updateProgram" }) as Promise<any>;
+    }
+
+    runSection(opts: requests.RunSectionData): Promise<requests.RunSectionResponse> {
+        return this.makeRequest({ ...opts, type: "runSection" }) as Promise<any>;
+    }
+
+    cancelSection(opts: requests.WithSection) {
+        return this.makeRequest({ ...opts, type: "cancelSection" });
+    }
+
+    cancelSectionRunId(opts: requests.CancelSectionRunIdData) {
+        return this.makeRequest({ ...opts, type: "cancelSectionRunId" });
+    }
+
+    pauseSectionRunner(opts: requests.PauseSectionRunnerData) {
+        return this.makeRequest({ ...opts, type: "pauseSectionRunner" });
+    }
 
     get sectionConstructor(): typeof Section {
         return Section;

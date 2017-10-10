@@ -12,8 +12,8 @@ import app from "./app";
 const mqttClient = new mqtt.MqttApiClient("mqtt://localhost:1883");
 mqttClient.start();
 
-import * as s from "@common/sprinklers";
 import * as schema from "@common/sprinklers/schema";
+import * as requests from "@common/sprinklers/requests";
 import * as ws from "@common/sprinklers/websocketData";
 import { autorunAsync } from "mobx";
 import { serialize } from "serializr";
@@ -24,40 +24,31 @@ app.get("/api/grinklers", (req, res) => {
     res.send(j);
 });
 
-async function doDeviceCallRequest(data: ws.IDeviceCallRequest): Promise<any> {
-    const { deviceName, method, args } = data;
+async function doDeviceCallRequest(requestData: ws.IDeviceCallRequest) {
+    const { deviceName, data } = requestData;
     if (deviceName !== "grinklers") {
         // error handling? or just get the right device
-        return;
+        return false;
     }
-    switch (method) {
-        case "runSection":
-            return device.runSection(args[0], s.Duration.fromSeconds(args[1]));
-        default:
-            // new Error(`unsupported device call: ${data.method}`) // TODO: error handling?
-            return;
-    }
+    const request = schema.requests.deserializeRequest(data);
+    return device.makeRequest(request);
 }
 
 async function deviceCallRequest(socket: WebSocket, data: ws.IDeviceCallRequest): Promise<void> {
-    let resData: ws.IDeviceCallResponse;
+    let response: requests.Response | false;
     try {
-        const result = await doDeviceCallRequest(data);
-        resData = {
-            type: "deviceCallResponse",
-            id: data.id,
-            result: "success",
-            data: result,
-        };
+        response = await doDeviceCallRequest(data);
     } catch (err) {
-        resData = {
+        response = err;
+    }
+    if (response) {
+        const resData: ws.IDeviceCallResponse = {
             type: "deviceCallResponse",
             id: data.id,
-            result: "error",
-            data: err,
+            data: response,
         };
+        socket.send(JSON.stringify(resData));
     }
-    socket.send(JSON.stringify(resData));
 }
 
 function webSocketHandler(socket: WebSocket) {

@@ -15,7 +15,11 @@ export class Section {
     }
 
     run(duration: Duration) {
-        return this.device.runSection(this, duration);
+        return this.device.runSection({ sectionId: this.id, duration });
+    }
+
+    cancel() {
+        return this.device.cancelSection({ sectionId: this.id });
     }
 
     toString(): string {

@@ -1,3 +1,5 @@
+import { Response as ResponseData } from "@common/sprinklers/requests";
+
 export interface IDeviceUpdate {
     type: "deviceUpdate";
     name: string;
@@ -7,8 +9,7 @@ export interface IDeviceUpdate {
 export interface IDeviceCallResponse {
     type: "deviceCallResponse";
     id: number;
-    result: "success" | "error";
-    data: any;
+    data: ResponseData;
 }
 
 export type IServerMessage = IDeviceUpdate | IDeviceCallResponse;
@@ -17,8 +18,7 @@ export interface IDeviceCallRequest {
     type: "deviceCallRequest";
     id: number;
     deviceName: string;
-    method: string;
-    args: any[];
+    data: any;
 }
 
 export type IClientMessage = IDeviceCallRequest;
