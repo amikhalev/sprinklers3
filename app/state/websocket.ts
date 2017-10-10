@@ -2,7 +2,7 @@ import { update } from "serializr";
 
 import logger from "@common/logger";
 import * as s from "@common/sprinklers";
-import * as schema from "@common/sprinklers/json";
+import * as schema from "@common/sprinklers/schema";
 import * as ws from "@common/sprinklers/websocketData";
 import { checkedIndexOf } from "@common/utils";
 
@@ -134,7 +134,7 @@ export class WebApiClient implements s.ISprinklersApi {
         if (data.name !== "grinklers") {
             return log.warn({ data }, "invalid deviceUpdate received");
         }
-        update(schema.sprinklersDeviceSchema, this.device, data.data);
+        update(schema.sprinklersDevice, this.device, data.data);
     }
 
     private onDeviceCallResponse(data: ws.IDeviceCallResponse) {
