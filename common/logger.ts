@@ -81,10 +81,6 @@ function filter(value: any) {
     return result;
 }
 
-function asISODate(time: string) {
-    return new Date(time).toISOString();
-}
-
 function formatSource(value: any): { str: string, args: any[] } {
     if (value.source) {
         return { str: "%c(" + value.source + ") ", args: ["color: #FF00FF"] };

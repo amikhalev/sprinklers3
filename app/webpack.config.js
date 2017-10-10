@@ -6,7 +6,8 @@ const HtmlWebpackPlugin = require("html-webpack-plugin");
 const ExtractTextPlugin = require("extract-text-webpack-plugin");
 const CaseSensitivePathsPlugin = require("case-sensitive-paths-webpack-plugin");
 const WatchMissingNodeModulesPlugin = require("react-dev-utils/WatchMissingNodeModulesPlugin");
-const UglifyJsPlugin = require("uglifyjs-webpack-plugin");
+// const UglifyJsPlugin = require("uglifyjs-webpack-plugin");
+const MinifyPlugin = require("babel-minify-webpack-plugin");
 
 const { getClientEnvironment } = require("../env");
 const paths = require("../paths");
@@ -99,7 +100,7 @@ const rules = (env) => {
             test: /\.tsx?$/,
             enforce: "pre",
             loader: require.resolve("tslint-loader"),
-            options: { typecheck: true, tsConfigFile: paths.appTsConfig },
+            options: { typeCheck: true, tsConfigFile: paths.appTsConfig },
         },
         {
             // "oneOf" will traverse all following loaders until one will
@@ -183,7 +184,11 @@ const getConfig = module.exports = (env) => {
         isProd && new ExtractTextPlugin({
             filename: cssFilename,
         }),
-        isProd && new UglifyJsPlugin({
+        // TODO: doesn't work with typescript target: es6
+        // isProd && new UglifyJsPlugin({
+        //     sourceMap: shouldUseSourceMap,
+        // }),
+        isProd && new MinifyPlugin({}, {
             sourceMap: shouldUseSourceMap,
         }),
         isDev && new webpack.NamedModulesPlugin(),

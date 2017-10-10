@@ -3,12 +3,11 @@ import * as ReactDOM from "react-dom";
 import { AppContainer } from "react-hot-loader";
 
 import App from "@app/components/App";
-import { MqttApiState, ProvideState, WebApiState } from "@app/state";
-import log from "@common/logger";
+import { ProvideState, WebApiState } from "@app/state";
+// import log from "@common/logger";
 
-Object.assign(log, { name: "sprinklers3/app", level: "debug" });
+// Object.assign(log, { name: "sprinklers3/app", level: "debug" });
 
-// const state = new MqttApiState();
 const state = new WebApiState();
 state.start();
 

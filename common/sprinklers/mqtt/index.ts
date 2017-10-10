@@ -209,6 +209,7 @@ class MqttSprinklersDevice extends s.SprinklersDevice {
         });
     }
 
+    /* tslint:disable:no-unused-variable */
     @handler(/^connected$/)
     private handleConnected(payload: string) {
         this.connected = (payload === "true");
@@ -261,6 +262,7 @@ class MqttSprinklersDevice extends s.SprinklersDevice {
             cb(data);
         }
     }
+    /* tslint:enable:no-unused-variable */
 }
 
 interface IResponseData {
