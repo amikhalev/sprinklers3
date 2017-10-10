@@ -1,5 +1,4 @@
 import { observable } from "mobx";
-import { Duration } from "./Duration";
 import { SprinklersDevice } from "./SprinklersDevice";
 
 export class Section {
@@ -14,7 +13,8 @@ export class Section {
         this.id = id;
     }
 
-    run(duration: Duration) {
+    /** duration is in seconds */
+    run(duration: number) {
         return this.device.runSection({ sectionId: this.id, duration });
     }
 

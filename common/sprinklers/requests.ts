@@ -1,5 +1,3 @@
-import { Duration } from "./Duration";
-
 export interface WithType<Type extends string = string> {
     type: Type;
 }
@@ -15,7 +13,7 @@ export type UpdateProgramResponse = Response<"updateProgram", { data: any }>;
 
 export interface WithSection { sectionId: number; }
 
-export type RunSectionData = WithSection & { duration: Duration };
+export type RunSectionData = WithSection & { duration: number };
 export type RunSectionReqeust = RunSectionData & WithType<"runSection">;
 export type RunSectionResponse = Response<"runSection", { runId: number }>;
 

@@ -1,12 +1,11 @@
 import { observable } from "mobx";
-import { Duration } from "./Duration";
 import { SprinklersDevice } from "./SprinklersDevice";
 
 export class SectionRun {
     readonly sectionRunner: SectionRunner;
     readonly id: number;
     section: number;
-    duration: Duration = new Duration();
+    duration: number = 0;
     startTime: Date | null = null;
     pauseTime: Date | null = null;
 

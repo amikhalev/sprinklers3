@@ -1,7 +1,7 @@
 import * as React from "react";
 import { Input, InputProps } from "semantic-ui-react";
 
-import { Duration } from "@common/sprinklers";
+import { Duration } from "@common/Duration";
 
 export default class DurationInput extends React.Component<{
     duration: Duration,

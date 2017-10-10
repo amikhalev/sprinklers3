@@ -2,6 +2,7 @@ import { observer } from "mobx-react";
 import * as React from "react";
 import { Table } from "semantic-ui-react";
 
+import { Duration } from "@common/Duration";
 import { Program, Schedule } from "@common/sprinklers";
 
 @observer
@@ -20,10 +21,12 @@ export default class ProgramTable extends React.Component<{ programs: Program[] 
             return null;
         }
         const { name, running, enabled, schedule, sequence } = program;
-        const sequenceItems = sequence.map((item, index) => (
-            <li key={index}>Section {item.section + 1 + ""} for&nbsp;
-                {item.duration.minutes}M {item.duration.seconds}S</li>
-        ));
+        const sequenceItems = sequence.map((item, index) => {
+            const duration = Duration.fromSeconds(item.duration);
+            return (
+                <li key={index}>Section {item.section + 1 + ""} for {duration.toString()}</li>
+            );
+        });
         return [(
             <Table.Row key={i}>
                 <Table.Cell className="program--number">{"" + (i + 1)}</Table.Cell>

@@ -3,8 +3,9 @@ import { observer } from "mobx-react";
 import * as React from "react";
 import { DropdownItemProps, DropdownProps, Form, Header, Segment } from "semantic-ui-react";
 
+import { Duration } from "@common/Duration";
 import log from "@common/logger";
-import { Duration, Section } from "@common/sprinklers";
+import { Section } from "@common/sprinklers";
 import DurationInput from "./DurationInput";
 
 @observer
@@ -17,7 +18,7 @@ export default class RunSectionForm extends React.Component<{
     constructor() {
         super();
         this.state = {
-            duration: new Duration(1, 1),
+            duration: new Duration(0, 0),
             section: "",
         };
     }
@@ -67,7 +68,7 @@ export default class RunSectionForm extends React.Component<{
         }
         const section: Section = this.props.sections[this.state.section];
         const { duration } = this.state;
-        section.run(duration)
+        section.run(duration.toSeconds())
             .then((result) => log.debug({ result }, "requested section run"))
             .catch((err) => log.error(err, "error running section"));
     }

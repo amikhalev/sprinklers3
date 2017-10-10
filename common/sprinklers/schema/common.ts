@@ -3,17 +3,7 @@ import {
 } from "serializr";
 import * as s from "..";
 
-export const duration: PropSchema = {
-    serializer: (d: s.Duration | null) =>
-        d != null ? d.toSeconds() : null,
-    deserializer: (json: any, done) => {
-        if (typeof json === "number") {
-            done(null, s.Duration.fromSeconds(json));
-        } else {
-            done(new Error(`Duration expects a number, not ${json}`), undefined);
-        }
-    },
-};
+export const duration: PropSchema = primitive();
 
 export const date: PropSchema = {
     serializer: (jsDate: Date | null) => jsDate != null ?

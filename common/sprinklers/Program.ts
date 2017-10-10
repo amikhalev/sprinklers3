@@ -1,15 +1,14 @@
 import { observable } from "mobx";
-import { Duration } from "./Duration";
 import { Schedule } from "./schedule";
 import { SprinklersDevice } from "./SprinklersDevice";
 
 export class ProgramItem {
     // the section number
     readonly section: number;
-    // duration of the run
-    readonly duration: Duration;
+    // duration of the run, in seconds
+    readonly duration: number;
 
-    constructor(section: number = 0, duration: Duration = new Duration()) {
+    constructor(section: number = 0, duration: number = 0) {
         this.section = section;
         this.duration = duration;
     }
