@@ -1,8 +1,7 @@
 import * as classNames from "classnames";
 import { observer } from "mobx-react";
 import * as React from "react";
-import FontAwesome = require("react-fontawesome");
-import { Header, Item } from "semantic-ui-react";
+import { Header, Icon, Item } from "semantic-ui-react";
 
 import { injectState, MqttApiState } from "@app/state";
 import { SprinklersDevice } from "@common/sprinklers";
@@ -16,7 +15,7 @@ const ConnectionState = ({ connected }: { connected: boolean }) => {
     });
     return (
         <span className={classes}>
-            <FontAwesome name={connected ? "plug" : "chain-broken"} />&nbsp;
+            <Icon name={connected ? "linkify" : "unlinkify"} />&nbsp;
             {connected ? "Connected" : "Disconnected"}
         </span>
     );
@@ -51,10 +50,10 @@ class DeviceView extends React.Component<DeviceViewProps> {
                     <Item.Meta>
                         Raspberry Pi Grinklers Instance
                     </Item.Meta>
-                    <SectionRunnerView sectionRunner={sectionRunner} />
                     <SectionTable sections={sections} />
                     <RunSectionForm sections={sections} />
                     <ProgramTable programs={programs} />
+                    <SectionRunnerView sectionRunner={sectionRunner} sections={sections} />
                 </Item.Content>
             </Item>
         );

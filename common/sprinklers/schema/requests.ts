@@ -1,4 +1,4 @@
-import { createSimpleSchema, deserialize, ModelSchema, object, primitive, serialize } from "serializr";
+import { createSimpleSchema, deserialize, ModelSchema, primitive, serialize } from "serializr";
 import * as requests from "../requests";
 import * as common from "./common";
 
@@ -16,9 +16,12 @@ export const withSection: ModelSchema<requests.WithSection> = createSimpleSchema
     sectionId: primitive(),
 });
 
-export const updateProgramData: ModelSchema<requests.UpdateProgramData> = createSimpleSchema({
+export const updateProgram: ModelSchema<requests.UpdateProgramData> = createSimpleSchema({
     ...withProgram.props,
-    data: object(createSimpleSchema({ "*": true })),
+    data: {
+        serializer: (data) => data,
+        deserializer: (json, done) => { done(null, json); },
+    },
 });
 
 export const runSection: ModelSchema<requests.RunSectionData> = createSimpleSchema({
@@ -42,7 +45,7 @@ export function getRequestSchema(request: requests.WithType): ModelSchema<any> {
         case "cancelProgram":
             return withProgram;
         case "updateProgram":
-            throw new Error("updateProgram not implemented");
+            return updateProgram;
         case "runSection":
             return runSection;
         case "cancelSection":

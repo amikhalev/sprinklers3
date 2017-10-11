@@ -54,7 +54,7 @@ async function deviceCallRequest(socket: WebSocket, data: ws.IDeviceCallRequest)
 function webSocketHandler(socket: WebSocket) {
     const stop = autorunAsync(() => {
         const json = serialize(schema.sprinklersDevice, device);
-        log.info({ device: json });
+        log.trace({ device: json });
         const data = { type: "deviceUpdate", name: "grinklers", data: json };
         socket.send(JSON.stringify(data));
     }, 100);

@@ -21,7 +21,7 @@ export const section: ModelSchema<s.Section> = {
 };
 
 export const sectionRun: ModelSchema<s.SectionRun> = {
-    factory: (c) => new s.SectionRun(c.json.id),
+    factory: (c) => new s.SectionRun(c.parentContext.target, c.json.id),
     props: {
         id: primitive(),
         section: primitive(),

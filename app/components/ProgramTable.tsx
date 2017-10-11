@@ -1,6 +1,6 @@
 import { observer } from "mobx-react";
 import * as React from "react";
-import { Table } from "semantic-ui-react";
+import { Button, Table } from "semantic-ui-react";
 
 import { Duration } from "@common/Duration";
 import { Program, Schedule } from "@common/sprinklers";
@@ -27,11 +27,17 @@ export default class ProgramTable extends React.Component<{ programs: Program[] 
                 <li key={index}>Section {item.section + 1 + ""} for {duration.toString()}</li>
             );
         });
+        const cancelOrRun = () => running ? program.cancel() : program.run();
         return [(
             <Table.Row key={i}>
                 <Table.Cell className="program--number">{"" + (i + 1)}</Table.Cell>
                 <Table.Cell className="program--name">{name}</Table.Cell>
-                <Table.Cell className="program--running">{running ? "Running" : "Not running"}</Table.Cell>
+                <Table.Cell className="program--running">
+                    {running ? "Running" : "Not running"}
+                    <Button onClick={cancelOrRun}>
+                        {running ? "Cancel" : "Run"}
+                    </Button>
+                </Table.Cell>
                 <Table.Cell className="program--enabled">{enabled ? "Enabled" : "Not enabled"}</Table.Cell>
             </Table.Row>
         ), (

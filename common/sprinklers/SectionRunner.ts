@@ -15,9 +15,7 @@ export class SectionRun {
         this.section = section;
     }
 
-    cancel() {
-        return this.sectionRunner.cancelRunById(this.id);
-    }
+    cancel = () => this.sectionRunner.cancelRunById(this.id);
 
     toString() {
         return `SectionRun{id=${this.id}, section=${this.section}, duration=${this.duration},` +
@@ -38,6 +36,18 @@ export class SectionRunner {
 
     cancelRunById(runId: number) {
         return this.device.cancelSectionRunId({ runId });
+    }
+
+    setPaused(paused: boolean) {
+        return this.device.pauseSectionRunner({ paused });
+    }
+
+    pause() {
+        return this.setPaused(true);
+    }
+
+    unpause() {
+        return this.setPaused(false);
     }
 
     toString(): string {

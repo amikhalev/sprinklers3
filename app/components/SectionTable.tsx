@@ -1,8 +1,7 @@
 import * as classNames from "classnames";
 import { observer } from "mobx-react";
 import * as React from "react";
-import FontAwesome = require("react-fontawesome");
-import { Table } from "semantic-ui-react";
+import { Icon, Table } from "semantic-ui-react";
 
 import { Section } from "@common/sprinklers";
 
@@ -21,7 +20,7 @@ export default class SectionTable extends React.Component<{ sections: Section[] 
             "section--state-false": !state,
         });
         const sectionState = state ?
-            (<span><FontAwesome name="tint" /> Irrigating</span>)
+            (<span><Icon name="shower" /> Irrigating</span>)
             : "Not irrigating";
         return (
             <Table.Row key={index}>
