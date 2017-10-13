@@ -1,25 +1,25 @@
 import * as classNames from "classnames";
 import { observer } from "mobx-react";
 import * as React from "react";
-import { Header, Icon, Item } from "semantic-ui-react";
+import { Grid, Header, Icon, Item } from "semantic-ui-react";
 
 import { injectState, MqttApiState } from "@app/state";
 import { SprinklersDevice } from "@common/sprinklers";
 import { ProgramTable, RunSectionForm, SectionRunnerView, SectionTable } from ".";
 
-const ConnectionState = ({ connected }: { connected: boolean }) => {
+function ConnectionState({ connected, className }: { connected: boolean, className?: string }) {
     const classes = classNames({
         "device--connectionState": true,
         "device--connectionState-connected": connected,
         "device--connectionState-disconnected": !connected,
-    });
+    }, className);
     return (
-        <span className={classes}>
+        <div className={classes}>
             <Icon name={connected ? "linkify" : "unlinkify"} />&nbsp;
             {connected ? "Connected" : "Disconnected"}
-        </span>
+        </div>
     );
-};
+}
 
 interface DeviceViewProps {
     deviceId: string;
@@ -44,14 +44,20 @@ class DeviceView extends React.Component<DeviceViewProps> {
                 <Item.Image src={require("@app/images/raspberry_pi.png")} />
                 <Item.Content>
                     <Header as="h1">
-                        <span>Device </span><kbd>{id}</kbd>
+                        <div>Device <kbd>{id}</kbd></div>
                         <ConnectionState connected={connected} />
                     </Header>
                     <Item.Meta>
                         Raspberry Pi Grinklers Instance
                     </Item.Meta>
-                    <SectionTable sections={sections} />
-                    <RunSectionForm sections={sections} />
+                    <Grid>
+                        <Grid.Column mobile={16} largeScreen={8}>
+                            <SectionTable sections={sections} />
+                        </Grid.Column>
+                        <Grid.Column mobile={16} largeScreen={8}>
+                            <RunSectionForm sections={sections} />
+                        </Grid.Column>
+                    </Grid>
                     <ProgramTable programs={programs} />
                     <SectionRunnerView sectionRunner={sectionRunner} sections={sections} />
                 </Item.Content>

@@ -1,7 +1,7 @@
 import { computed } from "mobx";
 import { observer } from "mobx-react";
 import * as React from "react";
-import { DropdownItemProps, DropdownProps, Form, Header, Segment } from "semantic-ui-react";
+import { DropdownItemProps, DropdownProps, Form, Grid, Header, Segment } from "semantic-ui-react";
 
 import { Duration } from "@common/Duration";
 import log from "@common/logger";
@@ -29,7 +29,7 @@ export default class RunSectionForm extends React.Component<{
             <Segment>
                 <Header>Run Section</Header>
                 <Form>
-                    <Form.Group>
+                    <Form.Group className="doubling stackable three column ui grid">
                         <Form.Select
                             label="Section"
                             placeholder="Section"
@@ -37,7 +37,10 @@ export default class RunSectionForm extends React.Component<{
                             value={section}
                             onChange={this.onSectionChange}
                         />
-                        <DurationInput duration={duration} onDurationChange={this.onDurationChange} />
+                        <DurationInput
+                            duration={duration}
+                            onDurationChange={this.onDurationChange}
+                        />
                         {/*Label must be &nbsp; to align it properly*/}
                         <Form.Button
                             label="&nbsp;"

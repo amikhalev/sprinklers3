@@ -1,32 +1,3 @@
-import { ISprinklersApi } from "@common/sprinklers";
-import { MqttApiClient } from "@common/sprinklers/mqtt";
-import { WebApiClient } from "./websocket";
-
-import { UiMessage, UiStore } from "./ui";
-export { UiMessage, UiStore };
+export { UiMessage, UiStore } from "./ui";
 export * from "./inject";
-
-export abstract class StateBase {
-    abstract readonly sprinklersApi: ISprinklersApi;
-    uiStore = new UiStore();
-
-    constructor() {
-        this.uiStore.addMessage({ header: "asdf", content: "boo!", error: true });
-    }
-
-    start() {
-        this.sprinklersApi.start();
-    }
-}
-
-const isDev = process.env.NODE_ENV === "development";
-
-export class MqttApiState extends StateBase {
-    sprinklersApi = new MqttApiClient(`ws://${location.hostname}:1884`);
-}
-
-export class WebApiState extends StateBase {
-    sprinklersApi = new WebApiClient(isDev ?
-        `ws://${location.hostname}:8080` :
-        `ws://${location.host}`);
-}
+export { default as StateBase } from "./StateBase";

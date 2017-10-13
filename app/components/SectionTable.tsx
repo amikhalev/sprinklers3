@@ -34,7 +34,7 @@ export default class SectionTable extends React.Component<{ sections: Section[] 
     render() {
         const rows = this.props.sections.map(SectionTable.renderRow);
         return (
-            <Table celled striped>
+            <Table celled striped unstackable>
                 <Table.Header>
                     <Table.Row>
                         <Table.HeaderCell colSpan="3">Sections</Table.HeaderCell>

@@ -132,6 +132,9 @@ class MqttSprinklersDevice extends s.SprinklersDevice {
 
     constructor(apiClient: MqttApiClient, prefix: string) {
         super();
+        this.sectionConstructor = MqttSection;
+        this.sectionRunnerConstructor = MqttSectionRunner;
+        this.programConstructor = MqttProgram;
         this.apiClient = apiClient;
         this.prefix = prefix;
         this.sectionRunner = new MqttSectionRunner(this);
@@ -140,10 +143,6 @@ class MqttSprinklersDevice extends s.SprinklersDevice {
     get id(): string {
         return this.prefix;
     }
-
-    get sectionConstructor() { return MqttSection; }
-    get sectionRunnerConstructor() { return MqttSectionRunner; }
-    get programConstructor() { return MqttProgram; }
 
     doSubscribe() {
         const topics = subscriptions.map((filter) => this.prefix + filter);

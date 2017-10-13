@@ -1,3 +1,4 @@
+import * as classNames from "classnames";
 import * as React from "react";
 import { Input, InputProps } from "semantic-ui-react";
 
@@ -5,13 +6,15 @@ import { Duration } from "@common/Duration";
 
 export default class DurationInput extends React.Component<{
     duration: Duration,
-    onDurationChange: (newDuration: Duration) => void;
+    onDurationChange: (newDuration: Duration) => void,
+    className?: string,
 }> {
     render() {
         const duration = this.props.duration;
+        const className = classNames("field", "durationInput", this.props.className);
         // const editing = this.props.onDurationChange != null;
         return (
-            <div className="field durationInput">
+            <div className={className}>
                 <label>Duration</label>
                 <div className="fields">
                     <Input

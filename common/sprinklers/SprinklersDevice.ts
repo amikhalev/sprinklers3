@@ -10,6 +10,10 @@ export abstract class SprinklersDevice {
     @observable programs: Program[] = [];
     @observable sectionRunner: SectionRunner;
 
+    sectionConstructor: typeof Section = Section;
+    sectionRunnerConstructor: typeof SectionRunner = SectionRunner;
+    programConstructor: typeof Program = Program;
+
     constructor() {
         this.sectionRunner = new (this.sectionRunnerConstructor)(this);
     }
@@ -43,16 +47,6 @@ export abstract class SprinklersDevice {
 
     pauseSectionRunner(opts: requests.PauseSectionRunnerData) {
         return this.makeRequest({ ...opts, type: "pauseSectionRunner" });
-    }
-
-    get sectionConstructor(): typeof Section {
-        return Section;
-    }
-    get sectionRunnerConstructor(): typeof SectionRunner {
-        return SectionRunner;
-    }
-    get programConstructor(): typeof Program {
-        return Program;
     }
 
     toString(): string {

@@ -13,7 +13,7 @@ import "semantic-ui-css/semantic.css";
 class App extends React.Component {
     render() {
         return (
-            <Container>
+            <Container className="app">
                 {/* <MessageTest /> */}
                 <DevicesView />
                 <MessagesView />

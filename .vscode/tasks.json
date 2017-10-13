@@ -48,6 +48,11 @@
             "type": "npm",
             "script": "start:dev-server",
             "problemMatcher": []
+        },
+        {
+            "type": "npm",
+            "script": "start:nodemon",
+            "problemMatcher": []
         }
     ]
 }
