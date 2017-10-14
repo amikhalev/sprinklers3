@@ -3,7 +3,7 @@ import { observer } from "mobx-react";
 import * as React from "react";
 import { Grid, Header, Icon, Item } from "semantic-ui-react";
 
-import { injectState, MqttApiState } from "@app/state";
+import { injectState, StateBase } from "@app/state";
 import { SprinklersDevice } from "@common/sprinklers";
 import { ProgramTable, RunSectionForm, SectionRunnerView, SectionTable } from ".";
 
@@ -23,7 +23,7 @@ function ConnectionState({ connected, className }: { connected: boolean, classNa
 
 interface DeviceViewProps {
     deviceId: string;
-    state: MqttApiState;
+    state: StateBase;
 }
 
 class DeviceView extends React.Component<DeviceViewProps> {

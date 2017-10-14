@@ -1,7 +1,7 @@
 import { computed } from "mobx";
 import { observer } from "mobx-react";
 import * as React from "react";
-import { DropdownItemProps, DropdownProps, Form, Grid, Header, Segment } from "semantic-ui-react";
+import { DropdownItemProps, DropdownProps, Form, Header, Segment } from "semantic-ui-react";
 
 import { Duration } from "@common/Duration";
 import log from "@common/logger";

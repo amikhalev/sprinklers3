@@ -3,12 +3,13 @@ import * as ReactDOM from "react-dom";
 import { AppContainer } from "react-hot-loader";
 
 import App from "@app/components/App";
-import { ProvideState, WebApiState } from "@app/state";
+import { ProvideState, StateBase } from "@app/state";
+import { WebApiState as StateClass } from "@app/state/web";
 // import log from "@common/logger";
 
 // Object.assign(log, { name: "sprinklers3/app", level: "debug" });
 
-const state = new WebApiState();
+const state: StateBase = new StateClass();
 state.start();
 
 const rootElem = document.getElementById("app");

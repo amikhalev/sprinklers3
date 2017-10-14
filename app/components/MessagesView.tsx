@@ -3,7 +3,7 @@ import { observer } from "mobx-react";
 import * as React from "react";
 import { Message, MessageProps, TransitionGroup } from "semantic-ui-react";
 
-import { injectState, MqttApiState, UiMessage, UiStore } from "@app/state/";
+import { injectState, StateBase, UiMessage, UiStore } from "@app/state/";
 
 @observer
 class MessageView extends React.Component<{
@@ -33,7 +33,7 @@ class MessageView extends React.Component<{
     }
 }
 
-class MessagesView extends React.Component<{ state: MqttApiState }> {
+class MessagesView extends React.Component<{ state: StateBase }> {
     render() {
         const { uiStore } = this.props.state;
         const messages = uiStore.messages.map((message) => (
