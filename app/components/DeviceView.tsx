@@ -6,12 +6,13 @@ import { Grid, Header, Icon, Item } from "semantic-ui-react";
 import { injectState, StateBase } from "@app/state";
 import { SprinklersDevice } from "@common/sprinklers";
 import { ProgramTable, RunSectionForm, SectionRunnerView, SectionTable } from ".";
+import "./DeviceView.scss";
 
 function ConnectionState({ connected, className }: { connected: boolean, className?: string }) {
     const classes = classNames({
-        "device--connectionState": true,
-        "device--connectionState-connected": connected,
-        "device--connectionState-disconnected": !connected,
+        connectionState: true,
+        connected: connected, /* tslint:disable-line:object-literal-shorthand */
+        disconnected: !connected,
     }, className);
     return (
         <div className={classes}>
@@ -42,13 +43,13 @@ class DeviceView extends React.Component<DeviceViewProps> {
         return (
             <Item>
                 <Item.Image src={require("@app/images/raspberry_pi.png")} />
-                <Item.Content>
+                <Item.Content className="device">
                     <Header as="h1">
                         <div>Device <kbd>{id}</kbd></div>
                         <ConnectionState connected={connected} />
                     </Header>
                     <Item.Meta>
-                        Raspberry Pi Grinklers Instance
+                        Raspberry Pi Grinklers Device
                     </Item.Meta>
                     <Grid>
                         <Grid.Column mobile={16} largeScreen={8}>
@@ -58,7 +59,7 @@ class DeviceView extends React.Component<DeviceViewProps> {
                             <RunSectionForm sections={sections} />
                         </Grid.Column>
                     </Grid>
-                    <ProgramTable programs={programs} />
+                    <ProgramTable programs={programs} sections={sections} />
                     <SectionRunnerView sectionRunner={sectionRunner} sections={sections} />
                 </Item.Content>
             </Item>

@@ -2,20 +2,6 @@
     margin-top: 1em;
 }
 
-.device--connectionState {
-    margin-left: .75em;
-    font-size: .75em;
-    font-weight: lighter;
-}
-
-.device--connectionState-connected {
-    color: #13D213;
-}
-
-.device--connectionState-disconnected {
-    color: #D20000;
-}
-
 .sectionRunner--pausedState {
     padding-left: .75em;
     font-size: .75em;
@@ -45,6 +31,10 @@
 
 }
 
+.program--runningButton {
+    margin-left: 1em !important;
+}
+
 .section--state-true {
     color: green;
 }
@@ -53,9 +43,13 @@
 
 }
 
-.durationInput--minutes > input,
-.durationInput--seconds > input {
-    width: 6em !important;
+.durationInput--minutes,
+.durationInput--seconds {
+    min-width: 6em !important;
+}
+
+.durationInput .ui.labeled.input > .label {
+    width: 3em;
 }
 
 .messages {

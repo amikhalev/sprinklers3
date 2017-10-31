@@ -16,7 +16,7 @@ export default class DurationInput extends React.Component<{
         return (
             <div className={className}>
                 <label>Duration</label>
-                <div className="fields">
+                <div className="ui two fields">
                     <Input
                         type="number"
                         className="field durationInput--minutes"

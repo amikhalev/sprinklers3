@@ -29,28 +29,26 @@ export default class RunSectionForm extends React.Component<{
             <Segment>
                 <Header>Run Section</Header>
                 <Form>
-                    <Form.Group className="doubling stackable three column ui grid">
-                        <Form.Select
-                            label="Section"
-                            placeholder="Section"
-                            options={this.sectionOptions}
-                            value={section}
-                            onChange={this.onSectionChange}
-                        />
-                        <DurationInput
-                            duration={duration}
-                            onDurationChange={this.onDurationChange}
-                        />
-                        {/*Label must be &nbsp; to align it properly*/}
-                        <Form.Button
-                            label="&nbsp;"
-                            primary
-                            onClick={this.run}
-                            disabled={!this.isValid}
-                        >
-                            Run
-                        </Form.Button>
-                    </Form.Group>
+                    <Form.Select
+                        label="Section"
+                        placeholder="Section"
+                        options={this.sectionOptions}
+                        value={section}
+                        onChange={this.onSectionChange}
+                    />
+                    <DurationInput
+                        duration={duration}
+                        onDurationChange={this.onDurationChange}
+                    />
+                    {/*Label must be &nbsp; to align it properly*/}
+                    <Form.Button
+                        label="&nbsp;"
+                        primary
+                        onClick={this.run}
+                        disabled={!this.isValid}
+                    >
+                        Run
+                    </Form.Button>
                 </Form>
             </Segment>
         );

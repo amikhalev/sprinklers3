@@ -1,4 +1,3 @@
-const autoprefixer = require("autoprefixer");
 const path = require("path");
 const webpack = require("webpack");
 
@@ -8,6 +7,7 @@ const CaseSensitivePathsPlugin = require("case-sensitive-paths-webpack-plugin");
 const WatchMissingNodeModulesPlugin = require("react-dev-utils/WatchMissingNodeModulesPlugin");
 // const UglifyJsPlugin = require("uglifyjs-webpack-plugin");
 const MinifyPlugin = require("babel-minify-webpack-plugin");
+const cssnext = require("postcss-cssnext");
 
 const { getClientEnvironment } = require("../env");
 const paths = require("../paths");
@@ -38,7 +38,7 @@ const postCssConfig = {
         ident: "postcss",
         plugins: () => [
             require("postcss-flexbugs-fixes"),
-            autoprefixer({
+            cssnext({
                 browsers: [
                     ">1%",
                     "last 4 versions",
@@ -49,6 +49,11 @@ const postCssConfig = {
             }),
         ],
     },
+};
+
+const sassConfig = {
+    loader: require.resolve("sass-loader"),
+    options: {},
 };
 
 const rules = (env) => {
@@ -95,6 +100,44 @@ const rules = (env) => {
                     publicPath,
             })
         };
+    const sassRule = (env === "dev") ?
+        {
+            test: /\.scss$/,
+            use: [
+                require.resolve("style-loader"),
+                {
+                    loader: require.resolve("css-loader"),
+                    options: {
+                        importLoaders: 1,
+                    },
+                },
+                sassConfig,
+            ],
+        } :
+        {
+            test: /\.css$/,
+            loader: ExtractTextPlugin.extract({
+                fallback: require.resolve('style-loader'),
+                use: [
+                    {
+                        loader: require.resolve('css-loader'),
+                        options: {
+                            importLoaders: 1,
+                            minimize: true,
+                            sourceMap: shouldUseSourceMap,
+                        },
+                    },
+                    sassConfig
+                ],
+                // ExtractTextPlugin expects the build output to be flat.
+                // (See https://github.com/webpack-contrib/extract-text-webpack-plugin/issues/27)
+                // However, our output is structured with css, js and media folders.
+                // To have this structure working with relative paths, we have to use custom options.
+                publicPath: shouldUseRelativeAssetPaths ?
+                    Array(cssFilename.split("/").length).join("../") :
+                    publicPath,
+            })
+        };
     return [
         {
             test: /\.tsx?$/,
@@ -119,6 +162,7 @@ const rules = (env) => {
                     },
                 },
                 cssRule,
+                sassRule,
                 // Process TypeScript with TSC.
                 {
                     test: /\.tsx?$/, use: {
