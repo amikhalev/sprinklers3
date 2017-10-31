@@ -53,6 +53,32 @@
             "type": "npm",
             "script": "start:nodemon",
             "problemMatcher": []
+        },
+        {
+            "type": "npm",
+            "script": "build:server",
+            "problemMatcher": ["$tsc"]
+        },
+        {
+            "type": "npm",
+            "script": "build:app",
+            "problemMatcher": {
+                "owner": "webpack",
+                "severity": "error",
+                "fileLocation": "relative",
+                "pattern": [
+                    {
+                        "regexp": "ERROR in (.*)",
+                        "file": 1
+                    },
+                    {
+                        "regexp": "\\((\\d+),(\\d+)\\):(.*)",
+                        "line": 1,
+                        "column": 2,
+                        "message": 3
+                    }
+                ]
+            }
         }
     ]
 }
