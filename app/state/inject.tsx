@@ -33,7 +33,7 @@ type Omit<T, K extends keyof T> = {[P in Diff<keyof T, K>]: T[P]};
 export function injectState<P extends { "state": StateBase }>(Component: React.ComponentType<P>) {
     return class extends React.Component<Omit<P, "state">> {
         static contextTypes = providedStateContextTypes;
-        context: IProvidedStateContext;
+        context!: IProvidedStateContext;
 
         render() {
             const state = this.context.providedState;

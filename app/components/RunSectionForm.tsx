@@ -15,8 +15,8 @@ export default class RunSectionForm extends React.Component<{
     duration: Duration,
     section: number | "",
 }> {
-    constructor() {
-        super();
+    constructor(props: any, context?: any) {
+        super(props, context);
         this.state = {
             duration: new Duration(0, 0),
             section: "",

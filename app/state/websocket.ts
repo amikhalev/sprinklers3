@@ -28,7 +28,7 @@ export class WebSprinklersDevice extends s.SprinklersDevice {
 
 export class WebApiClient implements s.ISprinklersApi {
     readonly webSocketUrl: string;
-    socket: WebSocket;
+    socket!: WebSocket;
     device: WebSprinklersDevice;
 
     nextDeviceRequestId = Math.round(Math.random() * 1000000);

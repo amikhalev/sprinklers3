@@ -15,7 +15,7 @@ mqttClient.start();
 import * as schema from "@common/sprinklers/schema";
 import * as requests from "@common/sprinklers/requests";
 import * as ws from "@common/sprinklers/websocketData";
-import { autorunAsync } from "mobx";
+import { autorun } from "mobx";
 import { serialize } from "serializr";
 const device = mqttClient.getDevice("grinklers");
 
@@ -52,12 +52,12 @@ async function deviceCallRequest(socket: WebSocket, data: ws.IDeviceCallRequest)
 }
 
 function webSocketHandler(socket: WebSocket) {
-    const stop = autorunAsync(() => {
+    const stop = autorun(() => {
         const json = serialize(schema.sprinklersDevice, device);
         log.trace({ device: json });
         const data = { type: "deviceUpdate", name: "grinklers", data: json };
         socket.send(JSON.stringify(data));
-    }, 100);
+    }, { delay: 100 });
     socket.on("message", (socketData: WebSocket.Data) => {
         if (typeof socketData !== "string") {
             return log.error({ type: typeof socketData }, "received invalid socket data type from client");

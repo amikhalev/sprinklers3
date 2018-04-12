@@ -1,4 +1,4 @@
-import * as chalk from "chalk";
+import chalk from "chalk";
 import pretty = require("pino/pretty");
 
 type Level = "default" | 60 | 50 | 40 | 30 | 20 | 10;

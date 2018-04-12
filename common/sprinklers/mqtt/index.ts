@@ -15,8 +15,8 @@ interface WithRid {
 
 export class MqttApiClient implements s.ISprinklersApi {
     readonly mqttUri: string;
-    client: mqtt.Client;
-    connected: boolean;
+    client!: mqtt.Client;
+    connected: boolean = false;
     devices: Map<string, MqttSprinklersDevice> = new Map();
 
     constructor(mqttUri: string) {
@@ -126,7 +126,7 @@ class MqttSprinklersDevice extends s.SprinklersDevice {
     readonly apiClient: MqttApiClient;
     readonly prefix: string;
 
-    handlers: IHandlerEntry[];
+    handlers: IHandlerEntry[] = [];
     private nextRequestId: number = Math.floor(Math.random() * 1000000000);
     private responseCallbacks: Map<number, ResponseCallback> = new Map();
 

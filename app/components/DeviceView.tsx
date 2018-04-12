@@ -28,7 +28,7 @@ interface DeviceViewProps {
 }
 
 class DeviceView extends React.Component<DeviceViewProps> {
-    device: SprinklersDevice;
+    device!: SprinklersDevice;
 
     componentWillMount() {
         this.updateDevice();

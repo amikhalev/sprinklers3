@@ -20,7 +20,7 @@ export default class SectionTable extends React.Component<{ sections: Section[] 
             "section--state-false": !state,
         });
         const sectionState = state ?
-            (<span><Icon name="shower" /> Irrigating</span>)
+            (<span><Icon name={"shower" as any} /> Irrigating</span>)
             : "Not irrigating";
         return (
             <Table.Row key={index}>

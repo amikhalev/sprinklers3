@@ -34,7 +34,8 @@
     "no-unused-variable": [
       true
     ],
-    "jsx-boolean-value": [ true, "never" ]
+    "jsx-boolean-value": [ true, "never" ],
+    "no-implicit-dependencies": false
   },
   "rulesDirectory": []
 }

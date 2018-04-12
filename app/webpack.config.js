@@ -2,11 +2,8 @@ const path = require("path");
 const webpack = require("webpack");
 
 const HtmlWebpackPlugin = require("html-webpack-plugin");
-const ExtractTextPlugin = require("extract-text-webpack-plugin");
 const CaseSensitivePathsPlugin = require("case-sensitive-paths-webpack-plugin");
-const WatchMissingNodeModulesPlugin = require("react-dev-utils/WatchMissingNodeModulesPlugin");
-// const UglifyJsPlugin = require("uglifyjs-webpack-plugin");
-const MinifyPlugin = require("babel-minify-webpack-plugin");
+const UglifyJsPlugin = require("uglifyjs-webpack-plugin");
 const cssnext = require("postcss-cssnext");
 
 const { getClientEnvironment } = require("../env");
@@ -62,82 +59,32 @@ const rules = (env) => {
     // "style" loader turns CSS into JS modules that inject <style> tags.
     // In production, we use a plugin to extract that CSS to a file, but
     // in development "style" loader enables hot editing of CSS.
-    const cssRule = (env === "dev") ?
-        {
-            test: /\.css$/,
-            use: [
-                require.resolve("style-loader"),
-                {
-                    loader: require.resolve("css-loader"),
-                    options: {
-                        importLoaders: 1,
-                    },
+    const cssRule = {
+        test: /\.css$/,
+        use: [
+            require.resolve("style-loader"),
+            {
+                loader: require.resolve("css-loader"),
+                options: {
+                    importLoaders: 1,
                 },
-                postCssConfig,
-            ],
-        } :
-        {
-            test: /\.css$/,
-            loader: ExtractTextPlugin.extract({
-                fallback: require.resolve('style-loader'),
-                use: [
-                    {
-                        loader: require.resolve('css-loader'),
-                        options: {
-                            importLoaders: 1,
-                            minimize: true,
-                            sourceMap: shouldUseSourceMap,
-                        },
-                    },
-                    postCssConfig
-                ],
-                // ExtractTextPlugin expects the build output to be flat.
-                // (See https://github.com/webpack-contrib/extract-text-webpack-plugin/issues/27)
-                // However, our output is structured with css, js and media folders.
-                // To have this structure working with relative paths, we have to use custom options.
-                publicPath: shouldUseRelativeAssetPaths ?
-                    Array(cssFilename.split("/").length).join("../") :
-                    publicPath,
-            })
-        };
-    const sassRule = (env === "dev") ?
-        {
-            test: /\.scss$/,
-            use: [
-                require.resolve("style-loader"),
-                {
-                    loader: require.resolve("css-loader"),
-                    options: {
-                        importLoaders: 1,
-                    },
+            },
+            postCssConfig,
+        ]
+    };
+    const sassRule = {
+        test: /\.scss$/,
+        use: [
+            require.resolve("style-loader"),
+            {
+                loader: require.resolve("css-loader"),
+                options: {
+                    importLoaders: 1,
                 },
-                sassConfig,
-            ],
-        } :
-        {
-            test: /\.css$/,
-            loader: ExtractTextPlugin.extract({
-                fallback: require.resolve('style-loader'),
-                use: [
-                    {
-                        loader: require.resolve('css-loader'),
-                        options: {
-                            importLoaders: 1,
-                            minimize: true,
-                            sourceMap: shouldUseSourceMap,
-                        },
-                    },
-                    sassConfig
-                ],
-                // ExtractTextPlugin expects the build output to be flat.
-                // (See https://github.com/webpack-contrib/extract-text-webpack-plugin/issues/27)
-                // However, our output is structured with css, js and media folders.
-                // To have this structure working with relative paths, we have to use custom options.
-                publicPath: shouldUseRelativeAssetPaths ?
-                    Array(cssFilename.split("/").length).join("../") :
-                    publicPath,
-            })
-        };
+            },
+            sassConfig,
+        ],
+    };
     return [
         {
             test: /\.tsx?$/,
@@ -224,23 +171,15 @@ const getConfig = module.exports = (env) => {
         // Otherwise React will be compiled in the very slow development mode.
         new webpack.DefinePlugin(environ.stringified),
         new CaseSensitivePathsPlugin(),
-        // Note: this won"t work without ExtractTextPlugin.extract(..) in `loaders`.
-        isProd && new ExtractTextPlugin({
-            filename: cssFilename,
-        }),
         // TODO: doesn't work with typescript target: es6
-        // isProd && new UglifyJsPlugin({
-        //     sourceMap: shouldUseSourceMap,
-        // }),
-        isProd && new MinifyPlugin({}, {
+        isProd && new UglifyJsPlugin({
             sourceMap: shouldUseSourceMap,
         }),
-        isDev && new webpack.NamedModulesPlugin(),
         isDev && new webpack.HotModuleReplacementPlugin(),
-        isDev && new WatchMissingNodeModulesPlugin(paths.nodeModulesDir),
     ].filter(Boolean);
 
     return {
+        mode: isProd ? "production" : "development",
         bail: isProd,
         devtool: shouldUseSourceMap ?
             isProd ? "source-map" : "eval-source-map" :
@@ -276,6 +215,9 @@ const getConfig = module.exports = (env) => {
             rules: rules(env),
         },
         plugins: plugins,
+        optimization: {
+            namedModules: isProd,
+        },
         devServer: {
             hot: true,
             port: 8081,

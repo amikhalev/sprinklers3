@@ -5,7 +5,7 @@ import * as React from "react";
 import { Button, Table } from "semantic-ui-react";
 
 import { Duration } from "@common/Duration";
-import { Program, Schedule, TimeOfDay, Weekday, DateOfYear, Section } from "@common/sprinklers";
+import { DateOfYear, Program, Schedule, Section, TimeOfDay, Weekday } from "@common/sprinklers";
 
 function timeToString(time: TimeOfDay) {
     return moment(time).format("LTS");
