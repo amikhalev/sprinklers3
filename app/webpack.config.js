@@ -104,7 +104,7 @@ const rules = (env) => {
                     test: [/\.bmp$/, /\.gif$/, /\.jpe?g$/, /\.png$/],
                     loader: require.resolve("url-loader"),
                     options: {
-                        limit: 10000,
+                        limit: (env === "prod") ? 10000 : 0,
                         name: "static/media/[name].[hash:8].[ext]",
                     },
                 },
