@@ -1,20 +1,28 @@
 import { update } from "serializr";
 
 import logger from "@common/logger";
-import * as s from "@common/sprinklers";
+import * as s from "@common/sprinklers/index";
 import * as requests from "@common/sprinklers/requests";
-import * as schema from "@common/sprinklers/schema";
+import * as schema from "@common/sprinklers/schema/index";
 import { seralizeRequest } from "@common/sprinklers/schema/requests";
 import * as ws from "@common/sprinklers/websocketData";
+import { autorun, observable } from "mobx";
 
 const log = logger.child({ source: "websocket" });
 
-export class WebSprinklersDevice extends s.SprinklersDevice {
-    readonly api: WebApiClient;
+export class WSSprinklersDevice extends s.SprinklersDevice {
+    readonly api: WebSocketApiClient;
 
-    constructor(api: WebApiClient) {
+    constructor(api: WebSocketApiClient) {
         super();
         this.api = api;
+        autorun(() => {
+            this.connectionState.serverToBroker = api.connectionState.serverToBroker;
+            this.connectionState.clientToServer = api.connectionState.clientToServer;
+            if (!api.connectionState.isConnected) {
+                this.connectionState.brokerToDevice = null;
+            }
+        });
     }
 
     get id() {
@@ -26,17 +34,25 @@ export class WebSprinklersDevice extends s.SprinklersDevice {
     }
 }
 
-export class WebApiClient implements s.ISprinklersApi {
+export class WebSocketApiClient implements s.ISprinklersApi {
     readonly webSocketUrl: string;
     socket!: WebSocket;
-    device: WebSprinklersDevice;
+    device: WSSprinklersDevice;
 
     nextDeviceRequestId = Math.round(Math.random() * 1000000);
     deviceResponseCallbacks: { [id: number]: (res: ws.IDeviceCallResponse) => void | undefined; } = {};
 
+    @observable connectionState: s.ConnectionState = new s.ConnectionState();
+
+    get connected(): boolean {
+        return this.connectionState.isConnected;
+    }
+
     constructor(webSocketUrl: string) {
         this.webSocketUrl = webSocketUrl;
-        this.device = new WebSprinklersDevice(this);
+        this.device = new WSSprinklersDevice(this);
+        this.connectionState.clientToServer = false;
+        this.connectionState.serverToBroker = false;
     }
 
     start() {
@@ -83,31 +99,37 @@ export class WebApiClient implements s.ISprinklersApi {
 
     private onOpen() {
         log.info("established websocket connection");
+        this.connectionState.clientToServer = true;
     }
 
     private onClose(event: CloseEvent) {
         log.info({ reason: event.reason, wasClean: event.wasClean },
             "disconnected from websocket");
+        this.connectionState.clientToServer = false;
     }
 
     private onError(event: Event) {
         log.error(event, "websocket error");
+        this.connectionState.clientToServer = false;
     }
 
     private onMessage(event: MessageEvent) {
-        log.trace({ event }, "websocket message");
         let data: ws.IServerMessage;
         try {
             data = JSON.parse(event.data);
         } catch (err) {
             return log.error({ event, err }, "received invalid websocket message");
         }
+        log.trace({ data }, "websocket message");
         switch (data.type) {
             case "deviceUpdate":
                 this.onDeviceUpdate(data);
                 break;
             case "deviceCallResponse":
                 this.onDeviceCallResponse(data);
+                break;
+            case "brokerConnectionUpdate":
+                this.onBrokerConnectionUpdate(data);
                 break;
             default:
                 log.warn({ data }, "unsupported event type received");
@@ -126,5 +148,9 @@ export class WebApiClient implements s.ISprinklersApi {
         if (typeof cb === "function") {
             cb(data);
         }
+    }
+
+    private onBrokerConnectionUpdate(data: ws.IBrokerConnectionUpdate) {
+        this.connectionState.serverToBroker = data.brokerConnected;
     }
 }

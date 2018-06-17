@@ -46,9 +46,8 @@ function formatter(value: any) {
     if (value.msg) {
         line += chalk.cyan(value.msg);
     }
-    line += "\n";
     if (value.err) {
-        line += "    " + withSpaces(value.err.stack) + "\n";
+        line += "\n    " + withSpaces(value.err.stack) + "\n";
     } else {
         line += filter(value);
     }
@@ -78,7 +77,7 @@ function filter(value: any) {
 
     for (const key of keys) {
         if (filteredKeys.indexOf(key) < 0) {
-            result += "    " + key + ": " + withSpaces(JSON.stringify(value[key], null, 2)) + "\n";
+            result += "\n    " + key + ": " + withSpaces(JSON.stringify(value[key], null, 2));
         }
     }
 

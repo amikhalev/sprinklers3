@@ -12,7 +12,12 @@ export interface IDeviceCallResponse {
     data: ResponseData;
 }
 
-export type IServerMessage = IDeviceUpdate | IDeviceCallResponse;
+export interface IBrokerConnectionUpdate {
+    type: "brokerConnectionUpdate";
+    brokerConnected: boolean;
+}
+
+export type IServerMessage = IDeviceUpdate | IDeviceCallResponse | IBrokerConnectionUpdate;
 
 export interface IDeviceCallRequest {
     type: "deviceCallRequest";

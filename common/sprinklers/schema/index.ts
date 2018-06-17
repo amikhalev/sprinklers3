@@ -10,6 +10,15 @@ export { requests };
 import * as common from "./common";
 export * from "./common";
 
+export const connectionState: ModelSchema<s.ConnectionState> = {
+    factory: (c) => new s.ConnectionState(),
+    props: {
+        clientToServer: primitive(),
+        serverToBroker: primitive(),
+        brokerToDevice: primitive(),
+    },
+};
+
 export const section: ModelSchema<s.Section> = {
     factory: (c) => new (c.parentContext.target as s.SprinklersDevice).sectionConstructor(
         c.parentContext.target, c.json.id),
@@ -73,7 +82,7 @@ export const program: ModelSchema<s.Program> = {
 };
 
 export const sprinklersDevice = createSimpleSchema({
-    connected: primitive(),
+    connectionState: object(connectionState),
     sections: list(object(section)),
     sectionRunner: object(sectionRunner),
     programs: list(object(program)),

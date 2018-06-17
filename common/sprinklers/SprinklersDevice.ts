@@ -1,14 +1,19 @@
-import { observable } from "mobx";
+import { computed, observable } from "mobx";
+import { ConnectionState } from "./ConnectionState";
 import { Program } from "./Program";
 import * as requests from "./requests";
 import { Section } from "./Section";
 import { SectionRunner } from "./SectionRunner";
 
 export abstract class SprinklersDevice {
-    @observable connected: boolean = false;
+    @observable connectionState: ConnectionState = new ConnectionState();
     @observable sections: Section[] = [];
     @observable programs: Program[] = [];
     @observable sectionRunner: SectionRunner;
+
+    @computed get connected(): boolean {
+        return this.connectionState.isConnected;
+    }
 
     sectionConstructor: typeof Section = Section;
     sectionRunnerConstructor: typeof SectionRunner = SectionRunner;
@@ -19,6 +24,7 @@ export abstract class SprinklersDevice {
     }
 
     abstract get id(): string;
+
     abstract makeRequest(request: requests.Request): Promise<requests.Response>;
 
     runProgram(opts: requests.WithProgram) {

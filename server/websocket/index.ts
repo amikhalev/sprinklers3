@@ -7,7 +7,7 @@ import * as requests from "@common/sprinklers/requests";
 import * as schema from "@common/sprinklers/schema";
 import * as ws from "@common/sprinklers/websocketData";
 
-import {state} from "../state";
+import { state } from "../state";
 
 async function doDeviceCallRequest(requestData: ws.IDeviceCallRequest) {
     const { deviceName, data } = requestData;
@@ -37,12 +37,24 @@ async function deviceCallRequest(socket: WebSocket, data: ws.IDeviceCallRequest)
 }
 
 export function handler(socket: WebSocket) {
-    const stop = autorun(() => {
-        const json = serialize(schema.sprinklersDevice, state.device);
-        log.trace({ device: json });
-        const data = { type: "deviceUpdate", name: "grinklers", data: json };
-        socket.send(JSON.stringify(data));
-    }, { delay: 100 });
+    const disposers = [
+        autorun(() => {
+            const json = serialize(schema.sprinklersDevice, state.device);
+            log.trace({ device: json });
+            const data: ws.IDeviceUpdate = { type: "deviceUpdate", name: "grinklers", data: json };
+            socket.send(JSON.stringify(data));
+        }, { delay: 100 }),
+        autorun(() => {
+            const data: ws.IBrokerConnectionUpdate  = {
+                type: "brokerConnectionUpdate",
+                brokerConnected: state.mqttClient.connected,
+            };
+            socket.send(JSON.stringify(data));
+        }),
+    ];
+    const stop = () => {
+        disposers.forEach((disposer) => disposer());
+    };
     socket.on("message", (socketData: WebSocket.Data) => {
         if (typeof socketData !== "string") {
             return log.error({ type: typeof socketData }, "received invalid socket data type from client");

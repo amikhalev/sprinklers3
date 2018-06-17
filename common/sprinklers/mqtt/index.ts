@@ -6,6 +6,7 @@ import * as s from "@common/sprinklers";
 import * as requests from "@common/sprinklers/requests";
 import * as schema from "@common/sprinklers/schema";
 import { seralizeRequest } from "@common/sprinklers/schema/requests";
+import { autorun, observable } from "mobx";
 
 const log = logger.child({ source: "mqtt" });
 
@@ -16,11 +17,16 @@ interface WithRid {
 export class MqttApiClient implements s.ISprinklersApi {
     readonly mqttUri: string;
     client!: mqtt.Client;
-    connected: boolean = false;
+    @observable connectionState: s.ConnectionState = new s.ConnectionState();
     devices: Map<string, MqttSprinklersDevice> = new Map();
+
+    get connected(): boolean {
+        return this.connectionState.isConnected;
+    }
 
     constructor(mqttUri: string) {
         this.mqttUri = mqttUri;
+        this.connectionState.serverToBroker = false;
     }
 
     private static newClientId() {
@@ -29,24 +35,21 @@ export class MqttApiClient implements s.ISprinklersApi {
 
     start() {
         const clientId = MqttApiClient.newClientId();
-        log.info({ clientId }, "connecting to mqtt with client id");
+        log.info({ mqttUri: this.mqttUri, clientId }, "connecting to mqtt broker with client id");
         this.client = mqtt.connect(this.mqttUri, {
-            clientId,
+            clientId, connectTimeout: 5000, reconnectPeriod: 5000,
         });
         this.client.on("message", this.onMessageArrived.bind(this));
-        this.client.on("offline", () => {
-            this.connected = false;
+        this.client.on("close", () => {
+            logger.warn("mqtt disconnected");
+            this.connectionState.serverToBroker = false;
         });
         this.client.on("error", (err) => {
             log.error({ err }, "mqtt error");
         });
         this.client.on("connect", () => {
             log.info("mqtt connected");
-            this.connected = true;
-            const values = this.devices.values();
-            for (const device of values) {
-                device.doSubscribe();
-            }
+            this.connectionState.serverToBroker = true;
         });
     }
 
@@ -116,9 +119,10 @@ interface IHandlerEntry {
 const handler = (test: RegExp) =>
     (target: MqttSprinklersDevice, propertyKey: string, descriptor: TypedPropertyDescriptor<IHandler>) => {
         if (typeof descriptor.value === "function") {
-            (target.handlers || (target.handlers = [])).push({
+            const entry = {
                 test, handler: descriptor.value,
-            });
+            };
+            (target.handlers || (target.handlers = [])).push(entry);
         }
     };
 
@@ -126,7 +130,7 @@ class MqttSprinklersDevice extends s.SprinklersDevice {
     readonly apiClient: MqttApiClient;
     readonly prefix: string;
 
-    handlers: IHandlerEntry[] = [];
+    handlers!: IHandlerEntry[];
     private nextRequestId: number = Math.floor(Math.random() * 1000000000);
     private responseCallbacks: Map<number, ResponseCallback> = new Map();
 
@@ -138,6 +142,16 @@ class MqttSprinklersDevice extends s.SprinklersDevice {
         this.apiClient = apiClient;
         this.prefix = prefix;
         this.sectionRunner = new MqttSectionRunner(this);
+
+        autorun(() => {
+            const brokerConnected = apiClient.connected;
+            this.connectionState.serverToBroker = brokerConnected;
+            if (brokerConnected) {
+                this.doSubscribe();
+            } else {
+                this.connectionState.brokerToDevice = false;
+            }
+        });
     }
 
     get id(): string {
@@ -192,7 +206,7 @@ class MqttSprinklersDevice extends s.SprinklersDevice {
     /* tslint:disable:no-unused-variable */
     @handler(/^connected$/)
     private handleConnected(payload: string) {
-        this.connected = (payload === "true");
+        this.connectionState.brokerToDevice = (payload === "true");
         log.trace(`MqttSprinklersDevice with prefix ${this.prefix}: ${this.connected}`);
         return;
     }
@@ -242,6 +256,7 @@ class MqttSprinklersDevice extends s.SprinklersDevice {
             cb(data);
         }
     }
+
     /* tslint:enable:no-unused-variable */
 }
 
