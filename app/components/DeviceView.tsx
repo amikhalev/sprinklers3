@@ -8,7 +8,8 @@ import { ConnectionState as ConState, SprinklersDevice } from "@common/sprinkler
 import { ProgramTable, RunSectionForm, SectionRunnerView, SectionTable } from ".";
 import "./DeviceView.scss";
 
-function ConnectionState({ connectionState, className }: { connectionState: ConState, className?: string }) {
+const ConnectionState = observer(({ connectionState, className }:
+                                      { connectionState: ConState, className?: string }) => {
     const connected = connectionState.isConnected;
     const classes = classNames({
         connectionState: true,
@@ -31,7 +32,7 @@ function ConnectionState({ connectionState, className }: { connectionState: ConS
             {connectionText}
         </div>
     );
-}
+});
 
 interface DeviceViewProps {
     deviceId: string;
@@ -62,11 +63,11 @@ class DeviceView extends React.Component<DeviceViewProps> {
                     <Item.Meta>
                         Raspberry Pi Grinklers Device
                     </Item.Meta>
-                    <Grid>
-                        <Grid.Column mobile={16} largeScreen={8}>
+                    <Grid stackable>
+                        <Grid.Column width="8">
                             <SectionTable sections={sections}/>
                         </Grid.Column>
-                        <Grid.Column mobile={16} largeScreen={8}>
+                        <Grid.Column width="8">
                             <RunSectionForm sections={sections}/>
                         </Grid.Column>
                     </Grid>

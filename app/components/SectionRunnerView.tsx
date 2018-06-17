@@ -27,7 +27,7 @@ function SectionRunView({ run, sections }:
     const duration = Duration.fromSeconds(run.duration);
     const cancel = run.cancel;
     return (
-        <Segment inverted={current} color={current ? "olive" : undefined}>
+        <Segment inverted={current} color={current ? "green" : undefined}>
             '{section.name}' for {duration.toString()}
             <Button onClick={cancel} icon><Icon name="remove" /></Button>
         </Segment>

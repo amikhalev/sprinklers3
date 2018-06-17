@@ -6,7 +6,7 @@ import * as requests from "@common/sprinklers/requests";
 import * as schema from "@common/sprinklers/schema/index";
 import { seralizeRequest } from "@common/sprinklers/schema/requests";
 import * as ws from "@common/sprinklers/websocketData";
-import { autorun, observable } from "mobx";
+import { action, autorun, observable } from "mobx";
 
 const log = logger.child({ source: "websocket" });
 
@@ -102,15 +102,25 @@ export class WebSocketApiClient implements s.ISprinklersApi {
         this.connectionState.clientToServer = true;
     }
 
+    /* tslint:disable-next-line:member-ordering */
+    private onDisconnect = action(() => {
+        this.connectionState.serverToBroker = null;
+        this.connectionState.clientToServer = false;
+    });
+
     private onClose(event: CloseEvent) {
         log.info({ reason: event.reason, wasClean: event.wasClean },
             "disconnected from websocket");
-        this.connectionState.clientToServer = false;
+        this.onDisconnect();
     }
 
     private onError(event: Event) {
-        log.error(event, "websocket error");
-        this.connectionState.clientToServer = false;
+        log.error({ event }, "websocket error");
+        action(() => {
+            this.connectionState.serverToBroker = null;
+            this.connectionState.clientToServer = false;
+        });
+        this.onDisconnect();
     }
 
     private onMessage(event: MessageEvent) {
