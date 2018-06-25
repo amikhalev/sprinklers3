@@ -2,7 +2,7 @@ import { primitive, PropSchema } from "serializr";
 
 function invariant(cond: boolean, message?: string) {
     if (!cond) {
-        throw new Error("[serializr] " + (message || "Illegal State"));
+        throw new Error("[serializr] " + (message || "Illegal ServerState"));
     }
 }
 

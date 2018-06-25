@@ -2,19 +2,21 @@ import * as express from "express";
 
 import * as schema from "@common/sprinklers/schema";
 import {serialize} from "serializr";
-import {state} from "../state";
+import { ServerState } from "../state";
 import logger from "./logger";
 import serveApp from "./serveApp";
 
-const app = express();
+export function createApp(state: ServerState) {
+    const app = express();
 
-app.use(logger);
+    app.use(logger);
 
-app.get("/api/grinklers", (req, res) => {
-    const j = serialize(schema.sprinklersDevice, state.device);
-    res.send(j);
-});
+    app.get("/api/grinklers", (req, res) => {
+        const j = serialize(schema.sprinklersDevice, state.device);
+        res.send(j);
+    });
 
-serveApp(app);
+    serveApp(app);
 
-export default app;
+    return app;
+}

@@ -1,7 +1,7 @@
 import {SprinklersDevice} from "@common/sprinklers";
 import * as mqtt from "@common/sprinklers/mqtt";
 
-export class State {
+export class ServerState {
     mqttClient!: mqtt.MqttApiClient;
     device!: SprinklersDevice;
 
@@ -16,5 +16,3 @@ export class State {
         this.mqttClient.start();
     }
 }
-
-export const state: State = new State();
