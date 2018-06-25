@@ -220,6 +220,7 @@ const getConfig = module.exports = (env) => {
         },
         devServer: {
             hot: true,
+            historyApiFallback: true,
             port: 8081,
             proxy: [{
                 context: ["/api"], // TODO: update when there is actually an api

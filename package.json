@@ -35,6 +35,7 @@
   },
   "homepage": "https://github.com/amikhalev/sprinklers3#readme",
   "dependencies": {
+    "@types/react-router-dom": "^4.2.7",
     "chalk": "^2.4.1",
     "express": "^4.16.3",
     "express-pino-logger": "^3.0.2",
@@ -44,6 +45,8 @@
     "mqtt": "^2.18.1",
     "pino": "^4.17.3",
     "postcss-cssnext": "^3.1.0",
+    "react-router": "^4.3.1",
+    "react-router-dom": "^4.3.1",
     "serializr": "^1.2.0",
     "uglify-es": "3.3.9",
     "ws": "^5.2.1"

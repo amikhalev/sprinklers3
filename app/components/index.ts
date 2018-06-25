@@ -7,3 +7,5 @@ export { default as ProgramTable } from "./ProgramTable";
 export { default as RunSectionForm } from "./RunSectionForm";
 export { default as SectionRunnerView } from "./SectionRunnerView";
 export { default as SectionTable } from "./SectionTable";
+export { default as NavBar } from "./NavBar";
+export { default as MessageTest } from "./MessageTest";
