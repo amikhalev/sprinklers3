@@ -33,11 +33,11 @@ export class WebSocketApi {
         const stop = () => {
             disposers.forEach((disposer) => disposer());
         };
-        socket.on("message", this.handleSocketMessage);
+        socket.on("message", (data) => this.handleSocketMessage(socket, data));
         socket.on("close", () => stop());
     }
 
-    private handleSocketMessage = (socket: WebSocket, socketData: WebSocket.Data) => {
+    private handleSocketMessage(socket: WebSocket, socketData: WebSocket.Data) {
         if (typeof socketData !== "string") {
             return log.error({ type: typeof socketData }, "received invalid socket data type from client");
         }

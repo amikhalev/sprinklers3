@@ -1,6 +1,7 @@
 import { update } from "serializr";
 
 import logger from "@common/logger";
+import { ErrorCode } from "@common/sprinklers/ErrorCode";
 import * as s from "@common/sprinklers/index";
 import * as requests from "@common/sprinklers/requests";
 import * as schema from "@common/sprinklers/schema/index";
@@ -9,6 +10,8 @@ import * as ws from "@common/sprinklers/websocketData";
 import { action, autorun, observable } from "mobx";
 
 const log = logger.child({ source: "websocket" });
+
+const TIMEOUT_MS = 5000;
 
 export class WSSprinklersDevice extends s.SprinklersDevice {
     readonly api: WebSocketApiClient;
@@ -84,14 +87,26 @@ export class WebSocketApiClient implements s.ISprinklersApi {
             id, deviceName, data: requestData,
         };
         const promise = new Promise<requests.Response>((resolve, reject) => {
+            let timeoutHandle: number;
             this.deviceResponseCallbacks[id] = (resData) => {
+                clearTimeout(timeoutHandle);
+                delete this.deviceResponseCallbacks[id];
                 if (resData.data.result === "success") {
                     resolve(resData.data);
                 } else {
                     reject(resData.data);
                 }
-                delete this.deviceResponseCallbacks[id];
             };
+            timeoutHandle = setTimeout(() => {
+                delete this.deviceResponseCallbacks[id];
+                const res: requests.RunSectionResponse = {
+                    type: "runSection",
+                    result: "error",
+                    code: ErrorCode.Timeout,
+                    message: "the request timed out",
+                };
+                reject(res);
+            }, TIMEOUT_MS);
         });
         this.socket.send(JSON.stringify(data));
         return promise;

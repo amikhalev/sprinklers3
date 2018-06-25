@@ -1,3 +1,3 @@
-export { UiMessage, UiStore } from "./ui";
-export * from "./inject";
+export { UiMessage, UiStore } from "./UiStore";
+export * from "./reactContext";
 export { default as StateBase } from "./StateBase";

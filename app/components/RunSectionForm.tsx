@@ -3,14 +3,17 @@ import { observer } from "mobx-react";
 import * as React from "react";
 import { DropdownItemProps, DropdownProps, Form, Header, Segment } from "semantic-ui-react";
 
+import { UiStore } from "@app/state";
 import { Duration } from "@common/Duration";
 import log from "@common/logger";
 import { Section } from "@common/sprinklers";
+import { RunSectionResponse } from "@common/sprinklers/requests";
 import DurationInput from "./DurationInput";
 
 @observer
 export default class RunSectionForm extends React.Component<{
     sections: Section[],
+    uiStore: UiStore,
 }, {
     duration: Duration,
     section: number | "",
@@ -70,8 +73,23 @@ export default class RunSectionForm extends React.Component<{
         const section: Section = this.props.sections[this.state.section];
         const { duration } = this.state;
         section.run(duration.toSeconds())
-            .then((result) => log.debug({ result }, "requested section run"))
-            .catch((err) => log.error(err, "error running section"));
+            .then(this.onRunSuccess)
+            .catch(this.onRunError);
+    }
+
+    private onRunSuccess = (result: RunSectionResponse) => {
+        log.debug({ result }, "requested section run");
+        this.props.uiStore.addMessage({
+            color: "green", header: "Section running",
+        });
+    }
+
+    private onRunError = (err: RunSectionResponse) => {
+        log.error(err, "error running section");
+        this.props.uiStore.addMessage({
+            color: "red", header: "Error running section",
+            content: err.message,
+        });
     }
 
     private get isValid(): boolean {

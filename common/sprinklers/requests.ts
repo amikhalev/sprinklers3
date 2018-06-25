@@ -37,9 +37,10 @@ export interface SuccessResponseData<Type extends string = string> extends WithT
 
 export interface ErrorResponseData<Type extends string = string> extends WithType<Type> {
     result: "error";
-    error: string;
-    offset?: number;
-    code?: number;
+    message: string;
+    code: number;
+    name?: string;
+    cause?: any;
 }
 
 export type Response<Type extends string = string, Res = {}> =

@@ -52,6 +52,7 @@ class DeviceView extends React.Component<DeviceViewProps> {
 
     render() {
         const { id, connectionState, sections, programs, sectionRunner } = this.device;
+        const { uiStore } = this.props.state;
         return (
             <Item>
                 <Item.Image src={require("@app/images/raspberry_pi.png")}/>
@@ -68,7 +69,7 @@ class DeviceView extends React.Component<DeviceViewProps> {
                             <SectionTable sections={sections}/>
                         </Grid.Column>
                         <Grid.Column width="8">
-                            <RunSectionForm sections={sections}/>
+                            <RunSectionForm sections={sections} uiStore={uiStore}/>
                         </Grid.Column>
                     </Grid>
                     <ProgramTable programs={programs} sections={sections}/>
