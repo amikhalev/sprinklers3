@@ -36,7 +36,7 @@ export const sectionRun: ModelSchema<s.SectionRun> = {
         section: primitive(),
         duration: common.duration,
         startTime: common.date,
-        endTime: common.date,
+        pauseTime: common.date,
     },
 };
 

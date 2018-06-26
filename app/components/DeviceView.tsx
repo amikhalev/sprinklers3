@@ -64,16 +64,16 @@ class DeviceView extends React.Component<DeviceViewProps> {
                     <Item.Meta>
                         Raspberry Pi Grinklers Device
                     </Item.Meta>
-                    <Grid stackable>
-                        <Grid.Column width="8">
+                    <SectionRunnerView sectionRunner={sectionRunner} sections={sections}/>
+                    <Grid>
+                        <Grid.Column mobile="16" tablet="16" computer="8">
                             <SectionTable sections={sections}/>
                         </Grid.Column>
-                        <Grid.Column width="8">
-                            <RunSectionForm sections={sections} uiStore={uiStore}/>
+                        <Grid.Column mobile="16" tablet="16" computer="8">
+                            <RunSectionForm device={this.device} uiStore={uiStore}/>
                         </Grid.Column>
                     </Grid>
                     <ProgramTable programs={programs} sections={sections}/>
-                    <SectionRunnerView sectionRunner={sectionRunner} sections={sections}/>
                 </Item.Content>
             </Item>
         );

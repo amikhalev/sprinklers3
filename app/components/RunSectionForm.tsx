@@ -6,13 +6,13 @@ import { DropdownItemProps, DropdownProps, Form, Header, Segment } from "semanti
 import { UiStore } from "@app/state";
 import { Duration } from "@common/Duration";
 import log from "@common/logger";
-import { Section } from "@common/sprinklers";
+import { Section, SprinklersDevice } from "@common/sprinklers";
 import { RunSectionResponse } from "@common/sprinklers/requests";
 import DurationInput from "./DurationInput";
 
 @observer
 export default class RunSectionForm extends React.Component<{
-    sections: Section[],
+    device: SprinklersDevice,
     uiStore: UiStore,
 }, {
     duration: Duration,
@@ -70,7 +70,7 @@ export default class RunSectionForm extends React.Component<{
         if (typeof this.state.section !== "number") {
             return;
         }
-        const section: Section = this.props.sections[this.state.section];
+        const section: Section = this.props.device.sections[this.state.section];
         const { duration } = this.state;
         section.run(duration.toSeconds())
             .then(this.onRunSuccess)
@@ -80,14 +80,15 @@ export default class RunSectionForm extends React.Component<{
     private onRunSuccess = (result: RunSectionResponse) => {
         log.debug({ result }, "requested section run");
         this.props.uiStore.addMessage({
-            color: "green", header: "Section running",
+            success: true, header: "Section running",
+            content: result.message, timeout: 2000,
         });
     }
 
     private onRunError = (err: RunSectionResponse) => {
         log.error(err, "error running section");
         this.props.uiStore.addMessage({
-            color: "red", header: "Error running section",
+            error: true, header: "Error running section",
             content: err.message,
         });
     }
@@ -98,7 +99,7 @@ export default class RunSectionForm extends React.Component<{
 
     @computed
     private get sectionOptions(): DropdownItemProps[] {
-        return this.props.sections.map((s, i) => ({
+        return this.props.device.sections.map((s, i) => ({
             text: s ? s.name : null,
             value: i,
         }));

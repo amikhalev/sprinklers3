@@ -13,7 +13,22 @@
 }
 
 .sectionRunner--pausedState-unpaused {
-    color: #BBBBBB;
+}
+
+.flex-horizontal-space-between {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+}
+
+.sectionRun .progress {
+    margin: 1em 0 0 !important;
+}
+
+.sectionRun .ui.progress .bar {
+    -webkit-transition: none;
+    transition: none;
+    min-width: 0 !important;
 }
 
 .section--number,
@@ -31,9 +46,15 @@
 
 }
 
-.program--runningButton {
-    margin-left: 1em !important;
+.ui.table {
+    tr > td.program--running {
+        display: flex !important;
+        @media only screen and (min-width: 768px) {
+            //line-height: 36px;
+        }
+    }
 }
+
 
 .section--state-true {
     color: green;
@@ -62,4 +83,8 @@
     z-index: 1000;
     display: flex;
     flex-direction: column;
+}
+
+.flex-spacer {
+    flex: 1;
 }

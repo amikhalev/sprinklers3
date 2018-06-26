@@ -176,6 +176,7 @@ const getConfig = module.exports = (env) => {
             sourceMap: shouldUseSourceMap,
         }),
         isDev && new webpack.HotModuleReplacementPlugin(),
+        new webpack.NamedModulesPlugin(),
     ].filter(Boolean);
 
     return {
