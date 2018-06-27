@@ -3,17 +3,17 @@ const fs = require("fs");
 const url = require("url");
 
 exports.rootDir = fs.realpathSync(process.cwd());
-const resolveRoot = (p) => path.resolve(exports.rootDir, p);
+const resolveRoot = exports.resolveRoot = (p) => path.resolve(exports.rootDir, p);
 
 function ensureSlash(p, needsSlash) {
-  const hasSlash = p.endsWith("/");
-  if (hasSlash && !needsSlash) {
-    return p.substr(p, p.length - 1);
-  } else if (!hasSlash && needsSlash) {
-    return `${p}/`;
-  } else {
-    return p;
-  }
+    const hasSlash = p.endsWith("/");
+    if (hasSlash && !needsSlash) {
+        return p.substr(p, p.length - 1);
+    } else if (!hasSlash && needsSlash) {
+        return `${p}/`;
+    } else {
+        return p;
+    }
 }
 
 exports.dotenv = resolveRoot(".env");

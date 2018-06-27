@@ -4,9 +4,13 @@ const webpack = require("webpack");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 const CaseSensitivePathsPlugin = require("case-sensitive-paths-webpack-plugin");
 const UglifyJsPlugin = require("uglifyjs-webpack-plugin");
-const cssnext = require("postcss-cssnext");
+const DashboardPlugin = require("webpack-dashboard/plugin");
+const BundleAnalyzerPlugin = require("webpack-bundle-analyzer").BundleAnalyzerPlugin;
+const MiniCssExtractPlugin = require("mini-css-extract-plugin");
+const HappyPack = require("happypack");
+const ForkTsCheckerWebpackPlugin = require("fork-ts-checker-webpack-plugin");
 
-const { getClientEnvironment } = require("../env");
+const {getClientEnvironment} = require("../env");
 const paths = require("../paths");
 
 // Webpack uses `publicPath` to determine where the app is being served from.
@@ -35,14 +39,8 @@ const postCssConfig = {
         ident: "postcss",
         plugins: () => [
             require("postcss-flexbugs-fixes"),
-            cssnext({
-                browsers: [
-                    ">1%",
-                    "last 4 versions",
-                    "Firefox ESR",
-                    "not ie < 9", // React doesn"t support IE8 anyway
-                ],
-                flexbox: "no-2009",
+            require("postcss-preset-env")({
+                stage: 0,
             }),
         ],
     },
@@ -59,10 +57,14 @@ const rules = (env) => {
     // "style" loader turns CSS into JS modules that inject <style> tags.
     // In production, we use a plugin to extract that CSS to a file, but
     // in development "style" loader enables hot editing of CSS.
+    const styleLoader =
+        (env === "prod") ? {
+            loader: MiniCssExtractPlugin.loader
+        } : require.resolve("style-loader");
     const cssRule = {
         test: /\.css$/,
         use: [
-            require.resolve("style-loader"),
+            styleLoader,
             {
                 loader: require.resolve("css-loader"),
                 options: {
@@ -75,23 +77,18 @@ const rules = (env) => {
     const sassRule = {
         test: /\.scss$/,
         use: [
-            require.resolve("style-loader"),
+            styleLoader,
             {
                 loader: require.resolve("css-loader"),
                 options: {
                     importLoaders: 1,
                 },
             },
+            postCssConfig,
             sassConfig,
         ],
     };
     return [
-        {
-            test: /\.tsx?$/,
-            enforce: "pre",
-            loader: require.resolve("tslint-loader"),
-            options: { typeCheck: true, tsConfigFile: paths.appTsConfig },
-        },
         {
             // "oneOf" will traverse all following loaders until one will
             // match the requirements. when no loader matches it will fall
@@ -110,12 +107,10 @@ const rules = (env) => {
                 },
                 cssRule,
                 sassRule,
-                // Process TypeScript with TSC.
+                // Process TypeScript with TSC through HappyPack.
                 {
-                    test: /\.tsx?$/, use: {
-                        loader: "awesome-typescript-loader",
-                        options: { configFileName: paths.appTsConfig }
-                    },
+                    test: /\.tsx?$/, use: "happypack/loader?id=ts",
+                    include: [ paths.appDir, paths.commonDir ],
                 },
                 // "file" loader makes sure those assets get served by WebpackDevServer.
                 // When you `import` an asset, you get its (virtual) filename.
@@ -177,13 +172,40 @@ const getConfig = module.exports = (env) => {
         }),
         isDev && new webpack.HotModuleReplacementPlugin(),
         new webpack.NamedModulesPlugin(),
+        new HappyPack({
+            id: "ts",
+            threads: 2,
+            loaders: [{
+                loader: "ts-loader",
+                options: {
+                    configFile: paths.appTsConfig,
+                    happyPackMode: true,
+                },
+            }],
+        }),
+        new ForkTsCheckerWebpackPlugin({
+            checkSyntacticErrors: true,
+            tsconfig: paths.appTsConfig,
+            tslint: paths.resolveRoot("tslint.json"),
+        }),
+        isDev && new DashboardPlugin(),
+        new BundleAnalyzerPlugin({
+            analyzerMode: "static",
+            openAnalyzer: false,
+            reportFilename: path.resolve(paths.serverBuildDir, "report.html"),
+        }),
+        new webpack.IgnorePlugin(/^\.\/locale$/, /moment$/),
+        isProd && new MiniCssExtractPlugin({
+            filename: "static/css/[name].[chunkhash:8].css",
+            chunkFilename: "static/css/[id].[chunkhash:8].css",
+        })
     ].filter(Boolean);
 
     return {
         mode: isProd ? "production" : "development",
         bail: isProd,
         devtool: shouldUseSourceMap ?
-            isProd ? "source-map" : "eval-source-map" :
+            isProd ? "source-map" : "inline-source-map" :
             false,
         entry: [
             isDev && require.resolve("react-hot-loader/patch"),

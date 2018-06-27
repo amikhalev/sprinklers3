@@ -12,6 +12,7 @@ import { action, autorun, observable } from "mobx";
 const log = logger.child({ source: "websocket" });
 
 const TIMEOUT_MS = 5000;
+const RECONNECT_TIMEOUT_MS = 5000;
 
 export class WSSprinklersDevice extends s.SprinklersDevice {
     readonly api: WebSocketApiClient;
@@ -39,13 +40,15 @@ export class WSSprinklersDevice extends s.SprinklersDevice {
 
 export class WebSocketApiClient implements s.ISprinklersApi {
     readonly webSocketUrl: string;
-    socket!: WebSocket;
     device: WSSprinklersDevice;
 
     nextDeviceRequestId = Math.round(Math.random() * 1000000);
     deviceResponseCallbacks: { [id: number]: (res: ws.IDeviceCallResponse) => void | undefined; } = {};
 
     @observable connectionState: s.ConnectionState = new s.ConnectionState();
+
+    private socket: WebSocket | null = null;
+    private reconnectTimer: number | null = null;
 
     get connected(): boolean {
         return this.connectionState.isConnected;
@@ -60,11 +63,18 @@ export class WebSocketApiClient implements s.ISprinklersApi {
 
     start() {
         log.debug({ url: this.webSocketUrl }, "connecting to websocket");
-        this.socket = new WebSocket(this.webSocketUrl);
-        this.socket.onopen = this.onOpen.bind(this);
-        this.socket.onclose = this.onClose.bind(this);
-        this.socket.onerror = this.onError.bind(this);
-        this.socket.onmessage = this.onMessage.bind(this);
+        this._connect();
+    }
+
+    stop() {
+        if (this.reconnectTimer != null) {
+            clearTimeout(this.reconnectTimer);
+            this.reconnectTimer = null;
+        }
+        if (this.socket != null) {
+            this.socket.close();
+            this.socket = null;
+        }
     }
 
     getDevice(name: string): s.SprinklersDevice {
@@ -80,6 +90,15 @@ export class WebSocketApiClient implements s.ISprinklersApi {
 
     // args must all be JSON serializable
     makeDeviceCall(deviceName: string, request: requests.Request): Promise<requests.Response> {
+        if (this.socket == null) {
+            const res: requests.Response = {
+                type: request.type,
+                result: "error",
+                code: ErrorCode.ServerDisconnected,
+                message: "the server is not connected",
+            };
+            throw res;
+        }
         const requestData = seralizeRequest(request);
         const id = this.nextDeviceRequestId++;
         const data: ws.IDeviceCallRequest = {
@@ -97,10 +116,10 @@ export class WebSocketApiClient implements s.ISprinklersApi {
                     reject(resData.data);
                 }
             };
-            timeoutHandle = setTimeout(() => {
+            timeoutHandle = window.setTimeout(() => {
                 delete this.deviceResponseCallbacks[id];
-                const res: requests.RunSectionResponse = {
-                    type: "runSection",
+                const res: requests.Response = {
+                    type: request.type,
                     result: "error",
                     code: ErrorCode.Timeout,
                     message: "the request timed out",
@@ -110,6 +129,18 @@ export class WebSocketApiClient implements s.ISprinklersApi {
         });
         this.socket.send(JSON.stringify(data));
         return promise;
+    }
+
+    private _reconnect = () => {
+        this._connect();
+    }
+
+    private _connect() {
+        this.socket = new WebSocket(this.webSocketUrl);
+        this.socket.onopen = this.onOpen.bind(this);
+        this.socket.onclose = this.onClose.bind(this);
+        this.socket.onerror = this.onError.bind(this);
+        this.socket.onmessage = this.onMessage.bind(this);
     }
 
     private onOpen() {
@@ -127,6 +158,7 @@ export class WebSocketApiClient implements s.ISprinklersApi {
         log.info({ reason: event.reason, wasClean: event.wasClean },
             "disconnected from websocket");
         this.onDisconnect();
+        this.reconnectTimer = window.setTimeout(this._reconnect, RECONNECT_TIMEOUT_MS);
     }
 
     private onError(event: Event) {

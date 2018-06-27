@@ -87,7 +87,7 @@ class SectionRunView extends React.Component<{
         const duration = Duration.fromSeconds(run.duration);
         const cancel = run.cancel;
         const description = `'${section.name}' for ${duration.toString()}`;
-        let running: boolean = false;
+        let running: boolean = false; // tslint:disable-line:no-unused-variable
         let paused: boolean = false;
         let progressBar: React.ReactNode | undefined;
         if (run.startTime != null) {
@@ -123,10 +123,10 @@ export default class SectionRunnerView extends React.Component<{
         const queueView = queue.map((run) =>
             <SectionRunView key={run.id} run={run} sections={sections}/>);
         if (current) {
-            queueView.unshift(<SectionRunView run={current} sections={sections}/>);
+            queueView.unshift(<SectionRunView key={-1} run={current} sections={sections}/>);
         }
         if (queueView.length === 0) {
-            queueView.push(<Segment>No items in queue</Segment>);
+            queueView.push(<Segment key={0}>No items in queue</Segment>);
         }
         return (
             <Segment className="sectionRunner">

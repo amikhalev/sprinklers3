@@ -6,4 +6,6 @@ export enum ErrorCode {
     InvalidData = 104,
     Internal = 200,
     Timeout = 300,
+    ServerDisconnected = 301,
+    BrokerDisconnected = 302,
 }

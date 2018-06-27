@@ -12,6 +12,7 @@
         "strict": true,
         "allowJs": true,
         "baseUrl": "..",
+        "sourceMap": true,
         "paths": {
             "@common/*": [
                 "./common/*"

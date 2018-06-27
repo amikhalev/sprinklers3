@@ -1,4 +1,4 @@
-import { flatMap } from "lodash";
+import flatMap from "lodash-es/flatMap";
 import { observer } from "mobx-react";
 import * as moment from "moment";
 import * as React from "react";
