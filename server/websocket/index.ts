@@ -14,6 +14,10 @@ export class WebSocketApi {
         this.state = state;
     }
 
+    listen(webSocketServer: WebSocket.Server) {
+        webSocketServer.on("connection", this.handleConnection);
+    }
+
     handleConnection = (socket: WebSocket) => {
         const disposers = [
             autorun(() => {

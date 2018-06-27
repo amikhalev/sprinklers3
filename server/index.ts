@@ -8,7 +8,7 @@ import {Server} from "http";
 import * as WebSocket from "ws";
 
 import { ServerState } from "./state";
-import { createApp } from "./app";
+import { createApp } from "./express";
 import { WebSocketApi } from "./websocket";
 
 const state = new ServerState();
@@ -20,9 +20,14 @@ const host = process.env.HOST || "0.0.0.0";
 
 const server = new Server(app);
 const webSocketServer = new WebSocket.Server({server});
-webSocketServer.on("connection", webSocketApi.handleConnection);
+webSocketApi.listen(webSocketServer);
 
-state.start();
-server.listen(port, host, () => {
-    log.info(`listening at ${host}:${port}`);
-});
+state.start()
+    .then(() => {
+        server.listen(port, host, () => {
+            log.info(`listening at ${host}:${port}`);
+        });
+    })
+    .catch((err) => {
+        log.error({ err }, "error starting server");
+    });
