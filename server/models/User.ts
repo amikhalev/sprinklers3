@@ -51,6 +51,16 @@ export class User implements IUser {
         });
     }
 
+    static async load(db: Database, id: string): Promise<User | null> {
+        const data = await db.db.table(User.tableName)
+            .get(id)
+            .run(db.conn);
+        if (data == null) {
+            return null;
+        }
+        return new User(db, data);
+    }
+
     static async loadByUsername(db: Database, username: string): Promise<User | null> {
         const seq = await db.db.table(User.tableName)
             .filter(r.row("username").eq(username))

@@ -7,9 +7,8 @@ import { ServerState } from "../state";
 import logger from "./logger";
 import serveApp from "./serveApp";
 
-import log from "@common/logger";
-
 import { User } from "../models/User";
+import { authentication } from "./authentication";
 
 export function createApp(state: ServerState) {
     const app = express();
@@ -41,24 +40,7 @@ export function createApp(state: ServerState) {
             .catch(next);
     });
 
-    app.post("/api/authenticate", (req, res, next) => {
-        const body = req.body;
-        log.info({body}, "/api/authenticate: " + req.body);
-        if (!body || !body.username || !body.password) {
-            return next(new Error("must specify username and password"));
-        }
-        User.loadByUsername(state.database, body.username)
-            .then((user) => {
-                if (!user) {
-                    throw new Error("user does not exist");
-                }
-                return user.comparePassword(body.password);
-            }).then((passwordMatches) => {
-                res.json({
-                    passwordMatches,
-                });
-            }).catch(next);
-    });
+    app.use("/api", authentication(state));
 
     serveApp(app);
 
