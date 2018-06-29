@@ -1,7 +1,7 @@
 import { observer } from "mobx-react";
 // import DevTools from "mobx-react-devtools";
 import * as React from "react";
-import { Redirect, Route, Switch } from "react-router";
+import { Redirect, Route, RouteComponentProps, Switch } from "react-router";
 import { BrowserRouter as Router } from "react-router-dom";
 import { Container } from "semantic-ui-react";
 
@@ -12,9 +12,9 @@ import "font-awesome/css/font-awesome.css";
 import "semantic-ui-css/semantic.css";
 import "@app/styles/app.scss";
 
-function DevicePage() {
+function DevicePage({match}: RouteComponentProps<{deviceId: string}>) {
     return (
-        <DevicesView/>
+        <DevicesView deviceId={match.params.deviceId}/>
     );
 }
 
@@ -32,7 +32,7 @@ class App extends React.Component {
                     <NavBar/>
 
                     <Switch>
-                        <Route path="/devices/grinklers" component={DevicePage}/>
+                        <Route path="/devices/:deviceId" component={DevicePage}/>
                         <Route path="/messagesTest" component={MessagesTestPage}/>
                         <Redirect to="/"/>
                     </Switch>

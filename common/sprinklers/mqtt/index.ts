@@ -147,6 +147,9 @@ class MqttSprinklersDevice extends s.SprinklersDevice {
             const brokerConnected = apiClient.connected;
             this.connectionState.serverToBroker = brokerConnected;
             if (brokerConnected) {
+                if (this.connectionState.brokerToDevice == null) {
+                    this.connectionState.brokerToDevice = false;
+                }
                 this.doSubscribe();
             } else {
                 this.connectionState.brokerToDevice = false;
