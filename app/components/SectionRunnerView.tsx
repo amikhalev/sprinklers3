@@ -82,25 +82,29 @@ class SectionRunView extends React.Component<{
 
     render() {
         const { run, sections } = this.props;
-        let now = this.state.now;
+        const startTime = run.unpauseTime ? run.unpauseTime : run.startTime;
+        const now = this.state.now;
         const section = sections[run.section];
         const duration = Duration.fromSeconds(run.duration);
         const cancel = run.cancel;
-        const description = `'${section.name}' for ${duration.toString()}`;
         let running: boolean = false; // tslint:disable-line:no-unused-variable
         let paused: boolean = false;
         let progressBar: React.ReactNode | undefined;
-        if (run.startTime != null) {
-            running = true;
+        if (startTime != null) {
+            let elapsed = (run.totalDuration - run.duration);
             if (run.pauseTime) {
-                now = run.pauseTime.valueOf();
                 paused = true;
+            } else {
+                running = true;
+                elapsed += (now - startTime.valueOf()) / 1000;
             }
-            const elapsed = (now.valueOf() - run.startTime.valueOf()) / 1000;
-            const percentage = elapsed / run.duration;
+            const percentage = elapsed / run.totalDuration;
             progressBar =
                 <Progress color={paused ? "yellow" : "blue"} size="tiny" percent={percentage * 100}/>;
         }
+        const description = `'${section.name}' for ${duration.toString()}` +
+            (paused ? " (paused)" : "") +
+            (running ? " (running)" : "");
         return (
             <Segment className="sectionRun">
                 <div className="flex-horizontal-space-between">

@@ -5,9 +5,11 @@ export class SectionRun {
     readonly sectionRunner: SectionRunner;
     readonly id: number;
     section: number;
+    totalDuration: number = 0;
     duration: number = 0;
     startTime: Date | null = null;
     pauseTime: Date | null = null;
+    unpauseTime: Date | null = null;
 
     constructor(sectionRunner: SectionRunner, id: number = 0, section: number = 0) {
         this.sectionRunner = sectionRunner;

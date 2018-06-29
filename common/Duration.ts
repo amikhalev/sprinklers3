@@ -36,6 +36,6 @@ export class Duration {
     }
 
     toString(): string {
-        return `${this.minutes}M ${this.seconds}S`;
+        return `${this.minutes}M ${this.seconds.toFixed(1)}S`;
     }
 }

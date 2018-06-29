@@ -34,9 +34,11 @@ export const sectionRun: ModelSchema<s.SectionRun> = {
     props: {
         id: primitive(),
         section: primitive(),
+        totalDuration: common.duration,
         duration: common.duration,
         startTime: common.date,
         pauseTime: common.date,
+        unpauseTime: common.date,
     },
 };
 
