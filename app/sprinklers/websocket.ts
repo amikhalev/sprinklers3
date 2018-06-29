@@ -17,20 +17,36 @@ const RECONNECT_TIMEOUT_MS = 5000;
 export class WSSprinklersDevice extends s.SprinklersDevice {
     readonly api: WebSocketApiClient;
 
-    constructor(api: WebSocketApiClient) {
+    private _id: string;
+
+    constructor(api: WebSocketApiClient, id: string) {
         super();
         this.api = api;
+        this._id = id;
         autorun(() => {
             this.connectionState.serverToBroker = api.connectionState.serverToBroker;
             this.connectionState.clientToServer = api.connectionState.clientToServer;
             if (!api.connectionState.isConnected) {
                 this.connectionState.brokerToDevice = null;
+            } else {
+                this.subscribe();
             }
         });
     }
 
     get id() {
-        return "grinklers";
+        return this._id;
+    }
+
+    subscribe() {
+        if (!this.api.socket) {
+            throw new Error("WebSocket not connected");
+        }
+        const subscribeRequest: ws.IDeviceSubscribeRequest = {
+            type: "deviceSubscribeRequest",
+            deviceId: this.id,
+        };
+        this.api.socket.send(JSON.stringify(subscribeRequest));
     }
 
     makeRequest(request: requests.Request): Promise<requests.Response> {
@@ -40,14 +56,15 @@ export class WSSprinklersDevice extends s.SprinklersDevice {
 
 export class WebSocketApiClient implements s.ISprinklersApi {
     readonly webSocketUrl: string;
-    device: WSSprinklersDevice;
+
+    devices: Map<string, WSSprinklersDevice> = new Map();
 
     nextDeviceRequestId = Math.round(Math.random() * 1000000);
     deviceResponseCallbacks: { [id: number]: (res: ws.IDeviceCallResponse) => void | undefined; } = {};
 
     @observable connectionState: s.ConnectionState = new s.ConnectionState();
 
-    private socket: WebSocket | null = null;
+    socket: WebSocket | null = null;
     private reconnectTimer: number | null = null;
 
     get connected(): boolean {
@@ -56,7 +73,6 @@ export class WebSocketApiClient implements s.ISprinklersApi {
 
     constructor(webSocketUrl: string) {
         this.webSocketUrl = webSocketUrl;
-        this.device = new WSSprinklersDevice(this);
         this.connectionState.clientToServer = false;
         this.connectionState.serverToBroker = false;
     }
@@ -77,19 +93,21 @@ export class WebSocketApiClient implements s.ISprinklersApi {
         }
     }
 
-    getDevice(name: string): s.SprinklersDevice {
-        if (name !== "grinklers") {
-            throw new Error("Devices which are not grinklers are not supported yet");
+    getDevice(id: string): s.SprinklersDevice {
+        let device = this.devices.get(id);
+        if (!device) {
+            device = new WSSprinklersDevice(this, id);
+            this.devices.set(id, device);
         }
-        return this.device;
+        return device;
     }
 
-    removeDevice(name: string) {
+    removeDevice(id: string) {
         // NOT IMPLEMENTED
     }
 
     // args must all be JSON serializable
-    makeDeviceCall(deviceName: string, request: requests.Request): Promise<requests.Response> {
+    makeDeviceCall(deviceId: string, request: requests.Request): Promise<requests.Response> {
         if (this.socket == null) {
             const res: requests.Response = {
                 type: request.type,
@@ -103,7 +121,7 @@ export class WebSocketApiClient implements s.ISprinklersApi {
         const id = this.nextDeviceRequestId++;
         const data: ws.IDeviceCallRequest = {
             type: "deviceCallRequest",
-            id, deviceName, data: requestData,
+            id, deviceId, data: requestData,
         };
         const promise = new Promise<requests.Response>((resolve, reject) => {
             let timeoutHandle: number;
@@ -194,10 +212,11 @@ export class WebSocketApiClient implements s.ISprinklersApi {
     }
 
     private onDeviceUpdate(data: ws.IDeviceUpdate) {
-        if (data.name !== "grinklers") {
+        const device = this.devices.get(data.deviceId);
+        if (!device) {
             return log.warn({ data }, "invalid deviceUpdate received");
         }
-        update(schema.sprinklersDevice, this.device, data.data);
+        update(schema.sprinklersDevice, device, data.data);
     }
 
     private onDeviceCallResponse(data: ws.IDeviceCallResponse) {

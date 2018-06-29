@@ -1,66 +1,104 @@
+import { autorun } from "mobx";
+import { serialize } from "serializr";
+import * as WebSocket from "ws";
+
 import log from "@common/logger";
 import * as requests from "@common/sprinklers/requests";
 import * as schema from "@common/sprinklers/schema";
 import * as ws from "@common/sprinklers/websocketData";
-import { autorun } from "mobx";
-import { serialize } from "serializr";
-import * as WebSocket from "ws";
 import { ServerState } from "../state";
 
-export class WebSocketApi {
-    state: ServerState;
+export class WebSocketClient {
+    api: WebSocketApi;
+    socket: WebSocket;
 
-    constructor(state: ServerState) {
-        this.state = state;
+    disposers: Array<() => void> = [];
+    deviceSubscriptions: string[] = [];
+
+    /// This shall be the user id if the client has been authenticated, null otherwise
+    userId: string | null = null;
+
+    get state() {
+        return this.api.state;
     }
 
-    listen(webSocketServer: WebSocket.Server) {
-        webSocketServer.on("connection", this.handleConnection);
+    constructor(api: WebSocketApi, socket: WebSocket) {
+        this.api = api;
+        this.socket = socket;
     }
 
-    handleConnection = (socket: WebSocket) => {
-        const disposers = [
-            autorun(() => {
-                const json = serialize(schema.sprinklersDevice, this.state.device);
-                log.trace({ device: json });
-                const data: ws.IDeviceUpdate = { type: "deviceUpdate", name: "grinklers", data: json };
-                socket.send(JSON.stringify(data));
-            }, { delay: 100 }),
-            autorun(() => {
-                const data: ws.IBrokerConnectionUpdate  = {
-                    type: "brokerConnectionUpdate",
-                    brokerConnected: this.state.mqttClient.connected,
-                };
-                socket.send(JSON.stringify(data));
-            }),
-        ];
-        const stop = () => {
-            disposers.forEach((disposer) => disposer());
-        };
-        socket.on("message", (data) => this.handleSocketMessage(socket, data));
-        socket.on("close", () => stop());
+    start() {
+        this.disposers.push(autorun(() => {
+            const updateData: ws.IBrokerConnectionUpdate = {
+                type: "brokerConnectionUpdate",
+                brokerConnected: this.state.mqttClient.connected,
+            };
+            this.socket.send(JSON.stringify(updateData));
+        }));
+        this.socket.on("message", this.handleSocketMessage);
+        this.socket.on("close", this.stop);
     }
 
-    private handleSocketMessage(socket: WebSocket, socketData: WebSocket.Data) {
+    stop = () => {
+        this.disposers.forEach((disposer) => disposer());
+        this.api.removeClient(this);
+    }
+
+    private handleSocketMessage = (socketData: WebSocket.Data) => {
+        this.doHandleSocketMessage(socketData)
+            .catch((err) => {
+                this.onError({ err }, "unhandled error on handling socket message");
+            });
+    }
+
+    private async doHandleSocketMessage(socketData: WebSocket.Data) {
         if (typeof socketData !== "string") {
-            return log.error({ type: typeof socketData }, "received invalid socket data type from client");
+            return this.onError({ type: typeof socketData }, "received invalid socket data type from client");
         }
         let data: ws.IClientMessage;
         try {
             data = JSON.parse(socketData);
         } catch (err) {
-            return log.error({ event, err }, "received invalid websocket message from client");
+            return this.onError({ event, err }, "received invalid websocket message from client");
         }
         switch (data.type) {
+            case "deviceSubscribeRequest":
+                this.deviceSubscribeRequest(data);
+                break;
             case "deviceCallRequest":
-                this.deviceCallRequest(socket, data);
+                await this.deviceCallRequest(data);
                 break;
             default:
-                return log.warn({ data }, "received invalid client message type");
+                return this.onError({ data }, "received invalid client message type");
         }
     }
 
-    private async deviceCallRequest(socket: WebSocket, data: ws.IDeviceCallRequest): Promise<void> {
+    private onError(data: any, message: string) {
+        log.error(data, message);
+        const errorData: ws.IError = {
+            type: "error", message, data,
+        };
+        this.socket.send(JSON.stringify(errorData));
+    }
+
+    private deviceSubscribeRequest(data: ws.IDeviceSubscribeRequest) {
+        // TODO: somehow validate this device id?
+        const deviceId = data.deviceId;
+        if (this.deviceSubscriptions.indexOf(deviceId) !== -1) {
+            return;
+        }
+        this.deviceSubscriptions.push(deviceId);
+        const device = this.state.mqttClient.getDevice(deviceId);
+        log.debug({ deviceId, userId: this.userId }, "websocket client subscribed to device");
+        this.disposers.push(autorun(() => {
+            const json = serialize(schema.sprinklersDevice, device);
+            log.trace({ device: json });
+            const updateData: ws.IDeviceUpdate = { type: "deviceUpdate", deviceId, data: json };
+            this.socket.send(JSON.stringify(updateData));
+        }, { delay: 100 }));
+    }
+
+    private async deviceCallRequest(data: ws.IDeviceCallRequest): Promise<void> {
         let response: requests.Response | false;
         try {
             response = await this.doDeviceCallRequest(data);
@@ -73,17 +111,43 @@ export class WebSocketApi {
                 id: data.id,
                 data: response,
             };
-            socket.send(JSON.stringify(resData));
+            this.socket.send(JSON.stringify(resData));
         }
     }
 
     private async doDeviceCallRequest(requestData: ws.IDeviceCallRequest): Promise<requests.Response | false> {
-        const { deviceName, data } = requestData;
-        if (deviceName !== "grinklers") {
+        const { deviceId, data } = requestData;
+        if (deviceId !== "grinklers") {
             // error handling? or just get the right device
             return false;
         }
         const request = schema.requests.deserializeRequest(data);
         return this.state.device.makeRequest(request);
+    }
+}
+
+export class WebSocketApi {
+    state: ServerState;
+    clients: WebSocketClient[] = [];
+
+    constructor(state: ServerState) {
+        this.state = state;
+    }
+
+    listen(webSocketServer: WebSocket.Server) {
+        webSocketServer.on("connection", this.handleConnection);
+    }
+
+    handleConnection = (socket: WebSocket) => {
+        const client = new WebSocketClient(this, socket);
+        client.start();
+        this.clients.push(client);
+    }
+
+    removeClient(client: WebSocketClient) {
+        const idx = this.clients.indexOf(client);
+        if (idx !== -1) {
+            this.clients.splice(idx, 1);
+        }
     }
 }

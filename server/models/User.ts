@@ -1,7 +1,8 @@
+import * as bcrypt from "bcrypt";
 import * as r from "rethinkdb";
 import { createModelSchema, deserialize, primitive, serialize, update } from "serializr";
+
 import { Database } from "./Database";
-import * as bcrypt from "bcrypt";
 
 export interface IUser {
     id: string | undefined;

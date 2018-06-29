@@ -53,13 +53,13 @@ export class MqttApiClient implements s.ISprinklersApi {
         });
     }
 
-    getDevice(prefix: string): s.SprinklersDevice {
-        if (/\//.test(prefix)) {
-            throw new Error("Prefix cannot contain a /");
+    getDevice(id: string): s.SprinklersDevice {
+        if (/\//.test(id)) {
+            throw new Error("Device id cannot contain a /");
         }
-        let device = this.devices.get(prefix);
+        let device = this.devices.get(id);
         if (!device) {
-            this.devices.set(prefix, device = new MqttSprinklersDevice(this, prefix));
+            this.devices.set(id, device = new MqttSprinklersDevice(this, id));
             if (this.connected) {
                 device.doSubscribe();
             }
@@ -67,13 +67,13 @@ export class MqttApiClient implements s.ISprinklersApi {
         return device;
     }
 
-    removeDevice(prefix: string) {
-        const device = this.devices.get(prefix);
+    removeDevice(id: string) {
+        const device = this.devices.get(id);
         if (!device) {
             return;
         }
         device.doUnsubscribe();
-        this.devices.delete(prefix);
+        this.devices.delete(id);
     }
 
     private onMessageArrived(topic: string, payload: Buffer, packet: mqtt.Packet) {

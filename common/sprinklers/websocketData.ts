@@ -1,8 +1,14 @@
 import { Response as ResponseData } from "@common/sprinklers/requests";
 
+export interface IError {
+    type: "error";
+    message: string;
+    data: any;
+}
+
 export interface IDeviceUpdate {
     type: "deviceUpdate";
-    name: string;
+    deviceId: string;
     data: any;
 }
 
@@ -17,13 +23,20 @@ export interface IBrokerConnectionUpdate {
     brokerConnected: boolean;
 }
 
-export type IServerMessage = IDeviceUpdate | IDeviceCallResponse | IBrokerConnectionUpdate;
+export type IServerMessage = IError | IDeviceUpdate | IDeviceCallResponse | IBrokerConnectionUpdate;
+
+export type SubscriptionType = "deviceUpdate" | "brokerConnectionUpdate";
+
+export interface IDeviceSubscribeRequest {
+    type: "deviceSubscribeRequest";
+    deviceId: string;
+}
 
 export interface IDeviceCallRequest {
     type: "deviceCallRequest";
     id: number;
-    deviceName: string;
+    deviceId: string;
     data: any;
 }
 
-export type IClientMessage = IDeviceCallRequest;
+export type IClientMessage = IDeviceSubscribeRequest | IDeviceCallRequest;
