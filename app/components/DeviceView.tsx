@@ -49,19 +49,24 @@ interface DeviceViewProps {
 }
 
 class DeviceView extends React.Component<DeviceViewProps> {
-    device!: SprinklersDevice;
-
-    componentWillMount() {
-        this.updateDevice();
-    }
-
-    componentWillUpdate() {
-        this.updateDevice();
-    }
-
     render() {
-        const { id, connectionState, sections, programs, sectionRunner } = this.device;
-        const { uiStore } = this.props.state;
+        const { uiStore, sprinklersApi } = this.props.state;
+        const device = sprinklersApi.getDevice(this.props.deviceId);
+        const { id, connectionState, sections, programs, sectionRunner } = device;
+        const deviceBody = connectionState.isAvailable && (
+            <React.Fragment>
+                <SectionRunnerView sectionRunner={sectionRunner} sections={sections}/>
+                <Grid>
+                    <Grid.Column mobile="16" tablet="16" computer="8">
+                        <SectionTable sections={sections}/>
+                    </Grid.Column>
+                    <Grid.Column mobile="16" tablet="16" computer="8">
+                        <RunSectionForm device={device} uiStore={uiStore}/>
+                    </Grid.Column>
+                </Grid>
+                <ProgramTable programs={programs} sections={sections}/>
+            </React.Fragment>
+        );
         return (
             <Item>
                 <Item.Image src={require("@app/images/raspberry_pi.png")}/>
@@ -73,31 +78,10 @@ class DeviceView extends React.Component<DeviceViewProps> {
                     <Item.Meta>
                         Raspberry Pi Grinklers Device
                     </Item.Meta>
-                    {connectionState.isAvailable &&
-                    <SectionRunnerView sectionRunner={sectionRunner} sections={sections}/>}
-                    {connectionState.isAvailable &&
-                    <Grid>
-                        <Grid.Column mobile="16" tablet="16" computer="8">
-                            <SectionTable sections={sections}/>
-                        </Grid.Column>
-                        <Grid.Column mobile="16" tablet="16" computer="8">
-                            <RunSectionForm device={this.device} uiStore={uiStore}/>
-                        </Grid.Column>
-                    </Grid>
-                    }
-                    {connectionState.isAvailable &&
-                    <ProgramTable programs={programs} sections={sections}/>
-                    }
+                    {deviceBody}
                 </Item.Content>
             </Item>
         );
-    }
-
-    private updateDevice() {
-        const { state, deviceId } = this.props;
-        if (!this.device || this.device.id !== deviceId) {
-            this.device = state.sprinklersApi.getDevice(deviceId);
-        }
     }
 }
 

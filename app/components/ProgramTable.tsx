@@ -74,7 +74,7 @@ export default class ProgramTable extends React.Component<{
         );
     }
 
-    private renderRows = (program: Program, i: number): JSX.Element[] | null => {
+    private renderRows = (program: Program, i: number): JSX.Element | null => {
         if (!program) {
             return null;
         }
@@ -87,8 +87,8 @@ export default class ProgramTable extends React.Component<{
             ];
         });
         const cancelOrRun = () => running ? program.cancel() : program.run();
-        const rows = [(
-            <Table.Row key={i}>
+        const mainRow = (
+            <Table.Row>
                 <Table.Cell className="program--number">{"" + (i + 1)}</Table.Cell>
                 <Table.Cell className="program--name">{name}</Table.Cell>
                 <Table.Cell className="program--enabled">{enabled ? "Enabled" : "Not enabled"}</Table.Cell>
@@ -100,17 +100,20 @@ export default class ProgramTable extends React.Component<{
                     </Button>
                 </Table.Cell>
             </Table.Row>
-        )];
-        if (false) {
-            rows.push(
-                <Table.Row key={i + .5}>
-                    <Table.Cell className="program--sequence" colSpan="4">
-                        <h4>Sequence: </h4> {sequenceItems}
-                        <h4>Schedule: </h4> <ScheduleView schedule={schedule}/>
-                    </Table.Cell>
-                </Table.Row>,
-            );
-        }
-        return rows;
+        );
+        const detailRow = false && (
+            <Table.Row>
+                <Table.Cell className="program--sequence" colSpan="4">
+                    <h4>Sequence: </h4> {sequenceItems}
+                    <h4>Schedule: </h4> <ScheduleView schedule={schedule}/>
+                </Table.Cell>
+            </Table.Row>
+        );
+        return (
+            <React.Fragment key={i}>
+                {mainRow}
+                {detailRow}
+            </React.Fragment>
+        );
     }
 }

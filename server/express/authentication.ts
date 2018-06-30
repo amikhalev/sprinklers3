@@ -6,6 +6,19 @@ import { User } from "../models/User";
 import { ServerState } from "../state";
 import { ApiError } from "./errors";
 
+declare global {
+    namespace Express {
+        interface Request {
+            token?: TokenClaims;
+        }
+    }
+}
+
+const JWT_SECRET = process.env.JWT_SECRET!;
+if (!JWT_SECRET) {
+    throw new Error("Must specify JWT_SECRET environment variable");
+}
+
 const ACCESS_TOKEN_LIFETIME = (30 * 60); // 30 minutes
 const REFRESH_TOKEN_LIFETIME = (24 * 60 * 60); // 24 hours
 
@@ -24,9 +37,9 @@ interface TokenClaims {
     exp: number;
 }
 
-function signToken(claims: TokenClaims, secret: string): Promise<string> {
+function signToken(claims: TokenClaims): Promise<string> {
     return new Promise((resolve, reject) => {
-        jwt.sign(claims, secret, (err: Error, encoded: string) => {
+        jwt.sign(claims, JWT_SECRET, (err: Error, encoded: string) => {
             if (err) {
                 reject(err);
             } else {
@@ -36,9 +49,9 @@ function signToken(claims: TokenClaims, secret: string): Promise<string> {
     });
 }
 
-function verifyToken(token: string, secret: string): Promise<TokenClaims> {
+function verifyToken(token: string): Promise<TokenClaims> {
     return new Promise((resolve, reject) => {
-        jwt.verify(token, secret, (err, decoded) => {
+        jwt.verify(token, JWT_SECRET, (err, decoded) => {
             if (err) {
                 if (err.name === "TokenExpiredError") {
                     reject(new ApiError(401, "The specified token is expired", err));
@@ -63,7 +76,7 @@ function generateAccessToken(user: User, secret: string): Promise<string> {
         exp: getExpTime(ACCESS_TOKEN_LIFETIME),
     };
 
-    return signToken(access_token_claims, secret);
+    return signToken(access_token_claims);
 }
 
 function generateRefreshToken(user: User, secret: string): Promise<string> {
@@ -75,14 +88,10 @@ function generateRefreshToken(user: User, secret: string): Promise<string> {
         exp: getExpTime(REFRESH_TOKEN_LIFETIME),
     };
 
-    return signToken(refresh_token_claims, secret);
+    return signToken(refresh_token_claims);
 }
 
 export function authentication(state: ServerState) {
-    const JWT_SECRET = process.env.JWT_SECRET!;
-    if (!JWT_SECRET) {
-        throw new Error("Must specify JWT_SECRET environment variable");
-    }
 
     const router = Router();
 
@@ -118,7 +127,7 @@ export function authentication(state: ServerState) {
         if (!body || !refresh_token) {
             throw new ApiError(400, "Must specify a refresh_token");
         }
-        const claims = await verifyToken(refresh_token, JWT_SECRET);
+        const claims = await verifyToken(refresh_token);
         if (claims.type !== "refresh") {
             throw new ApiError(400, "Not a refresh token");
         }
@@ -146,25 +155,26 @@ export function authentication(state: ServerState) {
         }
     });
 
-    router.post("/token/verify", async (req, res) => {
-        const bearer = req.headers.authorization;
-        if (!bearer) {
-            throw new ApiError(401, "No bearer token specified");
-        }
-        const matches = /^Bearer (.*)$/.exec(bearer);
-        if (!matches || !matches[1]) {
-            throw new ApiError(400, "Invalid bearer token specified");
-        }
-        const token = matches[1];
-
-        log.info({ token });
-
-        const decoded = await verifyToken(token, JWT_SECRET);
+    router.post("/token/verify", authorizeAccess, async (req, res) => {
         res.json({
             ok: true,
-            decoded,
+            token: req.token,
         });
     });
 
     return router;
+}
+
+export async function authorizeAccess(req: Express.Request, res: Express.Response) {
+    const bearer = req.headers.authorization;
+    if (!bearer) {
+        throw new ApiError(401, "No bearer token specified");
+    }
+    const matches = /^Bearer (.*)$/.exec(bearer);
+    if (!matches || !matches[1]) {
+        throw new ApiError(400, "Invalid bearer token specified");
+    }
+    const token = matches[1];
+
+    req.token = await verifyToken(token);
 }
