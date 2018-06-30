@@ -1,4 +1,5 @@
 import { update } from "serializr";
+import { action, autorun, observable, when } from "mobx";
 
 import logger from "@common/logger";
 import { ErrorCode } from "@common/sprinklers/ErrorCode";
@@ -7,7 +8,6 @@ import * as requests from "@common/sprinklers/requests";
 import * as schema from "@common/sprinklers/schema/index";
 import { seralizeRequest } from "@common/sprinklers/schema/requests";
 import * as ws from "@common/sprinklers/websocketData";
-import { action, autorun, observable } from "mobx";
 
 const log = logger.child({ source: "websocket" });
 
@@ -23,14 +23,8 @@ export class WSSprinklersDevice extends s.SprinklersDevice {
         super();
         this.api = api;
         this._id = id;
-        autorun(() => {
-            this.connectionState.serverToBroker = api.connectionState.serverToBroker;
-            this.connectionState.clientToServer = api.connectionState.clientToServer;
-            if (!api.connectionState.isConnected) {
-                this.connectionState.brokerToDevice = null;
-            } else {
-                this.subscribe();
-            }
+        when(() => api.connectionState.isConnected, () => {
+            this.subscribe();
         });
     }
 
@@ -47,6 +41,17 @@ export class WSSprinklersDevice extends s.SprinklersDevice {
             deviceId: this.id,
         };
         this.api.socket.send(JSON.stringify(subscribeRequest));
+    }
+
+    onSubscribeResponse(data: ws.IDeviceSubscribeResponse) {
+        this.connectionState.serverToBroker = true;
+        this.connectionState.clientToServer = true;
+        if (data.result === "success") {
+            this.connectionState.hasPermission = true;
+            this.connectionState.brokerToDevice = false;
+        } else if (data.result === "noPermission") {
+            this.connectionState.hasPermission = false;
+        }
     }
 
     makeRequest(request: requests.Request): Promise<requests.Response> {
@@ -197,6 +202,9 @@ export class WebSocketApiClient implements s.ISprinklersApi {
         }
         log.trace({ data }, "websocket message");
         switch (data.type) {
+            case "deviceSubscribeResponse":
+                this.onDeviceSubscribeResponse(data);
+                break;
             case "deviceUpdate":
                 this.onDeviceUpdate(data);
                 break;
@@ -209,6 +217,14 @@ export class WebSocketApiClient implements s.ISprinklersApi {
             default:
                 log.warn({ data }, "unsupported event type received");
         }
+    }
+
+    private onDeviceSubscribeResponse(data: ws.IDeviceSubscribeResponse) {
+        const device = this.devices.get(data.deviceId);
+        if (!device) {
+            return log.warn({ data }, "invalid deviceSubscribeResponse received");
+        }
+        device.onSubscribeResponse(data);
     }
 
     private onDeviceUpdate(data: ws.IDeviceUpdate) {

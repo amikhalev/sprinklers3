@@ -82,20 +82,29 @@ export class WebSocketClient {
     }
 
     private deviceSubscribeRequest(data: ws.IDeviceSubscribeRequest) {
-        // TODO: somehow validate this device id?
         const deviceId = data.deviceId;
-        if (this.deviceSubscriptions.indexOf(deviceId) !== -1) {
-            return;
+        let result: ws.IDeviceSubscribeResponse["result"];
+        if (deviceId !== "grinklers") { // TODO: somehow validate this device id?
+            result = "noPermission";
+        } else {
+            if (this.deviceSubscriptions.indexOf(deviceId) !== -1) {
+                return;
+            }
+            this.deviceSubscriptions.push(deviceId);
+            const device = this.state.mqttClient.getDevice(deviceId);
+            log.debug({ deviceId, userId: this.userId }, "websocket client subscribed to device");
+            this.disposers.push(autorun(() => {
+                const json = serialize(schema.sprinklersDevice, device);
+                log.trace({ device: json });
+                const updateData: ws.IDeviceUpdate = { type: "deviceUpdate", deviceId, data: json };
+                this.socket.send(JSON.stringify(updateData));
+            }, { delay: 100 }));
+            result = "success";
         }
-        this.deviceSubscriptions.push(deviceId);
-        const device = this.state.mqttClient.getDevice(deviceId);
-        log.debug({ deviceId, userId: this.userId }, "websocket client subscribed to device");
-        this.disposers.push(autorun(() => {
-            const json = serialize(schema.sprinklersDevice, device);
-            log.trace({ device: json });
-            const updateData: ws.IDeviceUpdate = { type: "deviceUpdate", deviceId, data: json };
-            this.socket.send(JSON.stringify(updateData));
-        }, { delay: 100 }));
+        const response: ws.IDeviceSubscribeResponse = {
+            type: "deviceSubscribeResponse", deviceId, result,
+        };
+        this.socket.send(JSON.stringify(response));
     }
 
     private async deviceCallRequest(data: ws.IDeviceCallRequest): Promise<void> {

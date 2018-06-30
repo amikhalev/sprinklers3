@@ -19,7 +19,36 @@ export class ConnectionState {
      */
     @observable brokerToDevice: boolean | null = null;
 
-    @computed get isConnected(): boolean {
+    /**
+     * Represents if whoever is trying to access this device has permission to access it.
+     * Is null if there is no concept of access involved.
+     */
+    @observable hasPermission: boolean | null = null;
+
+    @computed get noPermission() {
+        return this.hasPermission === false;
+    }
+
+    @computed get isAvailable(): boolean {
+        if (this.hasPermission === false) {
+            return false;
+        }
+        if (this.brokerToDevice != null) {
+            return true;
+        }
+        if (this.serverToBroker != null) {
+            return this.serverToBroker;
+        }
+        if (this.clientToServer != null) {
+            return this.clientToServer;
+        }
+        return false;
+    }
+
+    @computed get isConnected(): boolean | null {
+        if (this.hasPermission === false) {
+            return false;
+        }
         if (this.brokerToDevice != null) {
             return this.brokerToDevice;
         }
@@ -29,6 +58,6 @@ export class ConnectionState {
         if (this.clientToServer != null) {
             return this.clientToServer;
         }
-        return false;
+        return null;
     }
 }

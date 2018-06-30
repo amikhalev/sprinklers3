@@ -1,3 +1,4 @@
+import { autorun, observable } from "mobx";
 import * as mqtt from "mqtt";
 import { update } from "serializr";
 
@@ -6,7 +7,6 @@ import * as s from "@common/sprinklers";
 import * as requests from "@common/sprinklers/requests";
 import * as schema from "@common/sprinklers/schema";
 import { seralizeRequest } from "@common/sprinklers/schema/requests";
-import { autorun, observable } from "mobx";
 
 const log = logger.child({ source: "mqtt" });
 
@@ -161,14 +161,30 @@ class MqttSprinklersDevice extends s.SprinklersDevice {
         return this.prefix;
     }
 
-    doSubscribe() {
+    doSubscribe(): Promise<void> {
         const topics = subscriptions.map((filter) => this.prefix + filter);
-        this.apiClient.client.subscribe(topics, { qos: 1 });
+        return new Promise((resolve, reject) => {
+            this.apiClient.client.subscribe(topics, { qos: 1 }, (err) => {
+                if (err) {
+                    reject(err);
+                } else {
+                    resolve();
+                }
+            });
+        });
     }
 
-    doUnsubscribe() {
+    doUnsubscribe(): Promise<void> {
         const topics = subscriptions.map((filter) => this.prefix + filter);
-        this.apiClient.client.unsubscribe(topics);
+        return new Promise((resolve, reject) => {
+            this.apiClient.client.unsubscribe(topics, (err) => {
+                if (err) {
+                    reject(err);
+                } else {
+                    resolve();
+                }
+            });
+        });
     }
 
     onMessage(topic: string, payload: string) {

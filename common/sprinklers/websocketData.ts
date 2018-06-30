@@ -6,6 +6,12 @@ export interface IError {
     data: any;
 }
 
+export interface IDeviceSubscribeResponse {
+    type: "deviceSubscribeResponse";
+    deviceId: string;
+    result: "success" | "noPermission";
+}
+
 export interface IDeviceUpdate {
     type: "deviceUpdate";
     deviceId: string;
@@ -23,9 +29,8 @@ export interface IBrokerConnectionUpdate {
     brokerConnected: boolean;
 }
 
-export type IServerMessage = IError | IDeviceUpdate | IDeviceCallResponse | IBrokerConnectionUpdate;
-
-export type SubscriptionType = "deviceUpdate" | "brokerConnectionUpdate";
+export type IServerMessage = IError | IDeviceSubscribeResponse | IDeviceUpdate | IDeviceCallResponse |
+    IBrokerConnectionUpdate;
 
 export interface IDeviceSubscribeRequest {
     type: "deviceSubscribeRequest";
