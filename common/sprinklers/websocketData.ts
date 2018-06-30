@@ -20,7 +20,7 @@ export interface IDeviceUpdate {
 
 export interface IDeviceCallResponse {
     type: "deviceCallResponse";
-    id: number;
+    requestId: number;
     data: ResponseData;
 }
 
@@ -32,6 +32,11 @@ export interface IBrokerConnectionUpdate {
 export type IServerMessage = IError | IDeviceSubscribeResponse | IDeviceUpdate | IDeviceCallResponse |
     IBrokerConnectionUpdate;
 
+export interface IAuthenticateRequest {
+    type: "authenticateRequest";
+    accessToken: string;
+}
+
 export interface IDeviceSubscribeRequest {
     type: "deviceSubscribeRequest";
     deviceId: string;
@@ -39,7 +44,7 @@ export interface IDeviceSubscribeRequest {
 
 export interface IDeviceCallRequest {
     type: "deviceCallRequest";
-    id: number;
+    requestId: number;
     deviceId: string;
     data: any;
 }

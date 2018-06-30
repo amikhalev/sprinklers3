@@ -1,5 +1,5 @@
+import { action, observable, when } from "mobx";
 import { update } from "serializr";
-import { action, autorun, observable, when } from "mobx";
 
 import logger from "@common/logger";
 import { ErrorCode } from "@common/sprinklers/ErrorCode";
@@ -23,7 +23,7 @@ export class WSSprinklersDevice extends s.SprinklersDevice {
         super();
         this.api = api;
         this._id = id;
-        when(() => api.connectionState.isConnected, () => {
+        when(() => api.connectionState.isConnected || false, () => {
             this.subscribe();
         });
     }
@@ -73,7 +73,7 @@ export class WebSocketApiClient implements s.ISprinklersApi {
     private reconnectTimer: number | null = null;
 
     get connected(): boolean {
-        return this.connectionState.isConnected;
+        return this.connectionState.isConnected || false;
     }
 
     constructor(webSocketUrl: string) {
@@ -126,7 +126,7 @@ export class WebSocketApiClient implements s.ISprinklersApi {
         const id = this.nextDeviceRequestId++;
         const data: ws.IDeviceCallRequest = {
             type: "deviceCallRequest",
-            id, deviceId, data: requestData,
+            requestId: id, deviceId, data: requestData,
         };
         const promise = new Promise<requests.Response>((resolve, reject) => {
             let timeoutHandle: number;
@@ -236,7 +236,7 @@ export class WebSocketApiClient implements s.ISprinklersApi {
     }
 
     private onDeviceCallResponse(data: ws.IDeviceCallResponse) {
-        const cb = this.deviceResponseCallbacks[data.id];
+        const cb = this.deviceResponseCallbacks[data.requestId];
         if (typeof cb === "function") {
             cb(data);
         }

@@ -21,7 +21,7 @@ export class MqttApiClient implements s.ISprinklersApi {
     devices: Map<string, MqttSprinklersDevice> = new Map();
 
     get connected(): boolean {
-        return this.connectionState.isConnected;
+        return this.connectionState.isConnected || false;
     }
 
     constructor(mqttUri: string) {

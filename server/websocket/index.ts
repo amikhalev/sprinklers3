@@ -117,7 +117,7 @@ export class WebSocketClient {
         if (response) {
             const resData: ws.IDeviceCallResponse = {
                 type: "deviceCallResponse",
-                id: data.id,
+                requestId: data.requestId,
                 data: response,
             };
             this.socket.send(JSON.stringify(resData));

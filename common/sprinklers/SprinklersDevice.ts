@@ -12,7 +12,7 @@ export abstract class SprinklersDevice {
     @observable sectionRunner: SectionRunner;
 
     @computed get connected(): boolean {
-        return this.connectionState.isConnected;
+        return this.connectionState.isConnected || false;
     }
 
     sectionConstructor: typeof Section = Section;
