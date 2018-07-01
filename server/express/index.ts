@@ -2,7 +2,7 @@ import * as bodyParser from "body-parser";
 import * as express from "express";
 import { serialize} from "serializr";
 
-import * as schema from "@common/sprinklers/schema";
+import * as schema from "@common/sprinklersRpc/schema";
 import { ServerState } from "../state";
 import logger from "./logger";
 import serveApp from "./serveApp";

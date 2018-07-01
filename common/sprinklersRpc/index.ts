@@ -1,5 +1,5 @@
 // export * from "./Duration";
-export * from "./ISprinklersApi";
+export * from "./SprinklersRPC";
 export * from "./Program";
 export * from "./schedule";
 export * from "./Section";

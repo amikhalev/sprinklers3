@@ -1,7 +1,7 @@
 import { ConnectionState } from "./ConnectionState";
 import { SprinklersDevice } from "./SprinklersDevice";
 
-export interface ISprinklersApi {
+export interface SprinklersRPC {
     readonly connectionState: ConnectionState;
     readonly connected: boolean;
 

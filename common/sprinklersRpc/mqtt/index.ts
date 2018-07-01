@@ -3,10 +3,10 @@ import * as mqtt from "mqtt";
 import { update } from "serializr";
 
 import logger from "@common/logger";
-import * as s from "@common/sprinklers";
-import * as requests from "@common/sprinklers/deviceRequests";
-import * as schema from "@common/sprinklers/schema";
-import { seralizeRequest } from "@common/sprinklers/schema/requests";
+import * as s from "@common/sprinklersRpc";
+import * as requests from "@common/sprinklersRpc/deviceRequests";
+import * as schema from "@common/sprinklersRpc/schema";
+import { seralizeRequest } from "@common/sprinklersRpc/schema/requests";
 
 const log = logger.child({ source: "mqtt" });
 
@@ -14,7 +14,7 @@ interface WithRid {
     rid: number;
 }
 
-export class MqttApiClient implements s.ISprinklersApi {
+export class MqttApiClient implements s.SprinklersRPC {
     readonly mqttUri: string;
     client!: mqtt.Client;
     @observable connectionState: s.ConnectionState = new s.ConnectionState();

@@ -1,9 +1,20 @@
 import * as Express from "express";
 import Router from "express-promise-router";
 import * as jwt from "jsonwebtoken";
+
+import TokenClaims from "@common/TokenClaims";
+
 import { User } from "../models/User";
 import { ServerState } from "../state";
 import { ApiError } from "./errors";
+import {
+    TokenGrantPasswordRequest,
+    TokenGrantRefreshRequest,
+    TokenGrantRequest,
+    TokenGrantResponse
+} from "@common/http";
+
+export { TokenClaims };
 
 declare global {
     namespace Express {
@@ -26,14 +37,6 @@ const REFRESH_TOKEN_LIFETIME = (24 * 60 * 60); // 24 hours
  */
 function getExpTime(lifetime: number) {
     return Math.floor(Date.now() / 1000) + lifetime;
-}
-
-export interface TokenClaims {
-    iss: string;
-    type: "access" | "refresh";
-    aud: string;
-    name: string;
-    exp: number;
 }
 
 function signToken(claims: TokenClaims): Promise<string> {
@@ -94,8 +97,7 @@ export function authentication(state: ServerState) {
 
     const router = Router();
 
-    async function passwordGrant(req: Express.Request, res: Express.Response) {
-        const { body } = req;
+    async function passwordGrant(body: TokenGrantPasswordRequest, res: Express.Response): Promise<User> {
         const { username, password } = body;
         if (!body || !username || !password) {
             throw new ApiError(400, "Must specify username and password");
@@ -106,22 +108,13 @@ export function authentication(state: ServerState) {
         }
         const passwordMatches = user.comparePassword(password);
         if (passwordMatches) {
-            const [access_token, refresh_token] = await Promise.all(
-                [await generateAccessToken(user, JWT_SECRET),
-                    await generateRefreshToken(user, JWT_SECRET)]);
-            res.json({
-                access_token, refresh_token,
-            });
+            return user;
         } else {
-            res.status(400)
-                .json({
-                    message: "incorrect login",
-                });
+            throw new ApiError(400, "User does not exist");
         }
     }
 
-    async function refreshGrant(req: Express.Request, res: Express.Response) {
-        const { body } = req;
+    async function refreshGrant(body: TokenGrantRefreshRequest, res: Express.Response): Promise<User> {
         const { refresh_token } = body;
         if (!body || !refresh_token) {
             throw new ApiError(400, "Must specify a refresh_token");
@@ -134,24 +127,26 @@ export function authentication(state: ServerState) {
         if (!user) {
             throw new ApiError(400, "User does not exist");
         }
-        const [access_token, new_refresh_token] = await Promise.all(
-            [await generateAccessToken(user, JWT_SECRET),
-                await generateRefreshToken(user, JWT_SECRET)]);
-        res.json({
-            access_token, refresh_token: new_refresh_token,
-        });
+        return user;
     }
 
     router.post("/token/grant", async (req, res) => {
-        const { body } = req;
-        const { grant_type } = body;
-        if (grant_type === "password") {
-            await passwordGrant(req, res);
-        } else if (grant_type === "refresh") {
-            await refreshGrant(req, res);
+        const body: TokenGrantRequest = req.body;
+        let user: User;
+        if (body.grant_type === "password") {
+            user = await passwordGrant(body, res);
+        } else if (body.grant_type === "refresh") {
+            user = await refreshGrant(body, res);
         } else {
             throw new ApiError(400, "Invalid grant_type");
         }
+        const [access_token, refresh_token] = await Promise.all(
+            [await generateAccessToken(user, JWT_SECRET),
+                await generateRefreshToken(user, JWT_SECRET)]);
+        const response: TokenGrantResponse = {
+            access_token, refresh_token,
+        };
+        res.json(response);
     });
 
     router.post("/token/verify", authorizeAccess, async (req, res) => {

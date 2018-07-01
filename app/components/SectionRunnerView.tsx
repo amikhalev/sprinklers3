@@ -5,7 +5,7 @@ import { Button, Icon, Progress, Segment } from "semantic-ui-react";
 
 import { Duration } from "@common/Duration";
 import log from "@common/logger";
-import { Section, SectionRun, SectionRunner } from "@common/sprinklers";
+import { Section, SectionRun, SectionRunner } from "@common/sprinklersRpc";
 
 interface PausedStateProps {
     paused: boolean;

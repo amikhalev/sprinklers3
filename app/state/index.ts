@@ -1,3 +1,9 @@
 export { UiMessage, UiStore } from "./UiStore";
 export * from "./reactContext";
-export { default as StateBase } from "./StateBase";
+export { ClientState as StateBase } from "./ClientState";
+
+import ClientState from "./ClientState";
+
+
+export class WebApiState extends ClientState {
+}

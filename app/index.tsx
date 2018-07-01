@@ -3,11 +3,14 @@ import * as ReactDOM from "react-dom";
 import { AppContainer } from "react-hot-loader";
 
 import App from "@app/components/App";
-import { ProvideState, StateBase } from "@app/state";
-import { WebApiState as StateClass } from "@app/state/web";
+import { ProvideState, StateBase, WebApiState as StateClass } from "@app/state";
+import logger from "@common/logger";
 
 const state: StateBase = new StateClass();
-state.start();
+state.start()
+    .catch((err) => {
+        logger.error({err}, "error starting state");
+    });
 
 const rootElem = document.getElementById("app");
 

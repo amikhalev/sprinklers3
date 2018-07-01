@@ -4,10 +4,10 @@ import * as WebSocket from "ws";
 
 import * as rpc from "@common/jsonRpc";
 import log from "@common/logger";
-import * as deviceRequests from "@common/sprinklers/deviceRequests";
-import { ErrorCode } from "@common/sprinklers/ErrorCode";
-import * as schema from "@common/sprinklers/schema";
-import * as ws from "@common/sprinklers/websocketData";
+import * as deviceRequests from "@common/sprinklersRpc/deviceRequests";
+import { ErrorCode } from "@common/sprinklersRpc/ErrorCode";
+import * as schema from "@common/sprinklersRpc/schema";
+import * as ws from "@common/sprinklersRpc/websocketData";
 import { TokenClaims, verifyToken } from "../express/authentication";
 import { ServerState } from "../state";
 

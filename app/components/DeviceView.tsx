@@ -4,7 +4,7 @@ import * as React from "react";
 import { Grid, Header, Icon, Item, SemanticICONS } from "semantic-ui-react";
 
 import { injectState, StateBase } from "@app/state";
-import { ConnectionState as ConState } from "@common/sprinklers";
+import { ConnectionState as ConState } from "@common/sprinklersRpc";
 import { ProgramTable, RunSectionForm, SectionRunnerView, SectionTable } from ".";
 import "./DeviceView.scss";
 

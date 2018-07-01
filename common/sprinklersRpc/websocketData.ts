@@ -1,7 +1,7 @@
 import * as rpc from "../jsonRpc/index";
 
-import { Response as ResponseData } from "@common/sprinklers/deviceRequests";
-import { ErrorCode } from "@common/sprinklers/ErrorCode";
+import { Response as ResponseData } from "@common/sprinklersRpc/deviceRequests";
+import { ErrorCode } from "@common/sprinklersRpc/ErrorCode";
 
 export interface IAuthenticateRequest {
     accessToken: string;

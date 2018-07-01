@@ -3,12 +3,12 @@ import { update } from "serializr";
 
 import * as rpc from "@common/jsonRpc";
 import logger from "@common/logger";
-import * as deviceRequests from "@common/sprinklers/deviceRequests";
-import { ErrorCode } from "@common/sprinklers/ErrorCode";
-import * as s from "@common/sprinklers/index";
-import * as schema from "@common/sprinklers/schema/index";
-import { seralizeRequest } from "@common/sprinklers/schema/requests";
-import * as ws from "@common/sprinklers/websocketData";
+import * as deviceRequests from "@common/sprinklersRpc/deviceRequests";
+import { ErrorCode } from "@common/sprinklersRpc/ErrorCode";
+import * as s from "@common/sprinklersRpc/index";
+import * as schema from "@common/sprinklersRpc/schema/index";
+import { seralizeRequest } from "@common/sprinklersRpc/schema/requests";
+import * as ws from "@common/sprinklersRpc/websocketData";
 
 const log = logger.child({ source: "websocket" });
 
@@ -36,7 +36,9 @@ export class WSSprinklersDevice extends s.SprinklersDevice {
     }
 
     async subscribe() {
-        await this.api.authenticate("eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzcHJpbmtsZXJzMyIsImF1ZCI6IjA4NDQ4N2Q1LWU1NzktNDQ5YS05MzI5LTU5NWJlNGJjMmJiYyIsIm5hbWUiOiJBbGV4IE1pa2hhbGV2IiwidHlwZSI6ImFjY2VzcyIsImV4cCI6MTUzMDQxNzU3MCwiaWF0IjoxNTMwNDE1NzcwfQ.fRGiN_X1j3Hwe8a5y68wXLx1DQPtTkQr9h6Uh848dFM");
+        if (this.api.accessToken) {
+            await this.api.authenticate(this.api.accessToken);
+        }
         const subscribeRequest: ws.IDeviceSubscribeRequest = {
             deviceId: this.id,
         };
@@ -58,7 +60,7 @@ export class WSSprinklersDevice extends s.SprinklersDevice {
     }
 }
 
-export class WebSocketApiClient implements s.ISprinklersApi {
+export class WebSocketApiClient implements s.SprinklersRPC {
     readonly webSocketUrl: string;
 
     devices: Map<string, WSSprinklersDevice> = new Map();
@@ -68,6 +70,7 @@ export class WebSocketApiClient implements s.ISprinklersApi {
     private nextRequestId = Math.round(Math.random() * 1000000);
     private responseCallbacks: ws.ServerResponseHandlers = {};
     private reconnectTimer: number | null = null;
+    accessToken: string | undefined;
 
     get connected(): boolean {
         return this.connectionState.isConnected || false;

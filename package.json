@@ -44,6 +44,7 @@
     "fork-ts-checker-webpack-plugin": "^0.4.2",
     "jsonwebtoken": "^8.3.0",
     "mobx": "^5.0.3",
+    "mobx-utils": "^5.0.0",
     "module-alias": "^2.1.0",
     "moment": "^2.22.2",
     "mqtt": "^2.18.1",

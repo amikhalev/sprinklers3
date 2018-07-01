@@ -6,8 +6,8 @@ import { DropdownItemProps, DropdownProps, Form, Header, Segment } from "semanti
 import { UiStore } from "@app/state";
 import { Duration } from "@common/Duration";
 import log from "@common/logger";
-import { Section, SprinklersDevice } from "@common/sprinklers";
-import { RunSectionResponse } from "@common/sprinklers/deviceRequests";
+import { Section, SprinklersDevice } from "@common/sprinklersRpc";
+import { RunSectionResponse } from "@common/sprinklersRpc/deviceRequests";
 import DurationInput from "./DurationInput";
 
 @observer
