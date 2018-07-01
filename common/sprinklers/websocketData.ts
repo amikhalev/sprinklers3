@@ -1,6 +1,7 @@
 import * as rpc from "../jsonRpc/index";
 
 import { Response as ResponseData } from "@common/sprinklers/deviceRequests";
+import { ErrorCode } from "@common/sprinklers/ErrorCode";
 
 export interface IAuthenticateRequest {
     accessToken: string;
@@ -55,22 +56,41 @@ export interface IDeviceUpdate {
 export interface IServerNotificationTypes {
     "brokerConnectionUpdate": IBrokerConnectionUpdate;
     "deviceUpdate": IDeviceUpdate;
-    "error": Error;
+    "error": IError;
 }
 export type ServerNotificationMethod = keyof IServerNotificationTypes;
 
-export type Error = rpc.DefaultErrorType;
-export type ErrorData = rpc.ErrorData<Error>;
+export type IError = rpc.DefaultErrorType;
+export type ErrorData = rpc.ErrorData<IError>;
 
-export type ServerMessage = rpc.Message<{}, IServerResponseTypes, Error, IServerNotificationTypes>;
+export class RpcError extends Error implements IError {
+    name = "RpcError";
+    code: number;
+    data: any;
+
+    constructor(message: string, code: number = ErrorCode.BadRequest, data: any = {}) {
+        super(message);
+        this.code = code;
+        if (data instanceof Error) {
+            this.data = data.toString();
+        }
+        this.data = data;
+    }
+
+    toJSON(): IError {
+        return { code: this.code, message: this.message, data: this.data };
+    }
+}
+
+export type ServerMessage = rpc.Message<{}, IServerResponseTypes, IError, IServerNotificationTypes>;
 export type ServerNotification = rpc.Notification<IServerNotificationTypes>;
-export type ServerResponse = rpc.Response<IServerResponseTypes, Error>;
+export type ServerResponse = rpc.Response<IServerResponseTypes, IError>;
 export type ServerResponseData<Method extends keyof IServerResponseTypes = keyof IServerResponseTypes> =
-    rpc.ResponseData<IServerResponseTypes, Error, Method>;
-export type ServerResponseHandlers = rpc.ResponseHandlers<IServerResponseTypes, Error>;
+    rpc.ResponseData<IServerResponseTypes, IError, Method>;
+export type ServerResponseHandlers = rpc.ResponseHandlers<IServerResponseTypes, IError>;
 export type ServerNotificationHandlers = rpc.NotificationHandlers<IServerNotificationTypes>;
 
 export type ClientRequest<Method extends keyof IClientRequestTypes = keyof IClientRequestTypes> =
     rpc.Request<IClientRequestTypes, Method>;
-export type ClientMessage = rpc.Message<IClientRequestTypes, {}, Error, {}>;
-export type ClientRequestHandlers = rpc.RequestHandlers<IClientRequestTypes, IServerResponseTypes, Error>;
+export type ClientMessage = rpc.Message<IClientRequestTypes, {}, IError, {}>;
+export type ClientRequestHandlers = rpc.RequestHandlers<IClientRequestTypes, IServerResponseTypes, IError>;

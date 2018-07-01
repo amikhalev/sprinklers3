@@ -48,31 +48,33 @@ export class WebSocketClient {
         this.api.removeClient(this);
     }
 
+    private checkAuthorization() {
+        if (!this.userId) {
+            throw new ws.RpcError("this WebSocket session has not been authenticated",
+                ErrorCode.Unauthorized);
+        }
+    }
+
     private requestHandlers: ws.ClientRequestHandlers = {
         authenticate: async (data: ws.IAuthenticateRequest) => {
             if (!data.accessToken) {
-                return {
-                    result: "error", error: {
-                        code: ErrorCode.BadRequest, message: "no token specified",
-                    },
-                };
+                throw new ws.RpcError("no token specified", ErrorCode.BadRequest);
             }
             let decoded: TokenClaims;
             try {
                 decoded = await verifyToken(data.accessToken);
             } catch (e) {
-                return {
-                    result: "error",
-                    error: { code: ErrorCode.BadToken, message: "invalid token", data: e },
-                };
+                throw new ws.RpcError("invalid token", ErrorCode.BadToken, e);
             }
             this.userId = decoded.aud;
+            log.info({ userId: decoded.aud, name: decoded.name }, "authenticated websocket client");
             return {
                 result: "success",
                 data: { authenticated: true, message: "authenticated" },
             };
         },
         deviceSubscribe: async (data: ws.IDeviceSubscribeRequest) => {
+            this.checkAuthorization();
             const deviceId = data.deviceId;
             if (deviceId !== "grinklers") { // TODO: somehow validate this device id?
                 return {
@@ -100,6 +102,7 @@ export class WebSocketClient {
             return { result: "success", data: response };
         },
         deviceCall: async (data: ws.IDeviceCallRequest) => {
+            this.checkAuthorization();
             try {
                 const response = await this.doDeviceCallRequest(data);
                 const resData: ws.IDeviceCallResponse = {
@@ -108,13 +111,7 @@ export class WebSocketClient {
                 return { result: "success", data: resData };
             } catch (err) {
                 const e: deviceRequests.ErrorResponseData = err;
-                return {
-                    result: "error", error: {
-                        code: e.code,
-                        message: e.message,
-                        data: e,
-                    },
-                };
+                throw new ws.RpcError(e.message, e.code, e);
             }
         },
     };
@@ -155,7 +152,6 @@ export class WebSocketClient {
             return this.onError({ socketData, err }, "received invalid websocket message from client",
                 ErrorCode.Parse);
         }
-        log.debug({ data }, "client message");
         switch (data.type) {
             case "request":
                 await this.handleRequest(data);
@@ -168,21 +164,21 @@ export class WebSocketClient {
 
     private async handleRequest(request: ws.ClientRequest) {
         let response: ws.ServerResponseData;
-        if (!this.requestHandlers[request.method]) {
-            log.warn({ method: request.method }, "received invalid client request method");
-            response = {
-                result: "error", error: {
-                    code: ErrorCode.BadRequest, message: "received invalid client request method",
-                },
-            };
-        } else {
-            try {
-                response = await rpc.handleRequest(this.requestHandlers, request);
-            } catch (err) {
-                log.error({ method: request.method, err }, "error during processing of client request");
+        try {
+            if (!this.requestHandlers[request.method]) {
+                // noinspection ExceptionCaughtLocallyJS
+                throw new ws.RpcError("received invalid client request method");
+            }
+            response = await rpc.handleRequest(this.requestHandlers, request);
+        } catch (err) {
+            if (err instanceof ws.RpcError) {
+                log.debug({ err }, "rpc error");
+                response = { result: "error", error: err.toJSON() };
+            } else {
+                log.error({ method: request.method, err }, "unhandled error during processing of client request");
                 response = {
                     result: "error", error: {
-                        code: ErrorCode.Internal, message: "error during processing of client request",
+                        code: ErrorCode.Internal, message: "unhandled error during processing of client request",
                         data: err.toString(),
                     },
                 };
@@ -193,7 +189,7 @@ export class WebSocketClient {
 
     private onError(data: any, message: string, code: number = ErrorCode.Internal) {
         log.error(data, message);
-        const errorData: ws.Error = { code, message, data };
+        const errorData: ws.IError = { code, message, data };
         this.sendNotification("error", errorData);
     }
 

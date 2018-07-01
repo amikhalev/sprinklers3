@@ -36,9 +36,7 @@ export class WSSprinklersDevice extends s.SprinklersDevice {
     }
 
     async subscribe() {
-        if (!this.api.socket) {
-            throw new Error("WebSocket not connected");
-        }
+        await this.api.authenticate("eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzcHJpbmtsZXJzMyIsImF1ZCI6IjA4NDQ4N2Q1LWU1NzktNDQ5YS05MzI5LTU5NWJlNGJjMmJiYyIsIm5hbWUiOiJBbGV4IE1pa2hhbGV2IiwidHlwZSI6ImFjY2VzcyIsImV4cCI6MTUzMDQxNzU3MCwiaWF0IjoxNTMwNDE1NzcwfQ.fRGiN_X1j3Hwe8a5y68wXLx1DQPtTkQr9h6Uh848dFM");
         const subscribeRequest: ws.IDeviceSubscribeRequest = {
             deviceId: this.id,
         };
@@ -47,7 +45,7 @@ export class WSSprinklersDevice extends s.SprinklersDevice {
             this.connectionState.serverToBroker = true;
             this.connectionState.clientToServer = true;
         } catch (err) {
-            if ((err as ws.Error).code === ErrorCode.NoPermission) {
+            if ((err as ws.IError).code === ErrorCode.NoPermission) {
                 this.connectionState.hasPermission = false;
             } else {
                 log.error({ err });
@@ -117,7 +115,7 @@ export class WebSocketApiClient implements s.ISprinklersApi {
     // args must all be JSON serializable
     async makeDeviceCall(deviceId: string, request: deviceRequests.Request): Promise<deviceRequests.Response> {
         if (this.socket == null) {
-            const error: ws.Error = {
+            const error: ws.IError = {
                 code: ErrorCode.ServerDisconnected,
                 message: "the server is not connected",
             };
@@ -264,7 +262,7 @@ export class WebSocketApiClient implements s.ISprinklersApi {
             }
             update(schema.sprinklersDevice, device, data.data);
         },
-        error: (data: ws.Error) => {
+        error: (data: ws.IError) => {
             log.warn({ err: data }, "server error");
         },
     };
