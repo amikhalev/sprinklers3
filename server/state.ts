@@ -1,11 +1,9 @@
 import logger from "@common/logger";
-import {SprinklersDevice} from "@common/sprinklers";
 import * as mqtt from "@common/sprinklers/mqtt";
 import { Database } from "./models/Database";
 
 export class ServerState {
     mqttClient: mqtt.MqttApiClient;
-    device: SprinklersDevice;
     database: Database;
 
     constructor() {
@@ -14,7 +12,6 @@ export class ServerState {
             throw new Error("Must specify a MQTT_URL to connect to");
         }
         this.mqttClient = new mqtt.MqttApiClient(mqttUrl);
-        this.device = this.mqttClient.getDevice("grinklers");
         this.database = new Database();
     }
 

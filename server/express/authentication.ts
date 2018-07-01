@@ -1,4 +1,3 @@
-import log from "@common/logger";
 import * as Express from "express";
 import Router from "express-promise-router";
 import * as jwt from "jsonwebtoken";
@@ -29,7 +28,7 @@ function getExpTime(lifetime: number) {
     return Math.floor(Date.now() / 1000) + lifetime;
 }
 
-interface TokenClaims {
+export interface TokenClaims {
     iss: string;
     type: "access" | "refresh";
     aud: string;
@@ -49,7 +48,7 @@ function signToken(claims: TokenClaims): Promise<string> {
     });
 }
 
-function verifyToken(token: string): Promise<TokenClaims> {
+export function verifyToken(token: string): Promise<TokenClaims> {
     return new Promise((resolve, reject) => {
         jwt.verify(token, JWT_SECRET, (err, decoded) => {
             if (err) {

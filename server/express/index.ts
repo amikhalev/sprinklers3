@@ -1,6 +1,6 @@
 import * as bodyParser from "body-parser";
 import * as express from "express";
-import { serialize, serializeAll } from "serializr";
+import { serialize} from "serializr";
 
 import * as schema from "@common/sprinklers/schema";
 import { ServerState } from "../state";
@@ -16,8 +16,10 @@ export function createApp(state: ServerState) {
     app.use(logger);
     app.use(bodyParser.json());
 
-    app.get("/api/grinklers", (req, res) => {
-        const j = serialize(schema.sprinklersDevice, state.device);
+    app.get("/api/devices/:deviceId", (req, res) => {
+        // TODO: authorize device
+        const device = state.mqttClient.getDevice(req.params.deviceId);
+        const j = serialize(schema.sprinklersDevice, device);
         res.send(j);
     });
 

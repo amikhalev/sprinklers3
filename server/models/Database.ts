@@ -1,7 +1,7 @@
 import * as r from "rethinkdb";
 
-import { User } from "./User";
 import logger from "@common/logger";
+import { User } from "./User";
 
 export class Database {
     static readonly databaseName = "sprinklers3";

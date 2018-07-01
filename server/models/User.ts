@@ -1,6 +1,6 @@
 import * as bcrypt from "bcrypt";
 import * as r from "rethinkdb";
-import { createModelSchema, deserialize, primitive, serialize, update } from "serializr";
+import { createModelSchema, primitive, serialize, update } from "serializr";
 
 import { Database } from "./Database";
 
@@ -22,10 +22,6 @@ export class User implements IUser {
     passwordHash: string = "";
 
     private db: Database;
-
-    private get _db() {
-        return this.db.db;
-    }
 
     private get table() {
         return this.db.db.table(User.tableName);
@@ -76,7 +72,7 @@ export class User implements IUser {
     async create() {
         const data = serialize(this);
         delete data.id;
-        const a = this.table
+        await this.table
             .insert(data)
             .run(this.db.conn);
     }

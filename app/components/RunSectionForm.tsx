@@ -7,7 +7,7 @@ import { UiStore } from "@app/state";
 import { Duration } from "@common/Duration";
 import log from "@common/logger";
 import { Section, SprinklersDevice } from "@common/sprinklers";
-import { RunSectionResponse } from "@common/sprinklers/requests";
+import { RunSectionResponse } from "@common/sprinklers/deviceRequests";
 import DurationInput from "./DurationInput";
 
 @observer

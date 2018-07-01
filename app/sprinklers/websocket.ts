@@ -1,10 +1,11 @@
 import { action, observable, when } from "mobx";
 import { update } from "serializr";
 
+import * as rpc from "@common/jsonRpc";
 import logger from "@common/logger";
+import * as deviceRequests from "@common/sprinklers/deviceRequests";
 import { ErrorCode } from "@common/sprinklers/ErrorCode";
 import * as s from "@common/sprinklers/index";
-import * as requests from "@common/sprinklers/requests";
 import * as schema from "@common/sprinklers/schema/index";
 import { seralizeRequest } from "@common/sprinklers/schema/requests";
 import * as ws from "@common/sprinklers/websocketData";
@@ -13,6 +14,8 @@ const log = logger.child({ source: "websocket" });
 
 const TIMEOUT_MS = 5000;
 const RECONNECT_TIMEOUT_MS = 5000;
+
+// tslint:disable:member-ordering
 
 export class WSSprinklersDevice extends s.SprinklersDevice {
     readonly api: WebSocketApiClient;
@@ -32,29 +35,27 @@ export class WSSprinklersDevice extends s.SprinklersDevice {
         return this._id;
     }
 
-    subscribe() {
+    async subscribe() {
         if (!this.api.socket) {
             throw new Error("WebSocket not connected");
         }
         const subscribeRequest: ws.IDeviceSubscribeRequest = {
-            type: "deviceSubscribeRequest",
             deviceId: this.id,
         };
-        this.api.socket.send(JSON.stringify(subscribeRequest));
-    }
-
-    onSubscribeResponse(data: ws.IDeviceSubscribeResponse) {
-        this.connectionState.serverToBroker = true;
-        this.connectionState.clientToServer = true;
-        if (data.result === "success") {
-            this.connectionState.hasPermission = true;
-            this.connectionState.brokerToDevice = false;
-        } else if (data.result === "noPermission") {
-            this.connectionState.hasPermission = false;
+        try {
+            await this.api.makeRequest("deviceSubscribe", subscribeRequest);
+            this.connectionState.serverToBroker = true;
+            this.connectionState.clientToServer = true;
+        } catch (err) {
+            if ((err as ws.Error).code === ErrorCode.NoPermission) {
+                this.connectionState.hasPermission = false;
+            } else {
+                log.error({ err });
+            }
         }
     }
 
-    makeRequest(request: requests.Request): Promise<requests.Response> {
+    makeRequest(request: deviceRequests.Request): Promise<deviceRequests.Response> {
         return this.api.makeDeviceCall(this.id, request);
     }
 }
@@ -63,13 +64,11 @@ export class WebSocketApiClient implements s.ISprinklersApi {
     readonly webSocketUrl: string;
 
     devices: Map<string, WSSprinklersDevice> = new Map();
-
-    nextDeviceRequestId = Math.round(Math.random() * 1000000);
-    deviceResponseCallbacks: { [id: number]: (res: ws.IDeviceCallResponse) => void | undefined; } = {};
-
     @observable connectionState: s.ConnectionState = new s.ConnectionState();
-
     socket: WebSocket | null = null;
+
+    private nextRequestId = Math.round(Math.random() * 1000000);
+    private responseCallbacks: ws.ServerResponseHandlers = {};
     private reconnectTimer: number | null = null;
 
     get connected(): boolean {
@@ -111,47 +110,72 @@ export class WebSocketApiClient implements s.ISprinklersApi {
         // NOT IMPLEMENTED
     }
 
+    async authenticate(accessToken: string): Promise<ws.IAuthenticateResponse> {
+        return this.makeRequest("authenticate", { accessToken });
+    }
+
     // args must all be JSON serializable
-    makeDeviceCall(deviceId: string, request: requests.Request): Promise<requests.Response> {
+    async makeDeviceCall(deviceId: string, request: deviceRequests.Request): Promise<deviceRequests.Response> {
         if (this.socket == null) {
-            const res: requests.Response = {
-                type: request.type,
-                result: "error",
+            const error: ws.Error = {
                 code: ErrorCode.ServerDisconnected,
                 message: "the server is not connected",
             };
-            throw res;
+            throw error;
         }
         const requestData = seralizeRequest(request);
-        const id = this.nextDeviceRequestId++;
-        const data: ws.IDeviceCallRequest = {
-            type: "deviceCallRequest",
-            requestId: id, deviceId, data: requestData,
-        };
-        const promise = new Promise<requests.Response>((resolve, reject) => {
+        const data: ws.IDeviceCallRequest = { deviceId, data: requestData };
+        const resData = await this.makeRequest("deviceCall", data);
+        if (resData.data.result === "error") {
+            throw {
+                code: resData.data.code,
+                message: resData.data.message,
+                data: resData.data,
+            };
+        } else {
+            return resData.data;
+        }
+    }
+
+    makeRequest<Method extends ws.ClientRequestMethods>(method: Method, params: ws.IClientRequestTypes[Method]):
+        Promise<ws.IServerResponseTypes[Method]> {
+        const id = this.nextRequestId++;
+        return new Promise<ws.IServerResponseTypes[Method]>((resolve, reject) => {
             let timeoutHandle: number;
-            this.deviceResponseCallbacks[id] = (resData) => {
+            this.responseCallbacks[id] = (response) => {
                 clearTimeout(timeoutHandle);
-                delete this.deviceResponseCallbacks[id];
-                if (resData.data.result === "success") {
-                    resolve(resData.data);
+                delete this.responseCallbacks[id];
+                if (response.result === "success") {
+                    resolve(response.data);
                 } else {
-                    reject(resData.data);
+                    reject(response.error);
                 }
             };
             timeoutHandle = window.setTimeout(() => {
-                delete this.deviceResponseCallbacks[id];
-                const res: requests.Response = {
-                    type: request.type,
-                    result: "error",
-                    code: ErrorCode.Timeout,
-                    message: "the request timed out",
+                delete this.responseCallbacks[id];
+                const res: ws.ErrorData = {
+                    result: "error", error: {
+                        code: ErrorCode.Timeout,
+                        message: "the request timed out",
+                    },
                 };
                 reject(res);
             }, TIMEOUT_MS);
+            this.sendRequest(id, method, params);
         });
+    }
+
+    private sendMessage(data: ws.ClientMessage) {
+        if (!this.socket) {
+            throw new Error("WebSocketApiClient is not connected");
+        }
         this.socket.send(JSON.stringify(data));
-        return promise;
+    }
+
+    private sendRequest<Method extends ws.ClientRequestMethods>(
+        id: number, method: Method, params: ws.IClientRequestTypes[Method],
+    ) {
+        this.sendMessage({ type: "request", id, method, params });
     }
 
     private _reconnect = () => {
@@ -194,7 +218,7 @@ export class WebSocketApiClient implements s.ISprinklersApi {
     }
 
     private onMessage(event: MessageEvent) {
-        let data: ws.IServerMessage;
+        let data: ws.ServerMessage;
         try {
             data = JSON.parse(event.data);
         } catch (err) {
@@ -202,47 +226,46 @@ export class WebSocketApiClient implements s.ISprinklersApi {
         }
         log.trace({ data }, "websocket message");
         switch (data.type) {
-            case "deviceSubscribeResponse":
-                this.onDeviceSubscribeResponse(data);
+            case "notification":
+                this.onNotification(data);
                 break;
-            case "deviceUpdate":
-                this.onDeviceUpdate(data);
-                break;
-            case "deviceCallResponse":
-                this.onDeviceCallResponse(data);
-                break;
-            case "brokerConnectionUpdate":
-                this.onBrokerConnectionUpdate(data);
+            case "response":
+                this.onResponse(data);
                 break;
             default:
                 log.warn({ data }, "unsupported event type received");
         }
     }
 
-    private onDeviceSubscribeResponse(data: ws.IDeviceSubscribeResponse) {
-        const device = this.devices.get(data.deviceId);
-        if (!device) {
-            return log.warn({ data }, "invalid deviceSubscribeResponse received");
-        }
-        device.onSubscribeResponse(data);
-    }
-
-    private onDeviceUpdate(data: ws.IDeviceUpdate) {
-        const device = this.devices.get(data.deviceId);
-        if (!device) {
-            return log.warn({ data }, "invalid deviceUpdate received");
-        }
-        update(schema.sprinklersDevice, device, data.data);
-    }
-
-    private onDeviceCallResponse(data: ws.IDeviceCallResponse) {
-        const cb = this.deviceResponseCallbacks[data.requestId];
-        if (typeof cb === "function") {
-            cb(data);
+    private onNotification(data: ws.ServerNotification) {
+        try {
+            rpc.handleNotification(this.notificationHandlers, data);
+        } catch (err) {
+            logger.error({ err }, "error handling server notification");
         }
     }
 
-    private onBrokerConnectionUpdate(data: ws.IBrokerConnectionUpdate) {
-        this.connectionState.serverToBroker = data.brokerConnected;
+    private onResponse(data: ws.ServerResponse) {
+        try {
+            rpc.handleResponse(this.responseCallbacks, data);
+        } catch (err) {
+            log.error({ err }, "error handling server response");
+        }
     }
+
+    private notificationHandlers: ws.ServerNotificationHandlers = {
+        brokerConnectionUpdate: (data: ws.IBrokerConnectionUpdate) => {
+            this.connectionState.serverToBroker = data.brokerConnected;
+        },
+        deviceUpdate: (data: ws.IDeviceUpdate) => {
+            const device = this.devices.get(data.deviceId);
+            if (!device) {
+                return log.warn({ data }, "invalid deviceUpdate received");
+            }
+            update(schema.sprinklersDevice, device, data.data);
+        },
+        error: (data: ws.Error) => {
+            log.warn({ err: data }, "server error");
+        },
+    };
 }

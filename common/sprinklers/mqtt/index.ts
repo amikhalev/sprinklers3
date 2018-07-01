@@ -4,7 +4,7 @@ import { update } from "serializr";
 
 import logger from "@common/logger";
 import * as s from "@common/sprinklers";
-import * as requests from "@common/sprinklers/requests";
+import * as requests from "@common/sprinklers/deviceRequests";
 import * as schema from "@common/sprinklers/schema";
 import { seralizeRequest } from "@common/sprinklers/schema/requests";
 
