@@ -5,6 +5,8 @@ import { Token } from "@app/state/Token";
 import { TokenGrantPasswordRequest, TokenGrantRefreshRequest, TokenGrantResponse } from "@common/http";
 import logger from "@common/logger";
 
+const log = logger.child({ source: "TokenStore"});
+
 export class TokenStore {
     @observable accessToken: Token = new Token();
     @observable refreshToken: Token = new Token();
@@ -24,7 +26,7 @@ export class TokenStore {
         }, request);
         this.accessToken.token = response.access_token;
         this.refreshToken.token = response.refresh_token;
-        logger.debug({ aud: this.accessToken.claims!.aud }, "got password grant tokens");
+        log.debug({ aud: this.accessToken.claims!.aud }, "got password grant tokens");
     }
 
     async grantRefresh() {
@@ -39,7 +41,6 @@ export class TokenStore {
         }, request);
         this.accessToken.token = response.access_token;
         this.refreshToken.token = response.refresh_token;
-        logger.debug({ aud: this.accessToken.claims!.aud }, "got refresh grant tokens");
+        log.debug({ aud: this.accessToken.claims!.aud }, "got refresh grant tokens");
     }
 }
-

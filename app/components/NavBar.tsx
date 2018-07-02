@@ -18,6 +18,9 @@ function NavBar({ location }: { location: Location }) {
         <Menu>
             <NavItem to="/devices/grinklers">Device grinklers</NavItem>
             <NavItem to="/messagesTest">Messages test</NavItem>
+            <Menu.Menu position="right">
+                <NavItem to="/login">Login</NavItem>
+            </Menu.Menu>
         </Menu>
     );
 }

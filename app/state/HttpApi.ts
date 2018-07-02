@@ -1,4 +1,3 @@
-import { Token } from "@app/state/Token";
 import { TokenStore } from "@app/state/TokenStore";
 
 export class HttpApiError extends Error {

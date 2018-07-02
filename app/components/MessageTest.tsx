@@ -1,10 +1,10 @@
 import * as React from "react";
 import { Button, Segment } from "semantic-ui-react";
 
-import { injectState, StateBase } from "@app/state";
+import { AppState, injectState } from "@app/state";
 import { getRandomId } from "@common/utils";
 
-class MessageTest extends React.Component<{ state: StateBase }> {
+class MessageTest extends React.Component<{ appState: AppState }> {
     render() {
         return (
             <Segment>
@@ -17,20 +17,20 @@ class MessageTest extends React.Component<{ state: StateBase }> {
     }
 
     private test1 = () => {
-        this.props.state.uiStore.addMessage({
+        this.props.appState.uiStore.addMessage({
             info: true, content: "Test Message! " + getRandomId(), header: "Header to test message",
         });
     }
 
     private test2 = () => {
-        this.props.state.uiStore.addMessage({
+        this.props.appState.uiStore.addMessage({
             warning: true, content: "Im gonna dissapear in 5 seconds " + getRandomId(),
             header: "Header to test message", timeout: 5000,
         });
     }
 
     private test3 = () => {
-        this.props.state.uiStore.addMessage({
+        this.props.appState.uiStore.addMessage({
             color: "brown", content: <div className="ui segment">I Have crazy content!</div>,
             header: "Header to test message", timeout: 5000,
         });

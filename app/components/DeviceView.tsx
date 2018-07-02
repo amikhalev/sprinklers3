@@ -3,7 +3,7 @@ import { observer } from "mobx-react";
 import * as React from "react";
 import { Grid, Header, Icon, Item, SemanticICONS } from "semantic-ui-react";
 
-import { injectState, StateBase } from "@app/state";
+import { AppState, injectState } from "@app/state";
 import { ConnectionState as ConState } from "@common/sprinklersRpc";
 import { ProgramTable, RunSectionForm, SectionRunnerView, SectionTable } from ".";
 import "./DeviceView.scss";
@@ -45,13 +45,13 @@ const ConnectionState = observer(({ connectionState, className }:
 
 interface DeviceViewProps {
     deviceId: string;
-    state: StateBase;
+    appState: AppState;
 }
 
 class DeviceView extends React.Component<DeviceViewProps> {
     render() {
-        const { uiStore, sprinklersApi } = this.props.state;
-        const device = sprinklersApi.getDevice(this.props.deviceId);
+        const { uiStore, sprinklersRpc } = this.props.appState;
+        const device = sprinklersRpc.getDevice(this.props.deviceId);
         const { id, connectionState, sections, programs, sectionRunner } = device;
         const deviceBody = connectionState.isAvailable && (
             <React.Fragment>

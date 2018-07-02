@@ -1,47 +1,37 @@
-import { observer } from "mobx-react";
 // import DevTools from "mobx-react-devtools";
 import * as React from "react";
-import { Redirect, Route, RouteComponentProps, Switch } from "react-router";
-import { BrowserRouter as Router } from "react-router-dom";
+import { Redirect, Route, Switch } from "react-router";
 import { Container } from "semantic-ui-react";
 
-import { DevicesView, MessagesView, MessageTest, NavBar } from "@app/components";
+import { MessagesView, NavBar } from "@app/components";
+import * as p from "@app/pages";
 
 // tslint:disable:ordered-imports
 import "font-awesome/css/font-awesome.css";
 import "semantic-ui-css/semantic.css";
 import "@app/styles/app.scss";
 
-function DevicePage({match}: RouteComponentProps<{deviceId: string}>) {
+function NavContainer() {
     return (
-        <DevicesView deviceId={match.params.deviceId}/>
+        <Container className="app">
+            <NavBar/>
+
+            <Switch>
+                <Route path="/devices/:deviceId" component={p.DevicePage}/>
+                <Route path="/messagesTest" component={p.MessagesTestPage}/>
+                <Redirect to="/"/>
+            </Switch>
+
+            <MessagesView/>
+        </Container>
     );
 }
 
-function MessagesTestPage() {
+export default function App() {
     return (
-        <MessageTest/>
+        <Switch>
+            <Route path="/login" component={p.LoginPage}/>
+            <NavContainer/>
+        </Switch>
     );
 }
-
-class App extends React.Component {
-    render() {
-        return (
-            <Router>
-                <Container className="app">
-                    <NavBar/>
-
-                    <Switch>
-                        <Route path="/devices/:deviceId" component={DevicePage}/>
-                        <Route path="/messagesTest" component={MessagesTestPage}/>
-                        <Redirect to="/"/>
-                    </Switch>
-
-                    <MessagesView/>
-                </Container>
-            </Router>
-        );
-    }
-}
-
-export default observer(App);

@@ -1,15 +1,15 @@
 import * as React from "react";
 
-import { StateBase } from "@app/state";
+import { AppState } from "@app/state";
 
-const StateContext = React.createContext<StateBase | null>(null);
+const StateContext = React.createContext<AppState | null>(null);
 
 export interface ProvideStateProps {
-    state: StateBase;
+    state: AppState;
     children: React.ReactNode;
 }
 
-export function ProvideState({state, children}: ProvideStateProps) {
+export function ProvideState({ state, children }: ProvideStateProps) {
     return (
         <StateContext.Provider value={state}>
             {children}
@@ -18,11 +18,11 @@ export function ProvideState({state, children}: ProvideStateProps) {
 }
 
 export interface ConsumeStateProps {
-    children: (state: StateBase) => React.ReactNode;
+    children: (state: AppState) => React.ReactNode;
 }
 
-export function ConsumeState({children}: ConsumeStateProps) {
-    const consumeState = (state: StateBase | null) => {
+export function ConsumeState({ children }: ConsumeStateProps) {
+    const consumeState = (state: AppState | null) => {
         if (state == null) {
             throw new Error("Component with ConsumeState must be mounted inside ProvideState");
         }
@@ -35,14 +35,15 @@ type Diff<T extends string | number | symbol, U extends string | number | symbol
     ({[P in T]: P } & {[P in U]: never } & { [x: string]: never })[T];
 type Omit<T, K extends keyof T> = {[P in Diff<keyof T, K>]: T[P]};
 
-export function injectState<P extends { state: StateBase }>(Component: React.ComponentType<P>) {
-    return class extends React.Component<Omit<P, "state">> {
+export function injectState<P extends { appState: AppState }>(Component: React.ComponentType<P>):
+    React.ComponentClass<Omit<P, "appState">> {
+    return class extends React.Component<Omit<P, "appState">> {
         render() {
-            const consumeState = (state: StateBase | null) => {
+            const consumeState = (state: AppState | null) => {
                 if (state == null) {
                     throw new Error("Component with injectState must be mounted inside ProvideState");
                 }
-                return <Component {...this.props} state={state}/>;
+                return <Component {...this.props} appState={state}/>;
             };
             return <StateContext.Consumer>{consumeState}</StateContext.Consumer>;
         }

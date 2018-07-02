@@ -1,6 +1,7 @@
 import { action, observable, when } from "mobx";
 import { update } from "serializr";
 
+import { TokenStore } from "@app/state/TokenStore";
 import * as rpc from "@common/jsonRpc";
 import logger from "@common/logger";
 import * as deviceRequests from "@common/sprinklersRpc/deviceRequests";
@@ -18,17 +19,15 @@ const RECONNECT_TIMEOUT_MS = 5000;
 // tslint:disable:member-ordering
 
 export class WSSprinklersDevice extends s.SprinklersDevice {
-    readonly api: WebSocketApiClient;
+    readonly api: WebSocketRpcClient;
 
     private _id: string;
 
-    constructor(api: WebSocketApiClient, id: string) {
+    constructor(api: WebSocketRpcClient, id: string) {
         super();
         this.api = api;
         this._id = id;
-        when(() => api.connectionState.isConnected || false, () => {
-            this.subscribe();
-        });
+        this.waitSubscribe();
     }
 
     get id() {
@@ -36,9 +35,6 @@ export class WSSprinklersDevice extends s.SprinklersDevice {
     }
 
     async subscribe() {
-        if (this.api.accessToken) {
-            await this.api.authenticate(this.api.accessToken);
-        }
         const subscribeRequest: ws.IDeviceSubscribeRequest = {
             deviceId: this.id,
         };
@@ -58,26 +54,35 @@ export class WSSprinklersDevice extends s.SprinklersDevice {
     makeRequest(request: deviceRequests.Request): Promise<deviceRequests.Response> {
         return this.api.makeDeviceCall(this.id, request);
     }
+
+    waitSubscribe = () => {
+        when(() => this.api.connected, () => {
+            this.subscribe();
+            when(() => !this.api.connected, this.waitSubscribe);
+        });
+    }
 }
 
-export class WebSocketApiClient implements s.SprinklersRPC {
+export class WebSocketRpcClient implements s.SprinklersRPC {
     readonly webSocketUrl: string;
 
     devices: Map<string, WSSprinklersDevice> = new Map();
     @observable connectionState: s.ConnectionState = new s.ConnectionState();
     socket: WebSocket | null = null;
 
+    tokenStore: TokenStore;
+
     private nextRequestId = Math.round(Math.random() * 1000000);
     private responseCallbacks: ws.ServerResponseHandlers = {};
     private reconnectTimer: number | null = null;
-    accessToken: string | undefined;
 
     get connected(): boolean {
         return this.connectionState.isConnected || false;
     }
 
-    constructor(webSocketUrl: string) {
+    constructor(webSocketUrl: string, tokenStore: TokenStore) {
         this.webSocketUrl = webSocketUrl;
+        this.tokenStore = tokenStore;
         this.connectionState.clientToServer = false;
         this.connectionState.serverToBroker = false;
     }
@@ -113,6 +118,12 @@ export class WebSocketApiClient implements s.SprinklersRPC {
 
     async authenticate(accessToken: string): Promise<ws.IAuthenticateResponse> {
         return this.makeRequest("authenticate", { accessToken });
+    }
+
+    async tryAuthenticate() {
+        when(() => this.tokenStore.accessToken.isValid, () => {
+            return this.authenticate(this.tokenStore.accessToken.token!);
+        });
     }
 
     // args must all be JSON serializable
@@ -194,6 +205,7 @@ export class WebSocketApiClient implements s.SprinklersRPC {
     private onOpen() {
         log.info("established websocket connection");
         this.connectionState.clientToServer = true;
+        this.tryAuthenticate();
     }
 
     /* tslint:disable-next-line:member-ordering */

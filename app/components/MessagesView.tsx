@@ -3,7 +3,7 @@ import { observer } from "mobx-react";
 import * as React from "react";
 import { Message, MessageProps, TransitionGroup } from "semantic-ui-react";
 
-import { injectState, StateBase, UiMessage, UiStore } from "@app/state/";
+import { AppState, injectState, UiMessage, UiStore } from "@app/state/";
 
 @observer
 class MessageView extends React.Component<{
@@ -33,9 +33,9 @@ class MessageView extends React.Component<{
     }
 }
 
-class MessagesView extends React.Component<{ state: StateBase }> {
+class MessagesView extends React.Component<{ appState: AppState }> {
     render() {
-        const { uiStore } = this.props.state;
+        const { uiStore } = this.props.appState;
         const messages = uiStore.messages.map((message) => (
             <MessageView key={message.id} uiStore={uiStore} message={message} />
         ));

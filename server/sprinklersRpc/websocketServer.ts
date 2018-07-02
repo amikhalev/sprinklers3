@@ -33,12 +33,6 @@ export class WebSocketClient {
     }
 
     start() {
-        this.disposers.push(autorun(() => {
-            const updateData: ws.IBrokerConnectionUpdate = {
-                brokerConnected: this.state.mqttClient.connected,
-            };
-            this.sendNotification("brokerConnectionUpdate", updateData);
-        }));
         this.socket.on("message", this.handleSocketMessage);
         this.socket.on("close", this.stop);
     }
@@ -46,6 +40,15 @@ export class WebSocketClient {
     stop = () => {
         this.disposers.forEach((disposer) => disposer());
         this.api.removeClient(this);
+    }
+
+    private subscribeBrokerConnection() {
+        this.disposers.push(autorun(() => {
+            const updateData: ws.IBrokerConnectionUpdate = {
+                brokerConnected: this.state.mqttClient.connected,
+            };
+            this.sendNotification("brokerConnectionUpdate", updateData);
+        }));
     }
 
     private checkAuthorization() {
@@ -68,6 +71,7 @@ export class WebSocketClient {
             }
             this.userId = decoded.aud;
             log.info({ userId: decoded.aud, name: decoded.name }, "authenticated websocket client");
+            this.subscribeBrokerConnection();
             return {
                 result: "success",
                 data: { authenticated: true, message: "authenticated" },

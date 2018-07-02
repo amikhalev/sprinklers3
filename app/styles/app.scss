@@ -1,45 +1,46 @@
 .app {
-    margin-top: 1em;
+  margin-top: 1em;
 }
 
 .sectionRunner--pausedState {
-    padding-left: .75em;
-    font-size: .75em;
-    font-weight: lighter;
+  padding-left: .75em;
+  font-size: .75em;
+  font-weight: lighter;
 }
 
 .sectionRunner--pausedState > .fa {
-    padding-right: .2em;
+  padding-right: .2em;
 }
 
 .sectionRunner--pausedState-unpaused {
 }
 
 .flex-horizontal-space-between {
-    display: flex;
-    align-items: baseline;
-    justify-content: space-between;
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
 }
 
 .sectionRun .progress {
-    margin: 1em 0 0 !important;
+  margin: 1em 0 0 !important;
 }
 
 .sectionRun .ui.progress .bar {
-    -webkit-transition: none;
-    transition: none;
-    min-width: 0 !important;
+  -webkit-transition: none;
+  transition: none;
+  min-width: 0 !important;
 }
 
 .section--number,
 .program--number {
-    width: 2em
+  width: 2em
 }
 
 .section--name /*,
-.program--name*/ {
-    width: 10em;
-    white-space: nowrap;
+.program--name*/
+{
+  width: 10em;
+  white-space: nowrap;
 }
 
 .section--state {
@@ -47,17 +48,16 @@
 }
 
 .ui.table {
-    tr > td.program--running {
-        display: flex !important;
-        @media only screen and (min-width: 768px) {
-            //line-height: 36px;
-        }
+  tr > td.program--running {
+    display: flex !important;
+    @media only screen and (min-width: 768px) {
+      //line-height: 36px;
     }
+  }
 }
 
-
 .section--state-true {
-    color: green;
+  color: green;
 }
 
 .section--state-false {
@@ -66,25 +66,55 @@
 
 .durationInput--minutes,
 .durationInput--seconds {
-    min-width: 6em !important;
+  min-width: 6em !important;
 }
 
 .durationInput .ui.labeled.input > .label {
-    width: 3em;
+  width: 3em;
 }
 
 .messages {
-    position: fixed;
-    /* top: 12px; */
-    bottom: 1em;
-    left: 1em;
-    right: 1em;
-    padding-left: 0;
-    z-index: 1000;
-    display: flex;
-    flex-direction: column;
+  position: fixed;
+  /* top: 12px; */
+  bottom: 1em;
+  left: 1em;
+  right: 1em;
+  padding-left: 0;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
 }
 
 .flex-spacer {
-    flex: 1;
+  flex: 1;
+}
+
+.ui.container.loginPage {
+  margin-top: 1em;
+
+  .ui.header {
+    text-align: center;
+  }
+
+  /* Mobile */
+  @media only screen and (max-width: 767px) {
+    width: auto !important;
+    margin-left: 1em !important;
+    margin-right: 1em !important;
+  }
+
+  /* Tablet */
+  @media only screen and (min-width: 768px) and (max-width: 991px) {
+    width: 600px;
+  }
+
+  /* Small Monitor */
+  @media only screen and (min-width: 992px) and (max-width: 1199px) {
+    width: 600px;
+  }
+
+  /* Large Monitor */
+  @media only screen and (min-width: 1200px) {
+    width: 800px;
+  }
 }
