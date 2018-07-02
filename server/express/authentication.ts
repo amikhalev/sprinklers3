@@ -104,13 +104,13 @@ export function authentication(state: ServerState) {
         }
         const user = await User.loadByUsername(state.database, username);
         if (!user) {
-            throw new ApiError(401, "User does not exist");
+            throw new ApiError(400, "User does not exist");
         }
-        const passwordMatches = user.comparePassword(password);
+        const passwordMatches = await user.comparePassword(password);
         if (passwordMatches) {
             return user;
         } else {
-            throw new ApiError(400, "User does not exist");
+            throw new ApiError(401, "Invalid user credentials");
         }
     }
 
