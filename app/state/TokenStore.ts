@@ -19,6 +19,12 @@ export class TokenStore {
         this.api = api;
     }
 
+    clear() {
+        this.accessToken.token = null;
+        this.refreshToken.token = null;
+        this.saveLocalStorage();
+    }
+
     saveLocalStorage() {
         window.localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(this.toJSON()));
     }

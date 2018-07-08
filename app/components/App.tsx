@@ -31,7 +31,7 @@ export default function App() {
     return (
         <Switch>
             <Route path="/login" component={p.LoginPage}/>
-            <Route path="/login" component={p.LoginPage}/>
+            <Route path="/logout" component={p.LogoutPage}/>
             <NavContainer/>
         </Switch>
     );
