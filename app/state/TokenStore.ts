@@ -61,7 +61,7 @@ export class TokenStore {
     }
 
     toJSON() {
-        return { accessToken: this.accessToken.toJSON(), refreshToken: this.refreshToken.toJSON() }
+        return { accessToken: this.accessToken.toJSON(), refreshToken: this.refreshToken.toJSON() };
     }
 
     updateFromJson(json: any) {

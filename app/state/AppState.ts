@@ -2,8 +2,8 @@ import { WebSocketRpcClient } from "@app/sprinklersRpc/websocketClient";
 import HttpApi from "@app/state/HttpApi";
 import { UiStore } from "@app/state/UiStore";
 import { createBrowserHistory, History } from "history";
-import { RouterStore, syncHistoryWithStore } from "mobx-react-router";
 import { computed } from "mobx";
+import { RouterStore, syncHistoryWithStore } from "mobx-react-router";
 
 const isDev = process.env.NODE_ENV === "development";
 const websocketPort = isDev ? 8080 : location.port;
