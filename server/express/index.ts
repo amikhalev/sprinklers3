@@ -9,6 +9,7 @@ import serveApp from "./serveApp";
 
 import { User } from "../models/User";
 import { authentication } from "./authentication";
+import errorHandler from "./errorHandler";
 
 export function createApp(state: ServerState) {
     const app = express();
@@ -45,6 +46,8 @@ export function createApp(state: ServerState) {
     app.use("/api", authentication(state));
 
     serveApp(app);
+
+    app.use(errorHandler);
 
     return app;
 }

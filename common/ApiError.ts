@@ -1,6 +1,6 @@
-import { ErrorCode, toHttpStatus } from "@common/sprinklersRpc/ErrorCode";
+import { ErrorCode, toHttpStatus } from "@common/ErrorCode";
 
-export class ApiError extends Error {
+export default class ApiError extends Error {
     name = "ApiError";
     statusCode: number;
     code: ErrorCode;

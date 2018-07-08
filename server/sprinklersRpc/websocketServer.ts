@@ -5,7 +5,7 @@ import * as WebSocket from "ws";
 import * as rpc from "@common/jsonRpc";
 import log from "@common/logger";
 import * as deviceRequests from "@common/sprinklersRpc/deviceRequests";
-import { ErrorCode } from "@common/sprinklersRpc/ErrorCode";
+import { ErrorCode } from "@common/ErrorCode";
 import * as schema from "@common/sprinklersRpc/schema";
 import * as ws from "@common/sprinklersRpc/websocketData";
 import { TokenClaims, verifyToken } from "../express/authentication";

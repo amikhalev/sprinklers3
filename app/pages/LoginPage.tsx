@@ -1,15 +1,17 @@
-import { AppState, injectState } from "@app/state";
-import log from "@common/logger";
 import { computed, observable } from "mobx";
 import { observer } from "mobx-react";
 import * as React from "react";
-import { Container, Dimmer, Form, Header, InputOnChangeData, Loader, Segment } from "semantic-ui-react";
+import { Container, Dimmer, Form, Header, InputOnChangeData, Loader, Message, Segment } from "semantic-ui-react";
+
+import { AppState, injectState } from "@app/state";
+import log from "@common/logger";
 
 class LoginPageState {
     @observable username = "";
     @observable password = "";
 
     @observable loading: boolean = false;
+    @observable error: string | null = null;
 
     @computed get canLogin() {
         return this.username.length > 0 && this.password.length > 0;
@@ -25,6 +27,7 @@ class LoginPageState {
 
     login(appState: AppState) {
         this.loading = true;
+        this.error = null;
         appState.tokenStore.grantPassword(this.username, this.password)
             .then(() => {
                 this.loading = false;
@@ -33,6 +36,7 @@ class LoginPageState {
             })
             .catch((err) => {
                 this.loading = false;
+                this.error = err.message;
                 log.error({ err }, "login error");
             });
     }
@@ -42,7 +46,7 @@ class LoginPage extends React.Component<{ appState: AppState }> {
     pageState = new LoginPageState();
 
     render() {
-        const { username, password, canLogin, loading } = this.pageState;
+        const { username, password, canLogin, loading, error } = this.pageState;
         return (
             <Container className="loginPage">
                 <Segment>
@@ -59,6 +63,7 @@ class LoginPage extends React.Component<{ appState: AppState }> {
                             type="password"
                             onChange={this.pageState.onPasswordChange}
                         />
+                        <Message error visible={error != null}>{error}</Message>
                         <Form.Button disabled={!canLogin} onClick={this.login}>Login</Form.Button>
                     </Form>
                 </Segment>

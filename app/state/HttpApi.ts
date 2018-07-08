@@ -1,14 +1,8 @@
 import { TokenStore } from "@app/state/TokenStore";
+import ApiError from "@common/ApiError";
+import { ErrorCode } from "@common/ErrorCode";
 
-export class HttpApiError extends Error {
-    name = "HttpApiError";
-    status: number;
-
-    constructor(message: string, status: number = 500) {
-        super(message);
-        this.status = status;
-    }
-}
+export { ApiError };
 
 export default class HttpApi {
     baseUrl: string;
@@ -43,9 +37,14 @@ export default class HttpApi {
             ...options,
         };
         const response = await fetch(this.baseUrl + url, options);
-        const responseBody = await response.json() || {};
+        let responseBody: any;
+        try {
+            responseBody = await response.json() || {};
+        } catch (e) {
+            throw new ApiError("Invalid JSON response", ErrorCode.Internal, e);
+        }
         if (!response.ok) {
-            throw new HttpApiError(responseBody.message || response.statusText, response.status);
+            throw new ApiError(responseBody.message || response.statusText, responseBody.code, responseBody.data);
         }
         return responseBody;
     }

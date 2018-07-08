@@ -1,8 +1,8 @@
 import { observable } from "mobx";
 
-import HttpApi, { HttpApiError } from "@app/state/HttpApi";
+import HttpApi, { ApiError } from "@app/state/HttpApi";
 import { Token } from "@app/state/Token";
-import { TokenGrantPasswordRequest, TokenGrantRefreshRequest, TokenGrantResponse } from "@common/http";
+import { TokenGrantPasswordRequest, TokenGrantRefreshRequest, TokenGrantResponse } from "@common/httpApi";
 import logger from "@common/logger";
 
 const log = logger.child({ source: "TokenStore"});
@@ -52,7 +52,7 @@ export class TokenStore {
 
     async grantRefresh() {
         if (!this.refreshToken.isValid) {
-            throw new HttpApiError("can not grant refresh with invalid refresh_token");
+            throw new ApiError("can not grant refresh with invalid refresh_token");
         }
         const request: TokenGrantRefreshRequest = {
             grant_type: "refresh", refresh_token: this.refreshToken.token!,

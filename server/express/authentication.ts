@@ -3,17 +3,16 @@ import Router from "express-promise-router";
 import * as jwt from "jsonwebtoken";
 
 import TokenClaims from "@common/TokenClaims";
-
 import {
     TokenGrantPasswordRequest,
     TokenGrantRefreshRequest,
     TokenGrantRequest,
     TokenGrantResponse,
-} from "@common/http";
-import { ErrorCode } from "@common/sprinklersRpc/ErrorCode";
+} from "@common/httpApi";
+import { ErrorCode } from "@common/ErrorCode";
 import { User } from "../models/User";
 import { ServerState } from "../state";
-import { ApiError } from "./errors";
+import ApiError from "@common/ApiError";
 
 export { TokenClaims };
 
