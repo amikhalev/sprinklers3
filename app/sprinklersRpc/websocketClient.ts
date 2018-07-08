@@ -121,7 +121,8 @@ export class WebSocketRpcClient implements s.SprinklersRPC {
     }
 
     async tryAuthenticate() {
-        when(() => this.tokenStore.accessToken.isValid, () => {
+        when(() => this.connectionState.clientToServer === true
+            && this.tokenStore.accessToken.isValid, () => {
             return this.authenticate(this.tokenStore.accessToken.token!);
         });
     }

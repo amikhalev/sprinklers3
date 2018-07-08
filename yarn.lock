@@ -2133,7 +2133,7 @@ expand-tilde@^2.0.0, expand-tilde@^2.0.2:
 
 express-pino-logger@^3.0.2:
   version "3.0.2"
-  resolved "https://registry.yarnpkg.com/express-pino-logger/-/express-pino-logger-3.0.2.tgz#6384763e492a246dfbe795f9380a7234f300acc1"
+  resolved "https://registry.yarnpkg.com/express-pino-requestLogger/-/express-pino-requestLogger-3.0.2.tgz#6384763e492a246dfbe795f9380a7234f300acc1"
   dependencies:
     pino-http "^3.0.1"
 
@@ -4130,6 +4130,10 @@ mkdirp@0.5.x, "mkdirp@>=0.5 0", mkdirp@^0.5.0, mkdirp@^0.5.1, mkdirp@~0.5.0, mkd
 mobx-react-devtools@^5.0.1:
   version "5.0.1"
   resolved "https://registry.yarnpkg.com/mobx-react-devtools/-/mobx-react-devtools-5.0.1.tgz#9473c85929b2fc0c95086430419028cebd96fb3b"
+
+mobx-react-router@^4.0.4:
+  version "4.0.4"
+  resolved "https://registry.yarnpkg.com/mobx-react-router/-/mobx-react-router-4.0.4.tgz#b778618c84f16057f5ae9c09a4d364deade95fd8"
 
 mobx-react@^5.2.3:
   version "5.2.3"

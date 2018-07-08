@@ -4,15 +4,16 @@ import * as jwt from "jsonwebtoken";
 
 import TokenClaims from "@common/TokenClaims";
 
-import { User } from "../models/User";
-import { ServerState } from "../state";
-import { ApiError } from "./errors";
 import {
     TokenGrantPasswordRequest,
     TokenGrantRefreshRequest,
     TokenGrantRequest,
-    TokenGrantResponse
+    TokenGrantResponse,
 } from "@common/http";
+import { ErrorCode } from "@common/sprinklersRpc/ErrorCode";
+import { User } from "../models/User";
+import { ServerState } from "../state";
+import { ApiError } from "./errors";
 
 export { TokenClaims };
 
@@ -56,9 +57,9 @@ export function verifyToken(token: string): Promise<TokenClaims> {
         jwt.verify(token, JWT_SECRET, (err, decoded) => {
             if (err) {
                 if (err.name === "TokenExpiredError") {
-                    reject(new ApiError(401, "The specified token is expired", err));
+                    reject(new ApiError("The specified token is expired", ErrorCode.BadToken, err));
                 } else if (err.name === "JsonWebTokenError") {
-                    reject(new ApiError(400, "Invalid token", err));
+                    reject(new ApiError("Invalid token", ErrorCode.BadToken, err));
                 } else {
                     reject(err);
                 }
@@ -100,32 +101,32 @@ export function authentication(state: ServerState) {
     async function passwordGrant(body: TokenGrantPasswordRequest, res: Express.Response): Promise<User> {
         const { username, password } = body;
         if (!body || !username || !password) {
-            throw new ApiError(400, "Must specify username and password");
+            throw new ApiError("Must specify username and password");
         }
         const user = await User.loadByUsername(state.database, username);
         if (!user) {
-            throw new ApiError(400, "User does not exist");
+            throw new ApiError("User does not exist");
         }
         const passwordMatches = await user.comparePassword(password);
         if (passwordMatches) {
             return user;
         } else {
-            throw new ApiError(401, "Invalid user credentials");
+            throw new ApiError("Invalid user credentials");
         }
     }
 
     async function refreshGrant(body: TokenGrantRefreshRequest, res: Express.Response): Promise<User> {
         const { refresh_token } = body;
         if (!body || !refresh_token) {
-            throw new ApiError(400, "Must specify a refresh_token");
+            throw new ApiError("Must specify a refresh_token");
         }
         const claims = await verifyToken(refresh_token);
         if (claims.type !== "refresh") {
-            throw new ApiError(400, "Not a refresh token");
+            throw new ApiError("Not a refresh token");
         }
         const user = await User.load(state.database, claims.aud);
         if (!user) {
-            throw new ApiError(400, "User does not exist");
+            throw new ApiError("User no longer exists");
         }
         return user;
     }
@@ -138,7 +139,7 @@ export function authentication(state: ServerState) {
         } else if (body.grant_type === "refresh") {
             user = await refreshGrant(body, res);
         } else {
-            throw new ApiError(400, "Invalid grant_type");
+            throw new ApiError("Invalid grant_type");
         }
         const [access_token, refresh_token] = await Promise.all(
             [await generateAccessToken(user, JWT_SECRET),
@@ -162,11 +163,11 @@ export function authentication(state: ServerState) {
 export async function authorizeAccess(req: Express.Request, res: Express.Response) {
     const bearer = req.headers.authorization;
     if (!bearer) {
-        throw new ApiError(401, "No bearer token specified");
+        throw new ApiError("No Authorization header specified", ErrorCode.BadToken);
     }
     const matches = /^Bearer (.*)$/.exec(bearer);
     if (!matches || !matches[1]) {
-        throw new ApiError(400, "Invalid bearer token specified");
+        throw new ApiError("Invalid Authorization header, must be Bearer", ErrorCode.BadToken);
     }
     const token = matches[1];
 

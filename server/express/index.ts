@@ -4,7 +4,7 @@ import { serialize} from "serializr";
 
 import * as schema from "@common/sprinklersRpc/schema";
 import { ServerState } from "../state";
-import logger from "./logger";
+import requestLogger from "./requestLogger";
 import serveApp from "./serveApp";
 
 import { User } from "../models/User";
@@ -13,7 +13,7 @@ import { authentication } from "./authentication";
 export function createApp(state: ServerState) {
     const app = express();
 
-    app.use(logger);
+    app.use(requestLogger);
     app.use(bodyParser.json());
 
     app.get("/api/devices/:deviceId", (req, res) => {

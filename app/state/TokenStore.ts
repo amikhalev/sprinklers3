@@ -7,6 +7,8 @@ import logger from "@common/logger";
 
 const log = logger.child({ source: "TokenStore"});
 
+const LOCAL_STORAGE_KEY = "TokenStore";
+
 export class TokenStore {
     @observable accessToken: Token = new Token();
     @observable refreshToken: Token = new Token();
@@ -15,6 +17,18 @@ export class TokenStore {
 
     constructor(api: HttpApi) {
         this.api = api;
+    }
+
+    saveLocalStorage() {
+        window.localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(this.toJSON()));
+    }
+
+    loadLocalStorage() {
+        const data = window.localStorage.getItem(LOCAL_STORAGE_KEY);
+        if (data) {
+            const data2 = JSON.parse(data);
+            this.updateFromJson(data2);
+        }
     }
 
     async grantPassword(username: string, password: string) {
@@ -26,6 +40,7 @@ export class TokenStore {
         }, request);
         this.accessToken.token = response.access_token;
         this.refreshToken.token = response.refresh_token;
+        this.saveLocalStorage();
         log.debug({ aud: this.accessToken.claims!.aud }, "got password grant tokens");
     }
 
@@ -41,6 +56,16 @@ export class TokenStore {
         }, request);
         this.accessToken.token = response.access_token;
         this.refreshToken.token = response.refresh_token;
+        this.saveLocalStorage();
         log.debug({ aud: this.accessToken.claims!.aud }, "got refresh grant tokens");
+    }
+
+    toJSON() {
+        return { accessToken: this.accessToken.toJSON(), refreshToken: this.refreshToken.toJSON() }
+    }
+
+    updateFromJson(json: any) {
+        this.accessToken.token = json.accessToken;
+        this.refreshToken.token = json.refreshToken;
     }
 }

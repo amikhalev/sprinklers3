@@ -23,6 +23,10 @@ export class Token {
         this.updateCurrentTime();
     }
 
+    toJSON() {
+        return this.token;
+    }
+
     private updateCurrentTime = (reportChanged: boolean = true) => {
         if (reportChanged) {
             this.isExpiredAtom.reportChanged();
