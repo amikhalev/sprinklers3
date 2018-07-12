@@ -1,4 +1,4 @@
-import { action, observable, when } from "mobx";
+import { action, autorun, observable, when } from "mobx";
 import { update } from "serializr";
 
 import { TokenStore } from "@app/state/TokenStore";
@@ -33,6 +33,11 @@ export class WSSprinklersDevice extends s.SprinklersDevice {
         super();
         this.api = api;
         this._id = id;
+
+        autorun(() => {
+            this.connectionState.clientToServer = this.api.connectionState.clientToServer;
+            this.connectionState.serverToBroker = this.api.connectionState.serverToBroker;
+        });
         this.waitSubscribe();
     }
 
@@ -46,9 +51,9 @@ export class WSSprinklersDevice extends s.SprinklersDevice {
         };
         try {
             await this.api.makeRequest("deviceSubscribe", subscribeRequest);
-            this.connectionState.serverToBroker = true;
-            this.connectionState.clientToServer = true;
+            this.connectionState.brokerToDevice = true;
         } catch (err) {
+            this.connectionState.brokerToDevice = false;
             if ((err as ws.IError).code === ErrorCode.NoPermission) {
                 this.connectionState.hasPermission = false;
             } else {
@@ -62,9 +67,9 @@ export class WSSprinklersDevice extends s.SprinklersDevice {
     }
 
     waitSubscribe = () => {
-        when(() => this.api.connected, () => {
+        when(() => this.api.authenticated, () => {
             this.subscribe();
-            when(() => !this.api.connected, this.waitSubscribe);
+            when(() => !this.api.authenticated, this.waitSubscribe);
         });
     }
 }
@@ -75,6 +80,9 @@ export class WebSocketRpcClient implements s.SprinklersRPC {
     devices: Map<string, WSSprinklersDevice> = new Map();
     @observable connectionState: s.ConnectionState = new s.ConnectionState();
     socket: WebSocket | null = null;
+
+    @observable
+    authenticated: boolean = false;
 
     tokenStore: TokenStore;
 
@@ -128,8 +136,15 @@ export class WebSocketRpcClient implements s.SprinklersRPC {
 
     async tryAuthenticate() {
         when(() => this.connectionState.clientToServer === true
-            && this.tokenStore.accessToken.isValid, () => {
-            return this.authenticate(this.tokenStore.accessToken.token!);
+            && this.tokenStore.accessToken.isValid, async () => {
+            try {
+                await this.authenticate(this.tokenStore.accessToken.token!);
+                this.authenticated = true;
+            } catch (err) {
+                logger.error({ err }, "error authenticating websocket connection");
+                // TODO message?
+                this.authenticated = false;
+            }
         });
     }
 
@@ -212,6 +227,7 @@ export class WebSocketRpcClient implements s.SprinklersRPC {
     private onOpen() {
         log.info("established websocket connection");
         this.connectionState.clientToServer = true;
+        this.authenticated = false;
         this.tryAuthenticate();
     }
 
@@ -219,6 +235,7 @@ export class WebSocketRpcClient implements s.SprinklersRPC {
     private onDisconnect = action(() => {
         this.connectionState.serverToBroker = null;
         this.connectionState.clientToServer = false;
+        this.authenticated = false;
     });
 
     private onClose(event: CloseEvent) {
