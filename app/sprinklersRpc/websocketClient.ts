@@ -16,6 +16,12 @@ const log = logger.child({ source: "websocket" });
 const TIMEOUT_MS = 5000;
 const RECONNECT_TIMEOUT_MS = 5000;
 
+const isDev = process.env.NODE_ENV === "development";
+const websocketProtocol = (location.protocol === "https:") ? "wss:" : "ws:";
+const websocketPort = isDev ? 8080 : location.port;
+
+const DEFAULT_URL = `${websocketProtocol}//${location.hostname}:${websocketPort}`;
+
 // tslint:disable:member-ordering
 
 export class WSSprinklersDevice extends s.SprinklersDevice {
@@ -80,7 +86,7 @@ export class WebSocketRpcClient implements s.SprinklersRPC {
         return this.connectionState.isConnected || false;
     }
 
-    constructor(webSocketUrl: string, tokenStore: TokenStore) {
+    constructor(tokenStore: TokenStore, webSocketUrl: string = DEFAULT_URL) {
         this.webSocketUrl = webSocketUrl;
         this.tokenStore = tokenStore;
         this.connectionState.clientToServer = false;

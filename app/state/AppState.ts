@@ -7,17 +7,13 @@ import HttpApi from "@app/state/HttpApi";
 import { UiStore } from "@app/state/UiStore";
 import log from "@common/logger";
 
-const isDev = process.env.NODE_ENV === "development";
-const websocketPort = isDev ? 8080 : location.port;
-
 export default class AppState {
     history: History = createBrowserHistory();
     routerStore = new RouterStore();
     uiStore = new UiStore();
     httpApi = new HttpApi();
     tokenStore = this.httpApi.tokenStore;
-    sprinklersRpc = new WebSocketRpcClient(`ws://${location.hostname}:${websocketPort}`,
-        this.tokenStore);
+    sprinklersRpc = new WebSocketRpcClient(this.tokenStore);
 
     @computed get isLoggedIn() {
         return this.tokenStore.accessToken.isValid;
