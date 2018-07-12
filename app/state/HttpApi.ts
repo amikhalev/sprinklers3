@@ -16,7 +16,7 @@ export default class HttpApi {
         return { Authorization: `Bearer ${this.tokenStore.accessToken.token}` };
     }
 
-    constructor(baseUrl: string = `http://${location.hostname}:${location.port}/api`) {
+    constructor(baseUrl: string = `${location.protocol}://${location.hostname}:${location.port}/api`) {
         while (baseUrl.charAt(baseUrl.length - 1) === "/") {
             baseUrl = baseUrl.substring(0, baseUrl.length - 1);
         }
