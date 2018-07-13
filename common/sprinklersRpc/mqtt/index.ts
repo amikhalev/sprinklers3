@@ -7,6 +7,7 @@ import * as s from "@common/sprinklersRpc";
 import * as requests from "@common/sprinklersRpc/deviceRequests";
 import * as schema from "@common/sprinklersRpc/schema";
 import { seralizeRequest } from "@common/sprinklersRpc/schema/requests";
+import { getRandomId } from "@common/utils";
 
 const log = logger.child({ source: "mqtt" });
 
@@ -14,14 +15,14 @@ interface WithRid {
     rid: number;
 }
 
-export class MqttApiClient implements s.SprinklersRPC {
+export class MqttRpcClient implements s.SprinklersRPC {
     readonly mqttUri: string;
     client!: mqtt.Client;
     @observable connectionState: s.ConnectionState = new s.ConnectionState();
     devices: Map<string, MqttSprinklersDevice> = new Map();
 
     get connected(): boolean {
-        return this.connectionState.isConnected || false;
+        return this.connectionState.isServerConnected || false;
     }
 
     constructor(mqttUri: string) {
@@ -30,11 +31,11 @@ export class MqttApiClient implements s.SprinklersRPC {
     }
 
     private static newClientId() {
-        return "sprinklers3-MqttApiClient-" + Math.round(Math.random() * 1000);
+        return "sprinklers3-MqttApiClient-" + getRandomId();
     }
 
     start() {
-        const clientId = MqttApiClient.newClientId();
+        const clientId = MqttRpcClient.newClientId();
         log.info({ mqttUri: this.mqttUri, clientId }, "connecting to mqtt broker with client id");
         this.client = mqtt.connect(this.mqttUri, {
             clientId, connectTimeout: 5000, reconnectPeriod: 5000,
@@ -127,14 +128,14 @@ const handler = (test: RegExp) =>
     };
 
 class MqttSprinklersDevice extends s.SprinklersDevice {
-    readonly apiClient: MqttApiClient;
+    readonly apiClient: MqttRpcClient;
     readonly prefix: string;
 
     handlers!: IHandlerEntry[];
     private nextRequestId: number = Math.floor(Math.random() * 1000000000);
     private responseCallbacks: Map<number, ResponseCallback> = new Map();
 
-    constructor(apiClient: MqttApiClient, prefix: string) {
+    constructor(apiClient: MqttRpcClient, prefix: string) {
         super();
         this.sectionConstructor = MqttSection;
         this.sectionRunnerConstructor = MqttSectionRunner;

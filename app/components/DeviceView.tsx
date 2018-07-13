@@ -10,31 +10,27 @@ import "./DeviceView.scss";
 
 const ConnectionState = observer(({ connectionState, className }:
                                       { connectionState: ConState, className?: string }) => {
-    const connected = connectionState.isConnected;
-    const classes = classNames({
-        connectionState: true,
-        connected: connected === true,
-        disconnected: connected === false,
-        unknown: connected === null,
-    }, className);
+    const connected = connectionState.isDeviceConnected;
     let connectionText: string;
     let iconName: SemanticICONS = "unlinkify";
+    let clazzName: string = "disconnected";
     if (connected) {
         connectionText = "Connected";
         iconName = "linkify";
-    } else if (connected === null) {
-        connectionText = "Unknown";
-        iconName = "question";
+        clazzName = "connected";
+    } else if (connected === false) {
+        connectionText = "Device Disconnected";
     } else if (connectionState.noPermission) {
         connectionText = "No permission for this device";
         iconName = "ban";
-    } else if (connectionState.serverToBroker) {
-        connectionText = "Device Disconnected";
-    } else if (connectionState.clientToServer) {
-        connectionText = "Broker Disconnected";
+    } else if (connectionState.clientToServer === false) {
+        connectionText = "Disconnected from server";
     } else {
-        connectionText = "Server Disconnected";
+        connectionText = "Unknown";
+        iconName = "question";
+        clazzName = "unknown";
     }
+    const classes = classNames("connectionState", clazzName, className);
     return (
         <div className={classes}>
             <Icon name={iconName}/>&nbsp;

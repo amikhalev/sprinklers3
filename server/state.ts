@@ -3,7 +3,7 @@ import * as mqtt from "@common/sprinklersRpc/mqtt";
 import { Database } from "./models/Database";
 
 export class ServerState {
-    mqttClient: mqtt.MqttApiClient;
+    mqttClient: mqtt.MqttRpcClient;
     database: Database;
 
     constructor() {
@@ -11,7 +11,7 @@ export class ServerState {
         if (!mqttUrl) {
             throw new Error("Must specify a MQTT_URL to connect to");
         }
-        this.mqttClient = new mqtt.MqttApiClient(mqttUrl);
+        this.mqttClient = new mqtt.MqttRpcClient(mqttUrl);
         this.database = new Database();
     }
 

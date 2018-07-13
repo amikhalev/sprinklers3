@@ -14,7 +14,7 @@ export interface IUser {
 const HASH_ROUNDS = 10;
 
 export class User implements IUser {
-    static readonly tableName = "users";
+    static readonly tableName = "Users";
 
     id: string | undefined;
     username: string = "";
@@ -72,9 +72,10 @@ export class User implements IUser {
     async create() {
         const data = serialize(this);
         delete data.id;
-        await this.table
+        const result = await this.table
             .insert(data)
             .run(this.db.conn);
+        this.id = result.generated_keys[0];
     }
 
     async createOrUpdate() {
@@ -86,7 +87,12 @@ export class User implements IUser {
             this.table.insert(data) as r.Expression<any>,
             user.nth(0).update(data) as r.Expression<any>)
             .run(this.db.conn);
-        return a.inserted > 0;
+        if (a.inserted > 0) {
+            this.id = a.generated_keys[0];
+            return true;
+        } else {
+            return false;
+        }
     }
 
     async setPassword(newPassword: string): Promise<void> {

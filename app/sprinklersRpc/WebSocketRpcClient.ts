@@ -91,7 +91,7 @@ export class WebSocketRpcClient implements s.SprinklersRPC {
     private reconnectTimer: number | null = null;
 
     get connected(): boolean {
-        return this.connectionState.isConnected || false;
+        return this.connectionState.isServerConnected || false;
     }
 
     constructor(tokenStore: TokenStore, webSocketUrl: string = DEFAULT_URL) {

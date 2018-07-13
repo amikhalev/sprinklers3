@@ -45,18 +45,28 @@ export class ConnectionState {
         return false;
     }
 
-    @computed get isConnected(): boolean | null {
+    @computed get isDeviceConnected(): boolean | null {
         if (this.hasPermission === false) {
             return false;
         }
+        if (this.serverToBroker === false || this.clientToServer === false) {
+            return null;
+        }
         if (this.brokerToDevice != null) {
             return this.brokerToDevice;
+        }
+        return null;
+    }
+
+    @computed get isServerConnected(): boolean | null {
+        if (this.hasPermission === false) {
+            return false;
         }
         if (this.serverToBroker != null) {
             return this.serverToBroker;
         }
         if (this.clientToServer != null) {
-            return this.clientToServer;
+            return this.brokerToDevice;
         }
         return null;
     }

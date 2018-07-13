@@ -1,6 +1,7 @@
 import * as r from "rethinkdb";
 
 import logger from "@common/logger";
+import { SprinklersDevice, UserSprinklersDevice } from "./SprinklersDevice";
 import { User } from "./User";
 
 export class Database {
@@ -43,6 +44,12 @@ export class Database {
         if (tables.indexOf(User.tableName) === -1) {
             await User.createTable(this);
         }
+        if (tables.indexOf(SprinklersDevice.tableName) === -1) {
+            await SprinklersDevice.createTable(this);
+        }
+        if (tables.indexOf(UserSprinklersDevice.tableName) === -1) {
+            await UserSprinklersDevice.createTable(this);
+        }
         const alex = new User(this, {
             name: "Alex Mikhalev",
             username: "alex",
@@ -53,5 +60,12 @@ export class Database {
 
         const alex2 = await User.loadByUsername(this, "alex");
         logger.info("password valid: " + await alex2!.comparePassword("kakashka"));
+
+        const device = new SprinklersDevice(this, {
+            name: "test",
+        });
+        await device.createOrUpdate();
+
+        device.addToUser
     }
 }
