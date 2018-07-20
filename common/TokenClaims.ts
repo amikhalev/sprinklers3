@@ -1,7 +1,7 @@
 export default interface TokenClaims {
     iss: string;
     type: "access" | "refresh";
-    aud: string;
+    aud: number;
     name: string;
     exp: number;
 }

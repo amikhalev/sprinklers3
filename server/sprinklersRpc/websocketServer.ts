@@ -2,10 +2,10 @@ import { autorun } from "mobx";
 import { serialize } from "serializr";
 import * as WebSocket from "ws";
 
+import { ErrorCode } from "@common/ErrorCode";
 import * as rpc from "@common/jsonRpc";
 import log from "@common/logger";
 import * as deviceRequests from "@common/sprinklersRpc/deviceRequests";
-import { ErrorCode } from "@common/ErrorCode";
 import * as schema from "@common/sprinklersRpc/schema";
 import * as ws from "@common/sprinklersRpc/websocketData";
 import { TokenClaims, verifyToken } from "../express/authentication";
@@ -21,7 +21,7 @@ export class WebSocketClient {
     deviceSubscriptions: string[] = [];
 
     /// This shall be the user id if the client has been authenticated, null otherwise
-    userId: string | null = null;
+    userId: number | null = null;
 
     get state() {
         return this.api.state;

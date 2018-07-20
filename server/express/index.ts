@@ -7,7 +7,8 @@ import { ServerState } from "../state";
 import requestLogger from "./requestLogger";
 import serveApp from "./serveApp";
 
-import { User } from "../models/User";
+import ApiError from "@common/ApiError";
+import { ErrorCode } from "@common/ErrorCode";
 import { authentication } from "./authentication";
 import errorHandler from "./errorHandler";
 
@@ -25,7 +26,7 @@ export function createApp(state: ServerState) {
     });
 
     app.get("/api/users", (req, res) => {
-        User.loadAll(state.database)
+        state.database.users.find()
             .then((users) => {
                 res.json({
                     data: users,
@@ -34,8 +35,12 @@ export function createApp(state: ServerState) {
     });
 
     app.get("/api/users/:username", (req, res, next) => {
-        User.loadByUsername(state.database, req.params.username)
+        const { username } = req.params;
+        state.database.users.findByUsername(username)
             .then((user) => {
+                if (!user) {
+                    throw new ApiError(`user ${username} does not exist`, ErrorCode.NotFound);
+                }
                 res.json({
                     data: user,
                 });

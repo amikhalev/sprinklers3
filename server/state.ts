@@ -1,6 +1,6 @@
 import logger from "@common/logger";
 import * as mqtt from "@common/sprinklersRpc/mqtt";
-import { Database } from "./models/Database";
+import { Database } from "./Database";
 
 export class ServerState {
     mqttClient: mqtt.MqttRpcClient;

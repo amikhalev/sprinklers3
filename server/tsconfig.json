@@ -1,31 +1,32 @@
 {
-    "compilerOptions": {
-        "outDir": "../dist",
-        "sourceMap": true,
-        "experimentalDecorators": true,
-        "target": "es2017",
-        "module": "commonjs",
-        "lib": [
-            "es6",
-            "dom"
-        ],
-        "types": [
-            "webpack-env",
-            "node"
-        ],
-        "strict": true,
-        "allowJs": true,
-        "baseUrl": "..",
-        "paths": {
-            "@common/*": [
-                "./common/*"
-            ],
-            "@app/*": [
-                "./app/*"
-            ]
-        }
-    },
-    "include": [
-        "./**/*.ts"
-    ]
+  "compilerOptions": {
+    "outDir": "../dist",
+    "sourceMap": true,
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    "target": "es2017",
+    "module": "commonjs",
+    "lib": [
+      "es6",
+      "dom"
+    ],
+    "types": [
+      "webpack-env",
+      "node"
+    ],
+    "strict": true,
+    "allowJs": true,
+    "baseUrl": "..",
+    "paths": {
+      "@common/*": [
+        "./common/*"
+      ],
+      "@app/*": [
+        "./app/*"
+      ]
+    }
+  },
+  "include": [
+    "./**/*.ts"
+  ]
 }

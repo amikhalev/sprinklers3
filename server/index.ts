@@ -1,4 +1,5 @@
 /* tslint:disable:ordered-imports */
+import "reflect-metadata";
 import "./configureAlias";
 import "env";
 import "./configureLogger";

@@ -8,6 +8,7 @@ export enum ErrorCode {
     Unauthorized = 106,
     NoPermission = 107,
     NotImplemented = 108,
+    NotFound = 109,
     Internal = 200,
     Timeout = 300,
     ServerDisconnected = 301,
@@ -27,6 +28,8 @@ export function toHttpStatus(errorCode: ErrorCode): number {
             return 401; // Unauthorized
         case ErrorCode.NoPermission:
             return 403; // Forbidden
+        case ErrorCode.NotFound:
+            return 404;
         case ErrorCode.NotImplemented:
             return 501;
         case ErrorCode.Internal:

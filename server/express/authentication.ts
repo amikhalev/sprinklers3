@@ -2,17 +2,17 @@ import * as Express from "express";
 import Router from "express-promise-router";
 import * as jwt from "jsonwebtoken";
 
-import TokenClaims from "@common/TokenClaims";
+import ApiError from "@common/ApiError";
+import { ErrorCode } from "@common/ErrorCode";
 import {
     TokenGrantPasswordRequest,
     TokenGrantRefreshRequest,
     TokenGrantRequest,
     TokenGrantResponse,
 } from "@common/httpApi";
-import { ErrorCode } from "@common/ErrorCode";
-import { User } from "../models/User";
+import TokenClaims from "@common/TokenClaims";
+import { User } from "../entities";
 import { ServerState } from "../state";
-import ApiError from "@common/ApiError";
 
 export { TokenClaims };
 
@@ -72,7 +72,7 @@ export function verifyToken(token: string): Promise<TokenClaims> {
 function generateAccessToken(user: User, secret: string): Promise<string> {
     const access_token_claims: TokenClaims = {
         iss: "sprinklers3",
-        aud: user.id || "",
+        aud: user.id,
         name: user.name,
         type: "access",
         exp: getExpTime(ACCESS_TOKEN_LIFETIME),
@@ -84,7 +84,7 @@ function generateAccessToken(user: User, secret: string): Promise<string> {
 function generateRefreshToken(user: User, secret: string): Promise<string> {
     const refresh_token_claims: TokenClaims = {
         iss: "sprinklers3",
-        aud: user.id || "",
+        aud: user.id,
         name: user.name,
         type: "refresh",
         exp: getExpTime(REFRESH_TOKEN_LIFETIME),
@@ -102,7 +102,7 @@ export function authentication(state: ServerState) {
         if (!body || !username || !password) {
             throw new ApiError("Must specify username and password");
         }
-        const user = await User.loadByUsername(state.database, username);
+        const user = await state.database.users.findByUsername(username);
         if (!user) {
             throw new ApiError("User does not exist");
         }
@@ -123,7 +123,7 @@ export function authentication(state: ServerState) {
         if (claims.type !== "refresh") {
             throw new ApiError("Not a refresh token");
         }
-        const user = await User.load(state.database, claims.aud);
+        const user = await state.database.users.findOne(claims.aud);
         if (!user) {
             throw new ApiError("User no longer exists");
         }
