@@ -40,7 +40,7 @@ export default class DurationInput extends React.Component<{
     }
 
     private onMinutesChange: InputProps["onChange"] = (e, { value }) => {
-        if (value.length === 0 || isNaN(Number(value))) {
+        if (isNaN(Number(value))) {
             return;
         }
         const newMinutes = parseInt(value, 10);
@@ -48,7 +48,7 @@ export default class DurationInput extends React.Component<{
     }
 
     private onSecondsChange: InputProps["onChange"] = (e, { value }) => {
-        if (value.length === 0 || isNaN(Number(value))) {
+        if (isNaN(Number(value))) {
             return;
         }
         const newSeconds = parseInt(value, 10);

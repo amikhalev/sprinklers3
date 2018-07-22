@@ -46,9 +46,9 @@ interface DeviceViewProps {
 
 class DeviceView extends React.Component<DeviceViewProps> {
     render() {
-        const { uiStore, sprinklersRpc } = this.props.appState;
+        const { uiStore, sprinklersRpc, routerStore } = this.props.appState;
         const device = sprinklersRpc.getDevice(this.props.deviceId);
-        const { id, connectionState, sections, programs, sectionRunner } = device;
+        const { id, connectionState, sections, sectionRunner } = device;
         const deviceBody = connectionState.isAvailable && (
             <React.Fragment>
                 <SectionRunnerView sectionRunner={sectionRunner} sections={sections}/>
@@ -60,7 +60,7 @@ class DeviceView extends React.Component<DeviceViewProps> {
                         <RunSectionForm device={device} uiStore={uiStore}/>
                     </Grid.Column>
                 </Grid>
-                <ProgramTable programs={programs} sections={sections}/>
+                <ProgramTable device={device} routerStore={routerStore}/>
             </React.Fragment>
         );
         return (

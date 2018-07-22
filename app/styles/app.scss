@@ -47,13 +47,8 @@
 
 }
 
-.ui.table {
-  tr > td.program--running {
-    display: flex !important;
-    @media only screen and (min-width: 768px) {
-      //line-height: 36px;
-    }
-  }
+.flex {
+  display: flex !important;
 }
 
 .section--state-true {

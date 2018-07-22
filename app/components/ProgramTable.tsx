@@ -1,47 +1,78 @@
-import flatMap from "lodash-es/flatMap";
 import { observer } from "mobx-react";
-import * as moment from "moment";
+import { RouterStore } from "mobx-react-router";
 import * as React from "react";
-import { Button, Table } from "semantic-ui-react";
+import { Link } from "react-router-dom";
+import { Button, ButtonProps, Table } from "semantic-ui-react";
 
-import { Duration } from "@common/Duration";
-import { DateOfYear, Program, Schedule, Section, TimeOfDay, Weekday } from "@common/sprinklersRpc";
-
-function timeToString(time: TimeOfDay) {
-    return moment(time).format("LTS");
-}
-
-function formatDateOfYear(day: DateOfYear | null, prefix: string) {
-    if (day == null) {
-        return null;
-    }
-    return prefix + moment(day).format("l");
-}
+import { ProgramSequenceView, ScheduleView } from "@app/components";
+import * as rp from "@app/routePaths";
+import { Program, Section, SprinklersDevice } from "@common/sprinklersRpc";
 
 @observer
-export class ScheduleView extends React.Component<{ schedule: Schedule }> {
+class ProgramRows extends React.Component<{
+    program: Program, device: SprinklersDevice,
+    routerStore: RouterStore,
+    expanded: boolean, toggleExpanded: (program: Program) => void,
+}> {
     render() {
-        const { schedule } = this.props;
-        const times = schedule.times.map((time, i) => timeToString(time))
-            .join(", ");
-        const weekdays = schedule.weekdays.map((weekday) =>
-            Weekday[weekday]).join(", ");
-        const from = formatDateOfYear(schedule.from, "From ");
-        const to = formatDateOfYear(schedule.to, "To ");
-        return (
-            <div>
-                At {times} <br/>
-                On {weekdays} <br/>
-                {from} <br/>
-                {to}
-            </div>
+        const { program, device, expanded, routerStore } = this.props;
+        const { sections } = device;
+
+        const { name, running, enabled, schedule, sequence } = program;
+
+        const buttonStyle: ButtonProps = { size: "small", compact: true };
+        const detailUrl = rp.program(device.id, program.id);
+
+        const mainRow = (
+            <Table.Row>
+                <Table.Cell className="program--number">{"" + program.id}</Table.Cell>
+                <Table.Cell className="program--name">{name}</Table.Cell>
+                <Table.Cell className="program--enabled">{enabled ? "Enabled" : "Not enabled"}</Table.Cell>
+                <Table.Cell className="program--running">
+                    <span>{running ? "Running" : "Not running"}</span>
+                </Table.Cell>
+                <Table.Cell>
+                    <Button onClick={this.cancelOrRun} {...buttonStyle} positive={!running} negative={running}>
+                        {running ? "Cancel" : "Run"}
+                    </Button>
+                    <Button as={Link} to={detailUrl} {...buttonStyle} primary>
+                        Open
+                    </Button>
+                    <Button onClick={this.toggleExpanded} {...buttonStyle}>
+                        {expanded ? "Hide Details" : "Show Details"}
+                    </Button>
+                </Table.Cell>
+            </Table.Row>
         );
+        const detailRow = expanded && (
+            <Table.Row>
+                <Table.Cell className="program--sequence" colSpan="4">
+                    <h4>Sequence: </h4> <ProgramSequenceView sequence={sequence} sections={sections}/>
+                    <h4>Schedule: </h4> <ScheduleView schedule={schedule}/>
+                </Table.Cell>
+            </Table.Row>
+        );
+        return (
+            <React.Fragment>
+                {mainRow}
+                {detailRow}
+            </React.Fragment>
+        );
+    }
+
+    private cancelOrRun = () => {
+        const { program } = this.props;
+        program.running ? program.cancel() : program.run();
+    }
+
+    private toggleExpanded = () => {
+        this.props.toggleExpanded(this.props.program);
     }
 }
 
 @observer
 export default class ProgramTable extends React.Component<{
-    programs: Program[], sections: Section[],
+    device: SprinklersDevice, routerStore: RouterStore,
 }, {
     expandedPrograms: Program[],
 }> {
@@ -51,8 +82,8 @@ export default class ProgramTable extends React.Component<{
     }
 
     render() {
-        const programRows = Array.prototype.concat.apply([],
-            this.props.programs.map(this.renderRows));
+        const { programs, sections } = this.props.device;
+        const programRows = programs.map(this.renderRows);
 
         return (
             <Table celled>
@@ -65,6 +96,7 @@ export default class ProgramTable extends React.Component<{
                         <Table.HeaderCell className="program--name">Name</Table.HeaderCell>
                         <Table.HeaderCell className="program--enabled">Enabled?</Table.HeaderCell>
                         <Table.HeaderCell className="program--running">Running?</Table.HeaderCell>
+                        <Table.HeaderCell className="program--actions">Actions</Table.HeaderCell>
                     </Table.Row>
                 </Table.Header>
                 <Table.Body>
@@ -78,42 +110,29 @@ export default class ProgramTable extends React.Component<{
         if (!program) {
             return null;
         }
-        const { name, running, enabled, schedule, sequence } = program;
-        const sequenceItems = flatMap(sequence, (item, index) => {
-            const section = this.props.sections[item.section];
-            const duration = Duration.fromSeconds(item.duration);
-            return [
-                <em key={index}>"{section.name}"</em>, ` for ${duration.toString()}, `,
-            ];
-        });
-        const cancelOrRun = () => running ? program.cancel() : program.run();
-        const mainRow = (
-            <Table.Row>
-                <Table.Cell className="program--number">{"" + (i + 1)}</Table.Cell>
-                <Table.Cell className="program--name">{name}</Table.Cell>
-                <Table.Cell className="program--enabled">{enabled ? "Enabled" : "Not enabled"}</Table.Cell>
-                <Table.Cell className="program--running">
-                    <span>{running ? "Running" : "Not running"}</span>
-                    <div className="flex-spacer"/>
-                    <Button size="small" onClick={cancelOrRun}>
-                        {running ? "Cancel" : "Run"}
-                    </Button>
-                </Table.Cell>
-            </Table.Row>
-        );
-        const detailRow = false && (
-            <Table.Row>
-                <Table.Cell className="program--sequence" colSpan="4">
-                    <h4>Sequence: </h4> {sequenceItems}
-                    <h4>Schedule: </h4> <ScheduleView schedule={schedule}/>
-                </Table.Cell>
-            </Table.Row>
-        );
+        const expanded = this.state.expandedPrograms.indexOf(program) !== -1;
         return (
-            <React.Fragment key={i}>
-                {mainRow}
-                {detailRow}
-            </React.Fragment>
+            <ProgramRows
+                program={program}
+                device={this.props.device}
+                routerStore={this.props.routerStore}
+                expanded={expanded}
+                toggleExpanded={this.toggleExpanded}
+                key={i}
+            />
         );
+    }
+
+    private toggleExpanded = (program: Program) => {
+        const { expandedPrograms } = this.state;
+        const idx = expandedPrograms.indexOf(program);
+        if (idx !== -1) {
+            expandedPrograms.splice(idx, 1);
+        } else {
+            expandedPrograms.push(program);
+        }
+        this.setState({
+            expandedPrograms,
+        });
     }
 }

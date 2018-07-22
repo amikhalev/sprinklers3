@@ -1,9 +1,10 @@
+import { observer } from "mobx-react";
 import * as React from "react";
 import { Link } from "react-router-dom";
 import { Menu } from "semantic-ui-react";
 
+import * as rp from "@app/routePaths";
 import { AppState, ConsumeState, injectState } from "@app/state";
-import { observer } from "mobx-react";
 
 interface NavItemProps {
     to: string;
@@ -25,17 +26,17 @@ function NavBar({ appState }: { appState: AppState }) {
     let loginMenu;
     if (appState.isLoggedIn) {
         loginMenu = (
-            <NavItem to="/logout">Logout</NavItem>
+            <NavItem to={rp.logout}>Logout</NavItem>
         );
     } else {
         loginMenu = (
-            <NavItem to="/login">Login</NavItem>
+            <NavItem to={rp.login}>Login</NavItem>
         );
     }
     return (
         <Menu>
-            <NavItem to="/devices/grinklers">Device grinklers</NavItem>
-            <NavItem to="/messagesTest">Messages test</NavItem>
+            <NavItem to={rp.device("grinklers")}>Device grinklers</NavItem>
+            <NavItem to={rp.messagesTest}>Messages test</NavItem>
             <Menu.Menu position="right">
                 {loginMenu}
             </Menu.Menu>

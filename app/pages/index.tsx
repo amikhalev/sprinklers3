@@ -5,6 +5,7 @@ import { DevicesView, MessageTest} from "@app/components";
 
 export { LoginPage } from "./LoginPage";
 export { LogoutPage } from "./LogoutPage";
+export { default as ProgramPage } from "./ProgramPage";
 
 export function DevicePage({ match }: RouteComponentProps<{ deviceId: string }>) {
     return (
