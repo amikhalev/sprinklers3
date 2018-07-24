@@ -23,6 +23,7 @@ export default class SectionChooser extends React.Component<{
         }
         return (
             <Form.Select
+                className="sectionChooser"
                 label={label}
                 inline={inline}
                 placeholder="Section"

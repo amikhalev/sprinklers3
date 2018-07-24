@@ -33,7 +33,7 @@ class ProgramRows extends React.Component<{
                 </Table.Cell>
                 <Table.Cell>
                     <Button onClick={this.cancelOrRun} {...buttonStyle} positive={!running} negative={running}>
-                        {running ? "Cancel" : "Run"}
+                        {running ? "Stop" : "Run"}
                     </Button>
                     <Button as={Link} to={detailUrl} {...buttonStyle} primary>
                         Open

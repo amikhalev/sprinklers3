@@ -6,13 +6,7 @@
       flex-direction: row;
     }
   }
-  .ui.stackable.grid.in-container > .row > .column {
-    @media only screen and (max-width: 991px) {
-      padding-left: 0 !important;
-      padding-right: 0 !important;
-    }
-  }
-  .ui.stackable.grid.in-container {
+  .ui.grid {
     margin-top: 0;
   }
   .connectionState {
@@ -46,22 +40,32 @@
   width: 20em;
 }
 
+.sectionChooser {
+  .ui.selection.dropdown {
+    min-width: 12em;
+  }
+}
+
 .durationInputs {
   display: flex;
+  flex-wrap: wrap;
+  margin: -0.5em;
 }
 
 $durationInput-labelWidth: 2.5em;
 
 .ui.form .field .ui.input.durationInput {
+  margin: 0.5em;
+
   &.minutes {
-    margin-right: 1em;
+    //margin-right: 1em;
   }
   &.seconds {
 
   }
 
   > input {
-    flex: 1 1 6em;
+    flex: 1 0 6em;
     width: 100%;
   }
 

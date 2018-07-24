@@ -109,7 +109,7 @@ class SectionRunView extends React.Component<{
             <Segment className="sectionRun">
                 <div className="flex-horizontal-space-between">
                     {description}
-                    <Button onClick={cancel} icon size="mini"><Icon name="remove"/></Button>
+                    <Button negative onClick={cancel} icon size="mini"><Icon name="remove"/></Button>
                 </div>
                 {progressBar}
             </Segment>

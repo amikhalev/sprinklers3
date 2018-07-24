@@ -81,7 +81,7 @@ class ProgramPage extends React.Component<{
         return (
             <Modal.Actions>
                 <Button positive={!running} negative={running} onClick={this.cancelOrRun}>
-                    {running ? "Cancel" : "Run"}
+                    {running ? "Stop" : "Run"}
                 </Button>
                 {editButtons}
                 <Button onClick={this.close}>

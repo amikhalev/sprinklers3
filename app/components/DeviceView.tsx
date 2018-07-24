@@ -54,12 +54,14 @@ class DeviceView extends React.Component<DeviceViewProps & RouteComponentProps<a
         const { id, connectionState, sections, sectionRunner } = device;
         const deviceBody = connectionState.isAvailable && (
             <React.Fragment>
-                <SectionRunnerView sectionRunner={sectionRunner} sections={sections}/>
                 <Grid>
-                    <Grid.Column mobile="16" tablet="16" computer="8">
+                    <Grid.Column mobile="16" tablet="16" computer="16" largeScreen="6">
+                        <SectionRunnerView sectionRunner={sectionRunner} sections={sections}/>
+                    </Grid.Column>
+                    <Grid.Column mobile="16" tablet="9" computer="9" largeScreen="6">
                         <SectionTable sections={sections}/>
                     </Grid.Column>
-                    <Grid.Column mobile="16" tablet="16" computer="8">
+                    <Grid.Column mobile="16" tablet="7" computer="7" largeScreen="4">
                         <RunSectionForm device={device} uiStore={uiStore}/>
                     </Grid.Column>
                 </Grid>
