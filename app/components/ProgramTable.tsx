@@ -6,7 +6,7 @@ import { Button, ButtonProps, Table } from "semantic-ui-react";
 
 import { ProgramSequenceView, ScheduleView } from "@app/components";
 import * as rp from "@app/routePaths";
-import { Program, Section, SprinklersDevice } from "@common/sprinklersRpc";
+import { Program, SprinklersDevice } from "@common/sprinklersRpc";
 
 @observer
 class ProgramRows extends React.Component<{
@@ -15,7 +15,7 @@ class ProgramRows extends React.Component<{
     expanded: boolean, toggleExpanded: (program: Program) => void,
 }> {
     render() {
-        const { program, device, expanded, routerStore } = this.props;
+        const { program, device, expanded } = this.props;
         const { sections } = device;
 
         const { name, running, enabled, schedule, sequence } = program;
@@ -46,7 +46,7 @@ class ProgramRows extends React.Component<{
         );
         const detailRow = expanded && (
             <Table.Row>
-                <Table.Cell className="program--sequence" colSpan="4">
+                <Table.Cell className="program--sequence" colSpan="5">
                     <h4>Sequence: </h4> <ProgramSequenceView sequence={sequence} sections={sections}/>
                     <h4>Schedule: </h4> <ScheduleView schedule={schedule}/>
                 </Table.Cell>
@@ -82,7 +82,7 @@ export default class ProgramTable extends React.Component<{
     }
 
     render() {
-        const { programs, sections } = this.props.device;
+        const { programs } = this.props.device;
         const programRows = programs.map(this.renderRows);
 
         return (

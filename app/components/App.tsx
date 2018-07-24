@@ -17,12 +17,11 @@ function NavContainer() {
         <Container className="app">
             <NavBar/>
 
-            <Switch>
-                <Route path={rp.program(":deviceId", ":programId")} component={p.ProgramPage}/>
-                <Route path={rp.device(":deviceId")} component={p.DevicePage}/>
-                <Route path={rp.messagesTest} component={p.MessagesTestPage}/>
-                <Redirect to="/"/>
-            </Switch>
+            <Route path={rp.device(":deviceId")} component={p.DevicePage}/>
+            <Route path={rp.messagesTest} component={p.MessagesTestPage}/>
+            {/*<Switch>*/}
+                {/*<Redirect to="/"/>*/}
+            {/*</Switch>*/}
 
             <MessagesView/>
         </Container>

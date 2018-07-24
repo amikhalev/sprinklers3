@@ -15,9 +15,8 @@ export default class SectionTable extends React.Component<{ sections: Section[] 
         }
         const { name, state } = section;
         const sectionStateClass = classNames({
-            "section--state": true,
-            "section--state-true": state,
-            "section--state-false": !state,
+            "section-state": true,
+            "running": state,
         });
         const sectionState = state ?
             (<span><Icon name={"shower" as any} /> Irrigating</span>)

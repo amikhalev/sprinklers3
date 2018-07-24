@@ -37,3 +37,36 @@
   height: 14em;
   overflow-y: scroll;
 }
+
+.ui.modal.programEditor > .header > .header.item .inline.fields {
+  margin-bottom: 0;
+}
+
+.programSequence.editing .item .content {
+  width: 20em;
+}
+
+.durationInputs {
+  display: flex;
+}
+
+$durationInput-labelWidth: 2.5em;
+
+.ui.form .field .ui.input.durationInput {
+  &.minutes {
+    margin-right: 1em;
+  }
+  &.seconds {
+
+  }
+
+  > input {
+    flex: 1 1 6em;
+    width: 100%;
+  }
+
+  > .label {
+    flex: 0 0 $durationInput-labelWidth;
+    text-align: center;
+  }
+}

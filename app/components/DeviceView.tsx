@@ -3,8 +3,11 @@ import { observer } from "mobx-react";
 import * as React from "react";
 import { Grid, Header, Icon, Item, SemanticICONS } from "semantic-ui-react";
 
+import * as p from "@app/pages";
+import * as rp from "@app/routePaths";
 import { AppState, injectState } from "@app/state";
 import { ConnectionState as ConState } from "@common/sprinklersRpc";
+import { Route, RouteComponentProps, withRouter } from "react-router";
 import { ProgramTable, RunSectionForm, SectionRunnerView, SectionTable } from ".";
 import "./DeviceView.scss";
 
@@ -44,7 +47,7 @@ interface DeviceViewProps {
     appState: AppState;
 }
 
-class DeviceView extends React.Component<DeviceViewProps> {
+class DeviceView extends React.Component<DeviceViewProps & RouteComponentProps<any>> {
     render() {
         const { uiStore, sprinklersRpc, routerStore } = this.props.appState;
         const device = sprinklersRpc.getDevice(this.props.deviceId);
@@ -61,6 +64,7 @@ class DeviceView extends React.Component<DeviceViewProps> {
                     </Grid.Column>
                 </Grid>
                 <ProgramTable device={device} routerStore={routerStore}/>
+                <Route path={rp.program(":deviceId", ":programId")} component={p.ProgramPage}/>
             </React.Fragment>
         );
         return (
@@ -81,4 +85,4 @@ class DeviceView extends React.Component<DeviceViewProps> {
     }
 }
 
-export default injectState(observer(DeviceView));
+export default injectState(withRouter(observer(DeviceView)));

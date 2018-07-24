@@ -23,6 +23,6 @@ export class Section {
     }
 
     toString(): string {
-        return `Section{id=${this.id}, name="${this.name}", state=${this.state}}`;
+        return `Section ${this.id}: '${this.name}'`;
     }
 }

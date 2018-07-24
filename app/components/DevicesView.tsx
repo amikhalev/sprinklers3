@@ -3,8 +3,9 @@ import * as React from "react";
 import { Item } from "semantic-ui-react";
 
 import DeviceView from "@app/components/DeviceView";
+import { RouteComponentProps, withRouter } from "react-router";
 
-class DevicesView extends React.Component<{deviceId: string}> {
+class DevicesView extends React.Component<{deviceId: string} & RouteComponentProps<any>> {
     render() {
         return (
             <Item.Group divided>
@@ -14,4 +15,4 @@ class DevicesView extends React.Component<{deviceId: string}> {
     }
 }
 
-export default observer(DevicesView);
+export default withRouter(observer(DevicesView));

@@ -1,16 +1,20 @@
 import { observable } from "mobx";
+import { serialize } from "serializr";
+
 import { Schedule } from "./schedule";
+import * as schema from "./schema";
 import { SprinklersDevice } from "./SprinklersDevice";
 
 export class ProgramItem {
     // the section number
-    readonly section: number;
+    readonly section!: number;
     // duration of the run, in seconds
-    readonly duration: number;
+    readonly duration!: number;
 
-    constructor(section: number = 0, duration: number = 0) {
-        this.section = section;
-        this.duration = duration;
+    constructor(data?: Partial<ProgramItem>) {
+        if (data) {
+            Object.assign(this, data);
+        }
     }
 }
 
@@ -37,7 +41,8 @@ export class Program {
         return this.device.cancelProgram({ programId: this.id });
     }
 
-    update(data: any) {
+    update() {
+        const data = serialize(schema.program, this);
         return this.device.updateProgram({ programId: this.id, data });
     }
 

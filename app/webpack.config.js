@@ -2,6 +2,7 @@ const path = require("path");
 const webpack = require("webpack");
 
 const HtmlWebpackPlugin = require("html-webpack-plugin");
+const FaviconsWebpackPlugin = require("favicons-webpack-plugin");
 const CaseSensitivePathsPlugin = require("case-sensitive-paths-webpack-plugin");
 const UglifyJsPlugin = require("uglifyjs-webpack-plugin");
 const DashboardPlugin = require("webpack-dashboard/plugin");
@@ -160,6 +161,7 @@ const getConfig = module.exports = (env) => {
                 minifyURLs: true,
             } : undefined,
         }),
+        new FaviconsWebpackPlugin(path.resolve(paths.appDir, "images", "favicon-96x96.png")),
         // Makes some environment variables available to the JS code, for example:
         // if (process.env.NODE_ENV === "production") { ... }. See `./env.js`.
         // It is absolutely essential that NODE_ENV was set to production here.

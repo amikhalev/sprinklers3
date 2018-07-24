@@ -7,6 +7,9 @@ export class SprinklersDevice {
     @PrimaryGeneratedColumn()
     id!: number;
 
+    @Column({ nullable: true, type: "uuid" })
+    deviceId: string | null = null;
+
     @Column()
     name: string = "";
 

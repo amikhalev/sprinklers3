@@ -1,5 +1,5 @@
 .app {
-  margin-top: 1em;
+  padding-top: 1em;
 }
 
 .sectionRunner--pausedState {
@@ -51,26 +51,12 @@
   display: flex !important;
 }
 
-.section--state-true {
+.section-state.running {
   color: green;
-}
-
-.section--state-false {
-
-}
-
-.durationInput--minutes,
-.durationInput--seconds {
-  min-width: 6em !important;
-}
-
-.durationInput .ui.labeled.input > .label {
-  width: 3em;
 }
 
 .messages {
   position: fixed;
-  /* top: 12px; */
   bottom: 1em;
   left: 1em;
   right: 1em;

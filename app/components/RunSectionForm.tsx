@@ -1,14 +1,13 @@
-import { computed } from "mobx";
 import { observer } from "mobx-react";
 import * as React from "react";
-import { DropdownItemProps, DropdownProps, Form, Header, Segment } from "semantic-ui-react";
+import { Form, Header, Segment } from "semantic-ui-react";
 
+import { DurationView, SectionChooser } from "@app/components";
 import { UiStore } from "@app/state";
 import { Duration } from "@common/Duration";
 import log from "@common/logger";
 import { Section, SprinklersDevice } from "@common/sprinklersRpc";
 import { RunSectionResponse } from "@common/sprinklersRpc/deviceRequests";
-import DurationInput from "./DurationInput";
 
 @observer
 export default class RunSectionForm extends React.Component<{
@@ -16,13 +15,13 @@ export default class RunSectionForm extends React.Component<{
     uiStore: UiStore,
 }, {
     duration: Duration,
-    section: number | "",
+    section: Section | undefined,
 }> {
     constructor(props: any, context?: any) {
         super(props, context);
         this.state = {
             duration: new Duration(0, 0),
-            section: "",
+            section: undefined,
         };
     }
 
@@ -32,20 +31,18 @@ export default class RunSectionForm extends React.Component<{
             <Segment>
                 <Header>Run Section</Header>
                 <Form>
-                    <Form.Select
+                    <SectionChooser
                         label="Section"
-                        placeholder="Section"
-                        options={this.sectionOptions}
+                        sections={this.props.device.sections}
                         value={section}
                         onChange={this.onSectionChange}
                     />
-                    <DurationInput
+                    <DurationView
+                        label="Duration"
                         duration={duration}
                         onDurationChange={this.onDurationChange}
                     />
-                    {/*Label must be &nbsp; to align it properly*/}
                     <Form.Button
-                        label="&nbsp;"
                         primary
                         onClick={this.run}
                         disabled={!this.isValid}
@@ -57,8 +54,8 @@ export default class RunSectionForm extends React.Component<{
         );
     }
 
-    private onSectionChange = (e: React.SyntheticEvent<HTMLElement>, v: DropdownProps) => {
-        this.setState({ section: v.value as number });
+    private onSectionChange = (newSection: Section) => {
+        this.setState({ section: newSection });
     }
 
     private onDurationChange = (newDuration: Duration) => {
@@ -67,11 +64,10 @@ export default class RunSectionForm extends React.Component<{
 
     private run = (e: React.SyntheticEvent<HTMLElement>) => {
         e.preventDefault();
-        if (typeof this.state.section !== "number") {
+        const { section, duration } = this.state;
+        if (!section) {
             return;
         }
-        const section: Section = this.props.device.sections[this.state.section];
-        const { duration } = this.state;
         section.run(duration.toSeconds())
             .then(this.onRunSuccess)
             .catch(this.onRunError);
@@ -94,14 +90,6 @@ export default class RunSectionForm extends React.Component<{
     }
 
     private get isValid(): boolean {
-        return typeof this.state.section === "number";
-    }
-
-    @computed
-    private get sectionOptions(): DropdownItemProps[] {
-        return this.props.device.sections.map((s, i) => ({
-            text: s ? s.name : null,
-            value: i,
-        }));
+        return this.state.section != null && this.state.duration.toSeconds() > 0;
     }
 }
