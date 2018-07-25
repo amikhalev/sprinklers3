@@ -2,7 +2,7 @@ import { observer } from "mobx-react";
 import { createViewModel, IViewModel } from "mobx-utils";
 import * as React from "react";
 import { RouteComponentProps } from "react-router";
-import { Button, CheckboxProps, Form, Input, InputOnChangeData, Menu, Modal, Segment } from "semantic-ui-react";
+import { Button, CheckboxProps, Form, Input, InputOnChangeData, Menu, Modal } from "semantic-ui-react";
 
 import { ProgramSequenceView, ScheduleView } from "@app/components";
 import * as rp from "@app/routePaths";

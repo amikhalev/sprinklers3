@@ -1,7 +1,7 @@
 /* tslint:disable:ordered-imports */
 import "reflect-metadata";
 import "./configureAlias";
-import "env";
+import "@common/env";
 import "./configureLogger";
 
 import log from "@common/logger";

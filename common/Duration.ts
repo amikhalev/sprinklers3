@@ -1,14 +1,14 @@
 export class Duration {
+    static fromSeconds(seconds: number): Duration {
+        return new Duration(Math.floor(seconds / 60), seconds % 60);
+    }
+
     minutes: number = 0;
     seconds: number = 0;
 
     constructor(minutes: number = 0, seconds: number = 0) {
         this.minutes = minutes;
         this.seconds = seconds;
-    }
-
-    static fromSeconds(seconds: number): Duration {
-        return new Duration(Math.floor(seconds / 60), seconds % 60);
     }
 
     toSeconds(): number {

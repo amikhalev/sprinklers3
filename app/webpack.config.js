@@ -11,8 +11,8 @@ const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 const HappyPack = require("happypack");
 const ForkTsCheckerWebpackPlugin = require("fork-ts-checker-webpack-plugin");
 
-const {getClientEnvironment} = require("../env");
-const paths = require("../paths");
+const {getClientEnvironment} = require("../common/env");
+const paths = require("../common/paths");
 
 // Webpack uses `publicPath` to determine where the app is being served from.
 // It requires a trailing slash, or the file assets will get an incorrect path.

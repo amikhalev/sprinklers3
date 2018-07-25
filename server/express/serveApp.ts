@@ -2,7 +2,7 @@ import { Express } from "express";
 import * as path from "path";
 import * as serveStatic from "serve-static";
 
-import * as paths from "paths";
+import * as paths from "@common/paths";
 
 const index = path.join(paths.publicDir, "index.html");
 

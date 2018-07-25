@@ -19,7 +19,7 @@ export abstract class SprinklersDevice {
     sectionRunnerConstructor: typeof SectionRunner = SectionRunner;
     programConstructor: typeof Program = Program;
 
-    constructor() {
+    protected constructor() {
         this.sectionRunner = new (this.sectionRunnerConstructor)(this);
     }
 

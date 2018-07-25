@@ -9,7 +9,7 @@
       true
     ],
     "max-classes-per-file": [
-      false
+      true, 3
     ],
     "ordered-imports": true,
     "variable-name": [
@@ -24,16 +24,13 @@
     "member-ordering": [
       true,
       {
-        "order": "fields-first"
+        "order": "statics-first"
       }
     ],
     "object-literal-sort-keys": [
       false
     ],
     "no-submodule-imports": false,
-    "no-unused-variable": [
-      true
-    ],
     "jsx-boolean-value": [ true, "never" ],
     "no-implicit-dependencies": false
   },

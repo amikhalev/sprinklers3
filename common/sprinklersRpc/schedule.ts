@@ -1,6 +1,10 @@
 import { observable } from "mobx";
 
 export class TimeOfDay {
+    static fromDate(date: Date): TimeOfDay {
+        return new TimeOfDay(date.getHours(), date.getMinutes(), date.getSeconds(), date.getMilliseconds());
+    }
+
     readonly hour: number;
     readonly minute: number;
     readonly second: number;
@@ -11,10 +15,6 @@ export class TimeOfDay {
         this.minute = minute;
         this.second = second;
         this.millisecond = millisecond;
-    }
-
-    static fromDate(date: Date): TimeOfDay {
-        return new TimeOfDay(date.getHours(), date.getMinutes(), date.getSeconds(), date.getMilliseconds());
     }
 }
 

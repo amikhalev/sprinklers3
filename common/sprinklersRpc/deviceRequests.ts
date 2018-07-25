@@ -14,7 +14,7 @@ export type UpdateProgramResponse = Response<"updateProgram", { data: any }>;
 export interface WithSection { sectionId: number; }
 
 export type RunSectionData = WithSection & { duration: number };
-export type RunSectionReqeust = RunSectionData & WithType<"runSection">;
+export type RunSectionRequest = RunSectionData & WithType<"runSection">;
 export type RunSectionResponse = Response<"runSection", { runId: number }>;
 
 export type CancelSectionRequest = WithSection & WithType<"cancelSection">;
@@ -26,7 +26,7 @@ export interface PauseSectionRunnerData { paused: boolean; }
 export type PauseSectionRunnerRequest = PauseSectionRunnerData & WithType<"pauseSectionRunner">;
 
 export type Request = RunProgramRequest | CancelProgramRequest | UpdateProgramRequest |
-    RunSectionReqeust | CancelSectionRequest | CancelSectionRunIdRequest | PauseSectionRunnerRequest;
+    RunSectionRequest | CancelSectionRequest | CancelSectionRunIdRequest | PauseSectionRunnerRequest;
 
 export type RequestType = Request["type"];
 

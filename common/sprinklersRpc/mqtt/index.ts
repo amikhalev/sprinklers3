@@ -1,13 +1,15 @@
 import { autorun, observable } from "mobx";
 import * as mqtt from "mqtt";
-import { update } from "serializr";
 
 import logger from "@common/logger";
 import * as s from "@common/sprinklersRpc";
 import * as requests from "@common/sprinklersRpc/deviceRequests";
-import * as schema from "@common/sprinklersRpc/schema";
 import { seralizeRequest } from "@common/sprinklersRpc/schema/requests";
 import { getRandomId } from "@common/utils";
+
+import { MqttProgram } from "./MqttProgram";
+import { MqttSection } from "./MqttSection";
+import { MqttSectionRunner } from "./MqttSectionRunner";
 
 const log = logger.child({ source: "mqtt" });
 
@@ -16,22 +18,22 @@ interface WithRid {
 }
 
 export class MqttRpcClient implements s.SprinklersRPC {
+    get connected(): boolean {
+        return this.connectionState.isServerConnected || false;
+    }
+
+    private static newClientId() {
+        return "sprinklers3-MqttApiClient-" + getRandomId();
+    }
+
     readonly mqttUri: string;
     client!: mqtt.Client;
     @observable connectionState: s.ConnectionState = new s.ConnectionState();
     devices: Map<string, MqttSprinklersDevice> = new Map();
 
-    get connected(): boolean {
-        return this.connectionState.isServerConnected || false;
-    }
-
     constructor(mqttUri: string) {
         this.mqttUri = mqttUri;
         this.connectionState.serverToBroker = false;
-    }
-
-    private static newClientId() {
-        return "sprinklers3-MqttApiClient-" + getRandomId();
     }
 
     start() {
@@ -281,41 +283,3 @@ class MqttSprinklersDevice extends s.SprinklersDevice {
 }
 
 type ResponseCallback = (response: requests.Response) => void;
-
-class MqttSection extends s.Section {
-    onMessage(payload: string, topic: string | undefined) {
-        if (topic === "state") {
-            this.state = (payload === "true");
-        } else if (topic == null) {
-            this.updateFromJSON(JSON.parse(payload));
-        }
-    }
-
-    updateFromJSON(json: any) {
-        update(schema.section, this, json);
-    }
-}
-
-class MqttProgram extends s.Program {
-    onMessage(payload: string, topic: string | undefined) {
-        if (topic === "running") {
-            this.running = (payload === "true");
-        } else if (topic == null) {
-            this.updateFromJSON(JSON.parse(payload));
-        }
-    }
-
-    updateFromJSON(json: any) {
-        update(schema.program, this, json);
-    }
-}
-
-class MqttSectionRunner extends s.SectionRunner {
-    onMessage(payload: string) {
-        this.updateFromJSON(JSON.parse(payload));
-    }
-
-    updateFromJSON(json: any) {
-        update(schema.sectionRunner, this, json);
-    }
-}

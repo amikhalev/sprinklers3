@@ -1,5 +1,7 @@
 import * as pino from "pino";
 
+// tslint:disable:no-console
+
 type Level = "default" | "60" | "50" | "40" | "30" | "20" | "10";
 
 const levels: {[level in Level]: string } = {
