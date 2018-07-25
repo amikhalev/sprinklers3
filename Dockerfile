@@ -29,4 +29,5 @@ COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/public ./public
 
 EXPOSE 8080
+EXPOSE 8081
 ENTRYPOINT [ "npm", "run", "start" ]

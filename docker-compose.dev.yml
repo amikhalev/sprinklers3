@@ -1,0 +1,29 @@
+version: "3"
+services:
+  web:
+    image: "amikhalev/sprinklers3:dev"
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    ports:
+      - "8080:8080"
+      - "8081:8081"
+    volumes:
+      - ./app:/app/app
+      - ./common:/app/common
+      - ./server:/app/server
+    env_file:
+      - .env
+    environment:
+      - PORT=8080
+      - TYPEORM_CONNECTION=postgres
+      - TYPEORM_HOST=database
+      - TYPEORM_DATABASE=postgres
+      - TYPEORM_USERNAME=postgres
+      - TYPEORM_PASSWORD=8JN4w0UsN5dbjMjNvPe452P2yYOqg5PV
+      # Must specify JWT_SECRET and MQTT_URL
+
+  database:
+    image: "postgres:11-alpine"
+    environment:
+      - POSTGRES_PASSWORD=8JN4w0UsN5dbjMjNvPe452P2yYOqg5PV

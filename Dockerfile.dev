@@ -1,0 +1,16 @@
+FROM node:alpine
+
+RUN apk add yarn \
+    python \
+    make \
+    g++
+
+WORKDIR /app/
+
+COPY package.json yarn.lock /app/
+RUN yarn install --frozen-lockfile
+
+COPY tslint.json /app
+
+EXPOSE 8080
+ENTRYPOINT [ "npm", "run", "start:dev" ]
