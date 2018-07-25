@@ -3,6 +3,8 @@ services:
   web:
     image: "amikhalev/sprinklers3"
     build: .
+    depends_on:
+      - database
     ports:
       - "8080:8080"
     env_file:
