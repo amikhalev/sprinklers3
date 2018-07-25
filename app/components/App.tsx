@@ -10,7 +10,7 @@ import * as rp from "@app/routePaths";
 // tslint:disable:ordered-imports
 import "font-awesome/css/font-awesome.css";
 import "semantic-ui-css/semantic.css";
-import "@app/styles/app.scss";
+import "@app/styles/app";
 
 function NavContainer() {
     return (

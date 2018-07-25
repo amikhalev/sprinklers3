@@ -1,0 +1,29 @@
+.ui.container.loginPage {
+  margin-top: 1em;
+
+  .ui.header {
+    text-align: center;
+  }
+
+  /* Mobile */
+  @media only screen and (max-width: 767px) {
+    width: auto !important;
+    margin-left: 1em !important;
+    margin-right: 1em !important;
+  }
+
+  /* Tablet */
+  @media only screen and (min-width: 768px) and (max-width: 991px) {
+    width: 600px;
+  }
+
+  /* Small Monitor */
+  @media only screen and (min-width: 992px) and (max-width: 1199px) {
+    width: 600px;
+  }
+
+  /* Large Monitor */
+  @media only screen and (min-width: 1200px) {
+    width: 800px;
+  }
+}

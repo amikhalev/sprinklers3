@@ -2,100 +2,16 @@
   padding-top: 1em;
 }
 
-.sectionRunner--pausedState {
-  padding-left: .75em;
-  font-size: .75em;
-  font-weight: lighter;
-}
-
-.sectionRunner--pausedState > .fa {
-  padding-right: .2em;
-}
-
-.sectionRunner--pausedState-unpaused {
-}
-
 .flex-horizontal-space-between {
   display: flex;
   align-items: baseline;
   justify-content: space-between;
 }
 
-.sectionRun .progress {
-  margin: 1em 0 0 !important;
-}
-
-.sectionRun .ui.progress .bar {
-  -webkit-transition: none;
-  transition: none;
-  min-width: 0 !important;
-}
-
-.section--number,
-.program--number {
-  width: 2em
-}
-
-.section--name /*,
-.program--name*/
-{
-  width: 10em;
-  white-space: nowrap;
-}
-
-.section--state {
-
-}
-
 .flex {
   display: flex !important;
 }
 
-.section-state.running {
-  color: green;
-}
-
-.messages {
-  position: fixed;
-  bottom: 1em;
-  left: 1em;
-  right: 1em;
-  padding-left: 0;
-  z-index: 1000;
-  display: flex;
-  flex-direction: column;
-}
-
 .flex-spacer {
   flex: 1;
-}
-
-.ui.container.loginPage {
-  margin-top: 1em;
-
-  .ui.header {
-    text-align: center;
-  }
-
-  /* Mobile */
-  @media only screen and (max-width: 767px) {
-    width: auto !important;
-    margin-left: 1em !important;
-    margin-right: 1em !important;
-  }
-
-  /* Tablet */
-  @media only screen and (min-width: 768px) and (max-width: 991px) {
-    width: 600px;
-  }
-
-  /* Small Monitor */
-  @media only screen and (min-width: 992px) and (max-width: 1199px) {
-    width: 600px;
-  }
-
-  /* Large Monitor */
-  @media only screen and (min-width: 1200px) {
-    width: 800px;
-  }
 }

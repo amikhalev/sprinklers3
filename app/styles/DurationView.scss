@@ -1,0 +1,30 @@
+.durationInputs {
+  display: flex;
+  flex-wrap: wrap;
+  margin: -0.5em;
+
+  &.inline {
+    min-width: 30em;
+  }
+}
+
+$durationInput-inputWidth: 5em;
+$durationInput-labelWidth: 2.5em;
+
+.ui.form .field .ui.input.durationInput {
+  margin: 0.5em;
+
+  flex: 1 0 ($durationInput-inputWidth + $durationInput-labelWidth);
+
+  > input {
+    flex: 1 0 $durationInput-inputWidth;
+    min-width: $durationInput-inputWidth;
+    width: 100%;
+  }
+
+  > .label {
+    width: $durationInput-labelWidth;
+    flex: 0 0 $durationInput-labelWidth;
+    text-align: center;
+  }
+}

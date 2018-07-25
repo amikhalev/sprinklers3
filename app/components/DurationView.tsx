@@ -4,6 +4,8 @@ import { Form, Input, InputProps } from "semantic-ui-react";
 
 import { Duration } from "@common/Duration";
 
+import "@app/styles/DurationView";
+
 export default class DurationView extends React.Component<{
     label?: string,
     inline?: boolean,
@@ -12,14 +14,14 @@ export default class DurationView extends React.Component<{
     className?: string,
 }> {
     render() {
-        const { duration, label, inline, onDurationChange } = this.props;
-        const className = classNames("durationInput", this.props.className);
+        const { duration, label, inline, onDurationChange, className } = this.props;
+        const inputsClassName = classNames("durationInputs", { inline });
         if (onDurationChange) {
             return (
                 <React.Fragment>
-                    <Form.Field inline={inline}>
+                    <Form.Field inline={inline} className={className}>
                         {label && <label>{label}</label>}
-                        <div className="durationInputs">
+                        <div className={inputsClassName}>
                             <Input
                                 type="number"
                                 className="durationInput minutes"

@@ -1,0 +1,29 @@
+.sectionRunner .queue {
+  max-height: 14em;
+  height: 14em;
+  overflow-y: scroll;
+}
+
+.sectionRunner--pausedState {
+  padding-left: .75em;
+  font-size: .75em;
+  font-weight: lighter;
+}
+
+.sectionRunner--pausedState > .fa {
+  padding-right: .2em;
+}
+
+.sectionRunner--pausedState-unpaused {
+}
+
+.sectionRun {
+  .ui.progress {
+    margin: 1em 0 0 !important;
+
+    .bar {
+      transition: none;
+      min-width: 0 !important;
+    }
+  }
+}

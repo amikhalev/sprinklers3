@@ -168,7 +168,6 @@ const getConfig = module.exports = (env) => {
         // Otherwise React will be compiled in the very slow development mode.
         new webpack.DefinePlugin(environ.stringified),
         new CaseSensitivePathsPlugin(),
-        // TODO: doesn't work with typescript target: es6
         isProd && new UglifyJsPlugin({
             sourceMap: shouldUseSourceMap,
         }),
@@ -230,7 +229,7 @@ const getConfig = module.exports = (env) => {
                     "webpack://" + path.resolve(info.absoluteResourcePath).replace(/\\/g, "/") : undefined,
         },
         resolve: {
-            extensions: [".ts", ".tsx", ".js", ".json"],
+            extensions: [".ts", ".tsx", ".js", ".json", ".scss"],
             alias: {
                 "@app": paths.appDir,
                 "@common": paths.commonDir,
@@ -249,7 +248,7 @@ const getConfig = module.exports = (env) => {
             host: "0.0.0.0",
             port: 8081,
             proxy: [{
-                context: ["/api"], // TODO: update when there is actually an api
+                context: ["/api"],
                 target: paths.publicUrl,
             }],
         },

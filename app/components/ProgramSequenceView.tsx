@@ -7,6 +7,8 @@ import { DurationView, SectionChooser } from "@app/components/index";
 import { Duration } from "@common/Duration";
 import { ProgramItem, Section } from "@common/sprinklersRpc";
 
+import "@app/styles/ProgramSequenceView";
+
 @observer
 class ProgramSequenceItem extends React.Component<{
     sequenceItem: ProgramItem, sections: Section[], onChange?: (newItem: ProgramItem) => void,

@@ -6,6 +6,8 @@ import { Container, Dimmer, Form, Header, InputOnChangeData, Loader, Message, Se
 import { AppState, injectState } from "@app/state";
 import log from "@common/logger";
 
+import "@app/styles/LoginPage";
+
 class LoginPageState {
     @observable username = "";
     @observable password = "";

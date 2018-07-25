@@ -9,7 +9,8 @@ import { AppState, injectState } from "@app/state";
 import { ConnectionState as ConState } from "@common/sprinklersRpc";
 import { Route, RouteComponentProps, withRouter } from "react-router";
 import { ProgramTable, RunSectionForm, SectionRunnerView, SectionTable } from ".";
-import "./DeviceView.scss";
+
+import "@app/styles/DeviceView";
 
 const ConnectionState = observer(({ connectionState, className }:
                                       { connectionState: ConState, className?: string }) => {

@@ -5,6 +5,8 @@ import { Message, MessageProps, TransitionGroup } from "semantic-ui-react";
 
 import { AppState, injectState, UiMessage, UiStore } from "@app/state/";
 
+import "@app/styles/MessagesView";
+
 @observer
 class MessageView extends React.Component<{
     uiStore: UiStore,
