@@ -115,6 +115,7 @@ class ProgramPage extends React.Component<ProgramPageProps> {
             }
         } else {
             if (this.programView != null) {
+                this.programView.reset();
                 this.programView = null;
             }
         }
@@ -185,6 +186,9 @@ class ProgramPage extends React.Component<ProgramPageProps> {
 
     private close = () => {
         const { deviceId } = this.props.match.params;
+        if (this.programView) {
+            this.programView.reset();
+        }
         this.props.history.push({ pathname: rp.device(deviceId) });
     }
 

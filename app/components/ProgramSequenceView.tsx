@@ -121,16 +121,23 @@ class ProgramSequenceView extends React.Component<{
         const editing = this.props.editing || false;
         const className = classNames("programSequence", { editing });
         return (
-            <ProgramSequenceList
-                className={className}
-                useDragHandle
-                list={sequence}
-                sections={sections}
-                editing={editing}
-                onChange={this.changeItem}
-                onRemove={this.removeItem}
-                onSortEnd={this.onSortEnd}
-            />
+            <div>
+                <ProgramSequenceList
+                    className={className}
+                    useDragHandle
+                    helperClass="dragging"
+                    list={sequence}
+                    sections={sections}
+                    editing={editing}
+                    onChange={this.changeItem}
+                    onRemove={this.removeItem}
+                    onSortEnd={this.onSortEnd}
+                />
+                <Button onClick={this.addItem}>
+                    <Icon name="add"/>
+                    Add item
+                </Button>
+            </div>
         );
     }
 
@@ -140,6 +147,24 @@ class ProgramSequenceView extends React.Component<{
 
     private removeItem: ItemRemoveHandler = (index) => {
         this.props.sequence.splice(index, 1);
+    }
+
+    private addItem = () => {
+        let sectionId = 0;
+        for (const section of this.props.sections) {
+            const sectionNotIncluded = this.props.sequence
+                .every((sequenceItem) =>
+                    sequenceItem.section !== section.id);
+            if (sectionNotIncluded) {
+                sectionId = section.id;
+                break;
+            }
+        }
+        const item = new ProgramItem({
+            section: sectionId,
+            duration: new Duration(5, 0).toSeconds(),
+        });
+        this.props.sequence.push(item);
     }
 
     private onSortEnd = ({oldIndex, newIndex}: SortEnd) => {
