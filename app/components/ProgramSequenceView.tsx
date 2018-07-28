@@ -120,6 +120,15 @@ class ProgramSequenceView extends React.Component<{
         const { sequence, sections } = this.props;
         const editing = this.props.editing || false;
         const className = classNames("programSequence", { editing });
+        let addButton: React.ReactNode = null;
+        if (editing) {
+            addButton = (
+                <Button onClick={this.addItem}>
+                    <Icon name="add"/>
+                    Add item
+                </Button>
+            );
+        }
         return (
             <div>
                 <ProgramSequenceList
@@ -133,10 +142,7 @@ class ProgramSequenceView extends React.Component<{
                     onRemove={this.removeItem}
                     onSortEnd={this.onSortEnd}
                 />
-                <Button onClick={this.addItem}>
-                    <Icon name="add"/>
-                    Add item
-                </Button>
+                {addButton}
             </div>
         );
     }
