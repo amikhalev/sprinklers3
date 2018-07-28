@@ -149,7 +149,7 @@ class ProgramPage extends React.Component<ProgramPageProps> {
                         </Form.Field>
                         <Form.Field>
                             <label><h4>Schedule</h4></label>
-                            <ScheduleView schedule={schedule}/>
+                            <ScheduleView schedule={schedule} editing={editing}/>
                         </Form.Field>
                     </Form>
                 </Modal.Content>

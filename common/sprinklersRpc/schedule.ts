@@ -1,6 +1,11 @@
 import { observable } from "mobx";
+import { Moment } from "moment";
 
 export class TimeOfDay {
+    static fromMoment(m: Moment): TimeOfDay {
+        return new TimeOfDay(m.hour(), m.minute(), m.second(), m.millisecond());
+    }
+
     static fromDate(date: Date): TimeOfDay {
         return new TimeOfDay(date.getHours(), date.getMinutes(), date.getSeconds(), date.getMilliseconds());
     }
@@ -21,6 +26,10 @@ export class TimeOfDay {
 export enum Weekday {
     Sunday, Monday, Tuesday, Wednesday, Thursday, Friday, Saturday,
 }
+
+export const WEEKDAYS: Weekday[] = Object.keys(Weekday)
+    .map((weekday) => Number(weekday))
+    .filter((weekday) => !isNaN(weekday));
 
 export enum Month {
     January = 1,
