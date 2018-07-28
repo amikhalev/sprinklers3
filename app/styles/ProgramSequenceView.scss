@@ -10,8 +10,11 @@
   z-index: 2000;
   display: flex;
   margin-bottom: .5em;
-  i.icon {
-    margin: .5rem;
+  .fields {
+    margin: 0em 0em 1em !important;
+  }
+  .ui.icon.button {
+    height: fit-content;
   }
   .header {
     font-weight: bold;

@@ -1,8 +1,9 @@
 import { observer } from "mobx-react";
 import { createViewModel, IViewModel } from "mobx-utils";
+import * as qs from "query-string";
 import * as React from "react";
 import { RouteComponentProps } from "react-router";
-import { Button, CheckboxProps, Form, Input, InputOnChangeData, Menu, Modal } from "semantic-ui-react";
+import { Button, CheckboxProps, Form, Icon, Input, InputOnChangeData, Menu, Modal } from "semantic-ui-react";
 
 import { ProgramSequenceView, ScheduleView } from "@app/components";
 import * as rp from "@app/routePaths";
@@ -10,25 +11,19 @@ import { AppState, injectState } from "@app/state";
 import log from "@common/logger";
 import { Program, SprinklersDevice } from "@common/sprinklersRpc";
 
+interface ProgramPageProps extends RouteComponentProps<{ deviceId: string, programId: string }> {
+    appState: AppState;
+}
+
 @observer
-class ProgramPage extends React.Component<{
-    appState: AppState,
-} & RouteComponentProps<{ deviceId: string, programId: number }>, {
-    programView: Program & IViewModel<Program> | undefined,
-}> {
-    private device!: SprinklersDevice;
-    private program!: Program;
-
-    constructor(p: any) {
-        super(p);
-        this.state = {
-            programView: undefined,
-        };
-    }
-
+class ProgramPage extends React.Component<ProgramPageProps> {
     get isEditing(): boolean {
-        return this.state.programView != null;
+        return qs.parse(this.props.location.search).editing != null;
     }
+
+    device!: SprinklersDevice;
+    program!: Program;
+    programView: Program & IViewModel<Program> | null = null;
 
     renderName(program: Program) {
         const { name } = program;
@@ -64,9 +59,11 @@ class ProgramPage extends React.Component<{
             editButtons = (
                 <React.Fragment>
                     <Button primary onClick={this.save}>
+                        <Icon name="save" />
                         Save
                     </Button>
-                    <Button negative onClick={this.cancelEditing}>
+                    <Button negative onClick={this.stopEditing}>
+                        <Icon name="cancel" />
                         Cancel
                     </Button>
                 </React.Fragment>
@@ -74,17 +71,23 @@ class ProgramPage extends React.Component<{
         } else {
             editButtons = (
                 <Button primary onClick={this.startEditing}>
+                    <Icon name="edit"/>
                     Edit
                 </Button>
             );
         }
+        const stopStartButton = (
+            <Button onClick={this.cancelOrRun} positive={!running} negative={running}>
+                <Icon name={running ? "stop" : "play"} />
+                {running ? "Stop" : "Run"}
+            </Button>
+        );
         return (
             <Modal.Actions>
-                <Button positive={!running} negative={running} onClick={this.cancelOrRun}>
-                    {running ? "Stop" : "Run"}
-                </Button>
+                {stopStartButton}
                 {editButtons}
                 <Button onClick={this.close}>
+                    <Icon name="arrow left" />
                     Close
                 </Button>
             </Modal.Actions>
@@ -92,17 +95,32 @@ class ProgramPage extends React.Component<{
     }
 
     render() {
-        const { deviceId, programId } = this.props.match.params;
-        const device = this.device = this.props.appState.sprinklersRpc.getDevice(deviceId);
-        // TODO: check programId
-        if (device.programs.length <= programId || !device.programs[programId]) {
-            return null;
+        const { deviceId, programId: pid } = this.props.match.params;
+        const programId = Number(pid);
+        // tslint:disable-next-line:prefer-conditional-expression
+        if (!this.device || this.device.id !== deviceId) {
+            this.device = this.props.appState.sprinklersRpc.getDevice(deviceId);
         }
-        this.program = device.programs[programId];
+        // tslint:disable-next-line:prefer-conditional-expression
+        if (!this.program || this.program.id !== programId) {
+            if (this.device.programs.length > programId && programId >= 0) {
+                this.program = this.device.programs[programId];
+            } else {
+                return null;
+            }
+        }
+        if (this.isEditing) {
+            if (this.programView == null && this.program) {
+                this.programView = createViewModel(this.program);
+            }
+        } else {
+            if (this.programView != null) {
+                this.programView = null;
+            }
+        }
 
-        const { programView } = this.state;
-        const program = programView || this.program;
-        const editing = programView != null;
+        const program = this.programView || this.program;
+        const editing = this.isEditing;
 
         const { running, enabled, schedule, sequence } = program;
 
@@ -144,37 +162,25 @@ class ProgramPage extends React.Component<{
     }
 
     private startEditing = () => {
-        let { programView } = this.state;
-        if (programView) { // stop editing, so save
-            programView.submit();
-            programView = undefined;
-        } else { // start editing
-            programView = createViewModel(this.program);
-        }
-        this.setState({ programView });
+        this.props.history.push({ search: qs.stringify({ editing: true }) });
     }
 
     private save = () => {
-        let { programView } = this.state;
-        if (programView) { // stop editing, so save
-            programView.submit();
-            programView = undefined;
+        if (!this.programView || !this.program) {
+            return;
         }
-        this.setState({ programView });
+        this.programView.submit();
         this.program.update()
             .then((data) => {
                 log.info({ data }, "Program updated");
             }, (err) => {
                 log.error({ err }, "error updating Program");
             });
+        this.stopEditing();
     }
 
-    private cancelEditing = () => {
-        let { programView } = this.state;
-        if (programView) {
-            programView = undefined; // stop editing
-        }
-        this.setState({ programView });
+    private stopEditing = () => {
+        this.props.history.push({ search: "" });
     }
 
     private close = () => {
@@ -183,16 +189,14 @@ class ProgramPage extends React.Component<{
     }
 
     private onNameChange = (e: any, p: InputOnChangeData) => {
-        const { programView } = this.state;
-        if (programView) {
-            programView.name = p.value;
+        if (this.programView) {
+            this.programView.name = p.value;
         }
     }
 
     private onEnabledChange = (e: any, p: CheckboxProps) => {
-        const { programView } = this.state;
-        if (programView) {
-            programView.enabled = p.checked!;
+        if (this.programView) {
+            this.programView.enabled = p.checked!;
         }
     }
 }

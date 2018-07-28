@@ -1,6 +1,6 @@
 import { observer } from "mobx-react";
 import * as React from "react";
-import { Form, Header, Segment } from "semantic-ui-react";
+import { Form, Header, Icon, Segment } from "semantic-ui-react";
 
 import { DurationView, SectionChooser } from "@app/components";
 import { UiStore } from "@app/state";
@@ -47,6 +47,7 @@ export default class RunSectionForm extends React.Component<{
                         onClick={this.run}
                         disabled={!this.isValid}
                     >
+                        <Icon name="play"/>
                         Run
                     </Form.Button>
                 </Form>

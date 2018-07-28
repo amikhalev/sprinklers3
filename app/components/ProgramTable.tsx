@@ -2,7 +2,7 @@ import { observer } from "mobx-react";
 import { RouterStore } from "mobx-react-router";
 import * as React from "react";
 import { Link } from "react-router-dom";
-import { Button, ButtonProps, Table } from "semantic-ui-react";
+import { Button, ButtonProps, Icon, Table } from "semantic-ui-react";
 
 import { ProgramSequenceView, ScheduleView } from "@app/components";
 import * as rp from "@app/routePaths";
@@ -20,8 +20,15 @@ class ProgramRows extends React.Component<{
 
         const { name, running, enabled, schedule, sequence } = program;
 
-        const buttonStyle: ButtonProps = { size: "small", compact: true };
+        const buttonStyle: ButtonProps = { size: "small", compact: false };
         const detailUrl = rp.program(device.id, program.id);
+
+        const stopStartButton = (
+            <Button onClick={this.cancelOrRun} {...buttonStyle} positive={!running} negative={running}>
+                <Icon name={running ? "stop" : "play"} />
+                {running ? "Stop" : "Run"}
+            </Button>
+        );
 
         const mainRow = (
             <Table.Row>
@@ -32,13 +39,13 @@ class ProgramRows extends React.Component<{
                     <span>{running ? "Running" : "Not running"}</span>
                 </Table.Cell>
                 <Table.Cell>
-                    <Button onClick={this.cancelOrRun} {...buttonStyle} positive={!running} negative={running}>
-                        {running ? "Stop" : "Run"}
-                    </Button>
+                    {stopStartButton}
                     <Button as={Link} to={detailUrl} {...buttonStyle} primary>
+                        <Icon name="edit"/>
                         Open
                     </Button>
                     <Button onClick={this.toggleExpanded} {...buttonStyle}>
+                        <Icon name="list"/>
                         {expanded ? "Hide Details" : "Show Details"}
                     </Button>
                 </Table.Cell>

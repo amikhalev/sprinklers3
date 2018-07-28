@@ -1,9 +1,8 @@
 import classNames = require("classnames");
 import { observer } from "mobx-react";
 import * as React from "react";
-import * as ReactDOM from "react-dom";
-import { SortableContainer, SortableElement, SortableHandle, SortEnd, arrayMove } from "react-sortable-hoc";
-import { Form, Icon, List } from "semantic-ui-react";
+import { SortableContainer, SortableElement, SortableHandle, SortEnd } from "react-sortable-hoc";
+import { Button, Form, Icon, List } from "semantic-ui-react";
 
 import { DurationView, SectionChooser } from "@app/components/index";
 import { Duration } from "@common/Duration";
@@ -11,21 +10,31 @@ import { ProgramItem, Section } from "@common/sprinklersRpc";
 
 import "@app/styles/ProgramSequenceView";
 
-const Handle = SortableHandle(() => <Icon name="bars"/>);
+type ItemChangeHandler = (index: number, newItem: ProgramItem) => void;
+type ItemRemoveHandler = (index: number) => void;
+
+const Handle = SortableHandle(() => <Button basic icon><Icon name="bars"/></Button>);
 
 @observer
 class ProgramSequenceItem extends React.Component<{
-    sequenceItem: ProgramItem, sections: Section[], onChange?: (newItem: ProgramItem) => void,
+    sequenceItem: ProgramItem,
+    idx: number,
+    sections: Section[],
+    editing: boolean,
+    onChange: ItemChangeHandler,
+    onRemove: ItemRemoveHandler,
 }> {
     renderContent() {
-        const { sequenceItem, sections } = this.props;
-        const editing = this.props.onChange != null;
+        const { editing, sequenceItem, sections } = this.props;
         const section = sections[sequenceItem.section];
         const duration = Duration.fromSeconds(sequenceItem.duration);
 
         if (editing) {
             return (
                 <Form.Group>
+                    <Button icon negative onClick={this.onRemove}>
+                        <Icon name="cancel" />
+                    </Button>
                     <SectionChooser
                         label="Section"
                         sections={sections}
@@ -50,7 +59,7 @@ class ProgramSequenceItem extends React.Component<{
     }
 
     render() {
-        const editing = this.props.onChange != null;
+        const { editing }= this.props;
         return (
             <li className="programSequence-item ui form">
                 {editing ? <Handle /> : <List.Icon name="caret right"/>}
@@ -60,44 +69,43 @@ class ProgramSequenceItem extends React.Component<{
     }
 
     private onSectionChange = (newSection: Section) => {
-        if (!this.props.onChange) {
-            return;
-        }
-        this.props.onChange(new ProgramItem({
+        this.props.onChange(this.props.idx, new ProgramItem({
             ...this.props.sequenceItem, section: newSection.id,
         }));
     }
 
     private onDurationChange = (newDuration: Duration) => {
-        if (!this.props.onChange) {
-            return;
-        }
-        this.props.onChange(new ProgramItem({
+        this.props.onChange(this.props.idx, new ProgramItem({
             ...this.props.sequenceItem, duration: newDuration.toSeconds(),
         }));
+    }
+
+    private onRemove = () => {
+        this.props.onRemove(this.props.idx);
     }
 }
 
 const ProgramSequenceItemD = SortableElement(ProgramSequenceItem);
 
-type ItemChangeHandler = (newItem: ProgramItem, index: number) => void;
-
-const ProgramSequenceList = SortableContainer(observer(({ className, list, sections, onChange }: {
+const ProgramSequenceList = SortableContainer(observer((props: {
     className: string,
     list: ProgramItem[],
     sections: Section[],
-    onChange?: ItemChangeHandler,
+    editing: boolean,
+    onChange: ItemChangeHandler,
+    onRemove: ItemRemoveHandler,
 }) => {
+    const { className, list, sections, ...rest } = props;
     const listItems = list.map((item, index) => {
-        const onChangeHandler = onChange ? (newItem: ProgramItem) => onChange(newItem, index) : undefined;
         const key = `item-${index}`;
         return (
             <ProgramSequenceItemD
-                sequenceItem={item}
-                sections={sections}
+                {...rest}
                 key={key}
+                sequenceItem={item}
                 index={index}
-                onChange={onChangeHandler}
+                idx={index}
+                sections={sections}
             />
         );
     });
@@ -112,21 +120,26 @@ class ProgramSequenceView extends React.Component<{
         const { sequence, sections } = this.props;
         const editing = this.props.editing || false;
         const className = classNames("programSequence", { editing });
-        const onChange = editing ? this.changeItem : undefined;
         return (
             <ProgramSequenceList
                 className={className}
                 useDragHandle
                 list={sequence}
                 sections={sections}
-                onChange={onChange}
+                editing={editing}
+                onChange={this.changeItem}
+                onRemove={this.removeItem}
                 onSortEnd={this.onSortEnd}
             />
         );
     }
 
-    private changeItem: ItemChangeHandler = (newItem, index) => {
+    private changeItem: ItemChangeHandler = (index, newItem) => {
         this.props.sequence[index] = newItem;
+    }
+
+    private removeItem: ItemRemoveHandler = (index) => {
+        this.props.sequence.splice(index, 1);
     }
 
     private onSortEnd = ({oldIndex, newIndex}: SortEnd) => {

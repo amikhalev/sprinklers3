@@ -21,7 +21,7 @@ function PausedState({ paused, togglePaused }: PausedStateProps) {
         "sectionRunner--pausedState-unpaused": !paused,
     });
     return (
-        <Button className={classes} size="tiny" onClick={togglePaused}>
+        <Button className={classes} size="medium" onClick={togglePaused}>
             <Icon name={paused ? "pause" : "play"}/>
             {paused ? "Paused" : "Processing"}
         </Button>
@@ -137,7 +137,7 @@ export default class SectionRunnerView extends React.Component<{
         return (
             <Segment className="sectionRunner">
                 <div style={{ display: "flex", alignContent: "baseline" }}>
-                    <h4 style={{ marginBottom: 0 }}>Section Runner Queue</h4>
+                    <h3 style={{ marginBottom: 0 }}>Section Runner Queue</h3>
                     <div className="flex-spacer"/>
                     <PausedState paused={paused} togglePaused={this.togglePaused}/>
                 </div>
