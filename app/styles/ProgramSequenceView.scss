@@ -1,3 +1,22 @@
-.programSequence.editing .item .content {
-  width: 20em;
+.programSequence {
+  &.editing .programSequence-item .content {
+    // width: 20em;
+  }
+  padding-left: 0;
+}
+
+.programSequence-item {
+  list-style-type: none;
+  z-index: 2000;
+  display: flex;
+  margin-bottom: .5em;
+  i.icon {
+    margin: .5rem;
+  }
+  .header {
+    font-weight: bold;
+  }
+  .durationInputs {
+    width: 20em;
+  }
 }

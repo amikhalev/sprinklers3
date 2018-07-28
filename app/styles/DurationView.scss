@@ -1,49 +1,42 @@
 $durationInput-spacing: 1.0em;
+$durationInput-inputWidth: 4em;
+$durationInput-labelWidth: 2.5em;
 
-.durationInputs {
-  display: flex;
-  // max-width: 100%;
+.field .durationInputs {
+  display: flex; // max-width: 100%;
   justify-content: start;
   flex-wrap: wrap;
   margin: -$durationInput-spacing / 2;
 
-  &.inline {
-    min-width: 20em;
-
-    .ui.input.durationInput {
-      >input {
-        width: 0 !important;
-      }
-    }
-  }
-}
-
-$durationInput-inputWidth: 4em;
-$durationInput-labelWidth: 2.5em;
-
-.ui.form .field .ui.input.durationInput {
-  padding: $durationInput-spacing / 2;
-
-  max-width: 100%;
   width: auto;
-  flex-basis: auto;
-  flex-shrink: 0;
-  flex-grow: 1;
 
-  > input {
-    min-width: $durationInput-inputWidth;
-    width: auto;
-    flex-basis: $durationInput-inputWidth;
-    flex-grow: 1;
-    flex-shrink: 0;
+  .ui.input.durationInput>input {
+    width: 0 !important;
   }
 
-  > .label {
-    min-width: $durationInput-labelWidth;
-    width: $durationInput-labelWidth;
-    flex: $durationInput-labelWidth;
-    flex-grow: 0;
+  .ui.input.durationInput {
+    padding: $durationInput-spacing / 2;
+    max-width: 100%;
+    width: auto !important;
+    flex-basis: auto;
     flex-shrink: 0;
-    text-align: center;
+    flex-grow: 1;
+
+    >input {
+      min-width: $durationInput-inputWidth;
+      width: auto;
+      flex-basis: $durationInput-inputWidth;
+      flex-grow: 1;
+      flex-shrink: 0;
+    }
+
+    >.label {
+      min-width: $durationInput-labelWidth;
+      width: $durationInput-labelWidth;
+      flex: $durationInput-labelWidth;
+      flex-grow: 0;
+      flex-shrink: 0;
+      text-align: center;
+    }
   }
 }
