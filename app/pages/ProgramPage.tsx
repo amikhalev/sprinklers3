@@ -1,5 +1,5 @@
+import { assign, merge } from "lodash";
 import { observer } from "mobx-react";
-import { createViewModel, IViewModel } from "mobx-utils";
 import * as qs from "query-string";
 import * as React from "react";
 import { RouteComponentProps } from "react-router";
@@ -23,7 +23,7 @@ class ProgramPage extends React.Component<ProgramPageProps> {
 
     device!: SprinklersDevice;
     program!: Program;
-    programView: Program & IViewModel<Program> | null = null;
+    programView: Program | null = null;
 
     renderName(program: Program) {
         const { name } = program;
@@ -111,11 +111,14 @@ class ProgramPage extends React.Component<ProgramPageProps> {
         }
         if (this.isEditing) {
             if (this.programView == null && this.program) {
-                this.programView = createViewModel(this.program);
+                // this.programView = createViewModel(this.program);
+                // this.programView = observable(toJS(this.program));
+                this.programView = new Program(this.program.device, this.program.id);
+                merge(this.programView, this.program);
             }
         } else {
             if (this.programView != null) {
-                this.programView.reset();
+                // this.programView.reset();
                 this.programView = null;
             }
         }
@@ -170,7 +173,7 @@ class ProgramPage extends React.Component<ProgramPageProps> {
         if (!this.programView || !this.program) {
             return;
         }
-        this.programView.submit();
+        assign(this.program, this.programView);
         this.program.update()
             .then((data) => {
                 log.info({ data }, "Program updated");
@@ -186,10 +189,7 @@ class ProgramPage extends React.Component<ProgramPageProps> {
 
     private close = () => {
         const { deviceId } = this.props.match.params;
-        if (this.programView) {
-            this.programView.reset();
-        }
-        this.props.history.push({ pathname: rp.device(deviceId) });
+        this.props.history.push({ pathname: rp.device(deviceId), search: "" });
     }
 
     private onNameChange = (e: any, p: InputOnChangeData) => {
