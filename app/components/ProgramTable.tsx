@@ -2,7 +2,7 @@ import { observer } from "mobx-react";
 import { RouterStore } from "mobx-react-router";
 import * as React from "react";
 import { Link } from "react-router-dom";
-import { Button, ButtonProps, Icon, Table } from "semantic-ui-react";
+import { Button, ButtonProps, Form, Icon, Table } from "semantic-ui-react";
 
 import { ProgramSequenceView, ScheduleView } from "@app/components";
 import * as rp from "@app/routePaths";
@@ -41,11 +41,11 @@ class ProgramRows extends React.Component<{
                 <Table.Cell>
                     {stopStartButton}
                     <Button as={Link} to={detailUrl} {...buttonStyle} primary>
-                        <Icon name="edit"/>
+                        <Icon name="edit" />
                         Open
                     </Button>
                     <Button onClick={this.toggleExpanded} {...buttonStyle}>
-                        <Icon name="list"/>
+                        <Icon name="list" />
                         {expanded ? "Hide Details" : "Show Details"}
                     </Button>
                 </Table.Cell>
@@ -54,8 +54,10 @@ class ProgramRows extends React.Component<{
         const detailRow = expanded && (
             <Table.Row>
                 <Table.Cell className="program--sequence" colSpan="5">
-                    <h4>Sequence: </h4> <ProgramSequenceView sequence={sequence} sections={sections}/>
-                    <h4>Schedule: </h4> <ScheduleView schedule={schedule}/>
+                    <Form>
+                        <h4>Sequence: </h4> <ProgramSequenceView sequence={sequence} sections={sections} />
+                        <ScheduleView schedule={schedule} label={<h4>Schedule: </h4>} />
+                    </Form>
                 </Table.Cell>
             </Table.Row>
         );

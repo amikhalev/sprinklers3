@@ -71,7 +71,7 @@ class ProgramPage extends React.Component<ProgramPageProps> {
         } else {
             editButtons = (
                 <Button primary onClick={this.startEditing}>
-                    <Icon name="edit"/>
+                    <Icon name="edit" />
                     Edit
                 </Button>
             );
@@ -141,11 +141,15 @@ class ProgramPage extends React.Component<ProgramPageProps> {
                                 readOnly={!editing}
                                 onChange={this.onEnabledChange}
                             />
-                            <Form.Checkbox toggle label="Running" checked={running} readOnly={!editing}/>
+                            <Form.Checkbox toggle label="Running" checked={running} readOnly={!editing} />
                         </Form.Group>
                         <Form.Field>
                             <label><h4>Sequence</h4></label>
-                            <ProgramSequenceView sequence={sequence} sections={this.device.sections} editing={editing}/>
+                            <ProgramSequenceView
+                                sequence={sequence}
+                                sections={this.device.sections}
+                                editing={editing}
+                            />
                         </Form.Field>
                         <ScheduleView schedule={schedule} editing={editing} label={<h4>Schedule</h4>} />
                     </Form>

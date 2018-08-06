@@ -23,7 +23,7 @@ export default class ScheduleView extends React.Component<ScheduleViewProps> {
 
         let labelNode: React.ReactNode;
         if (typeof label === "string") {
-            labelNode = <label>{label}</label>
+            labelNode = <label>{label}</label>;
         } else if (label != null) {
             labelNode = label;
         }
@@ -31,10 +31,10 @@ export default class ScheduleView extends React.Component<ScheduleViewProps> {
         return (
             <Form.Field className="scheduleView">
                 {labelNode}
-                <ScheduleTimes times={schedule.times} editing={editing} onChange={this.updateTimes}/>
-                <WeekdaysView weekdays={schedule.weekdays} editing={editing} onChange={this.updateWeekdays}/>
-                <ScheduleDate label="From" date={schedule.from} editing={editing} onChange={this.updateFromDate}/>
-                <ScheduleDate label="To" date={schedule.to} editing={editing} onChange={this.updateToDate}/>
+                <ScheduleTimes times={schedule.times} editing={editing} onChange={this.updateTimes} />
+                <WeekdaysView weekdays={schedule.weekdays} editing={editing} onChange={this.updateWeekdays} />
+                <ScheduleDate label="From" date={schedule.from} editing={editing} onChange={this.updateFromDate} />
+                <ScheduleDate label="To" date={schedule.to} editing={editing} onChange={this.updateToDate} />
             </Form.Field>
         );
     }

@@ -31,9 +31,11 @@ export default class WeekdaysView extends React.Component<WeekdaysViewProps> {
         } else {
             node = weekdays.map((weekday) => Weekday[weekday]).join(", ");
         }
-        return (<Form.Group inline>
-            <label>On</label> {node}
-        </Form.Group>);
+        return (
+            <Form.Group inline>
+                <label>On</label> {node}
+            </Form.Group>
+        );
     }
     private toggleWeekday = (event: React.FormEvent<HTMLInputElement>, data: CheckboxProps) => {
         const { weekdays, onChange } = this.props;

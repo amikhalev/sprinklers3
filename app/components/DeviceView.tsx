@@ -13,7 +13,7 @@ import { ProgramTable, RunSectionForm, SectionRunnerView, SectionTable } from ".
 import "@app/styles/DeviceView";
 
 const ConnectionState = observer(({ connectionState, className }:
-                                      { connectionState: ConState, className?: string }) => {
+    { connectionState: ConState, className?: string }) => {
     const connected = connectionState.isDeviceConnected;
     let connectionText: string;
     let iconName: SemanticICONS = "unlinkify";
@@ -37,7 +37,7 @@ const ConnectionState = observer(({ connectionState, className }:
     const classes = classNames("connectionState", clazzName, className);
     return (
         <div className={classes}>
-            <Icon name={iconName}/>&nbsp;
+            <Icon name={iconName} />&nbsp;
             {connectionText}
         </div>
     );
@@ -57,26 +57,26 @@ class DeviceView extends React.Component<DeviceViewProps & RouteComponentProps<a
             <React.Fragment>
                 <Grid>
                     <Grid.Column mobile="16" tablet="16" computer="16" largeScreen="6">
-                        <SectionRunnerView sectionRunner={sectionRunner} sections={sections}/>
+                        <SectionRunnerView sectionRunner={sectionRunner} sections={sections} />
                     </Grid.Column>
                     <Grid.Column mobile="16" tablet="9" computer="9" largeScreen="6">
-                        <SectionTable sections={sections}/>
+                        <SectionTable sections={sections} />
                     </Grid.Column>
                     <Grid.Column mobile="16" tablet="7" computer="7" largeScreen="4">
-                        <RunSectionForm device={device} uiStore={uiStore}/>
+                        <RunSectionForm device={device} uiStore={uiStore} />
                     </Grid.Column>
                 </Grid>
-                <ProgramTable device={device} routerStore={routerStore}/>
-                <Route path={rp.program(":deviceId", ":programId")} component={p.ProgramPage}/>
+                <ProgramTable device={device} routerStore={routerStore} />
+                <Route path={rp.program(":deviceId", ":programId")} component={p.ProgramPage} />
             </React.Fragment>
         );
         return (
             <Item>
-                <Item.Image src={require("@app/images/raspberry_pi.png")}/>
+                <Item.Image src={require("@app/images/raspberry_pi.png")} />
                 <Item.Content className="device">
                     <Header as="h1">
                         <div>Device <kbd>{id}</kbd></div>
-                        <ConnectionState connectionState={connectionState}/>
+                        <ConnectionState connectionState={connectionState} />
                     </Header>
                     <Item.Meta>
                         Raspberry Pi Grinklers Device

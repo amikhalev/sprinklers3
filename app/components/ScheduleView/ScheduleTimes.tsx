@@ -27,10 +27,11 @@ export default class ScheduleTimes extends React.Component<{
                 </span>
             );
         }
-        return (<Form.Field inline className="scheduleTimes">
-            <label>At</label>
-            {timesNode}
-        </Form.Field>);
+        return (
+            <Form.Field inline className="scheduleTimes">
+                <label>At</label> {timesNode}
+            </Form.Field>
+        );
     }
     private onTimeChange = (newTime: TimeOfDay, index: number) => {
         const { times, onChange } = this.props;

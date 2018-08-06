@@ -28,18 +28,22 @@ export default class TimeInput extends React.Component<TimeInputProps, TimeInput
         }
         return {};
     }
+
     constructor(p: any) {
         super(p);
         this.state = { rawValue: "", lastTime: null };
     }
+
     render() {
         return <Input type="time" value={this.state.rawValue} onChange={this.onChange} onBlur={this.onBlur} />;
     }
+
     private onChange = (e: React.SyntheticEvent<HTMLInputElement>, data: InputOnChangeData) => {
         this.setState({
             rawValue: data.value,
         });
-    };
+    }
+
     private onBlur: React.FocusEventHandler<HTMLInputElement> = (e) => {
         const m = moment(this.state.rawValue, HTML_TIME_INPUT_FORMAT);
         if (m.isValid()) {
@@ -47,5 +51,5 @@ export default class TimeInput extends React.Component<TimeInputProps, TimeInput
         } else {
             this.setState({ rawValue: timeOfDayToHtmlDateInput(this.props.value) });
         }
-    };
+    }
 }

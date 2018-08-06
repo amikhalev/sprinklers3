@@ -42,7 +42,7 @@ export default class ScheduleDate extends React.Component<ScheduleDateProps, Sch
             if (date) {
                 clearIcon = <Icon name="ban" link onClick={this.onClear} />;
             }
-            dayNode = <Input type="date" icon={clearIcon} value={this.state.rawValue} onChange={this.onChange}/>;
+            dayNode = <Input type="date" icon={clearIcon} value={this.state.rawValue} onChange={this.onChange} />;
         } else {
             let dayString: string;
             if (date) {
@@ -56,7 +56,7 @@ export default class ScheduleDate extends React.Component<ScheduleDateProps, Sch
 
         let labelNode: React.ReactNode = null;
         if (typeof label === "string") {
-            labelNode = <label>{label}</label>
+            labelNode = <label>{label}</label>;
         } else if (label != null) {
             labelNode = label;
         }
