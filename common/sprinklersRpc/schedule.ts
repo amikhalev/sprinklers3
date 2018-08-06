@@ -10,6 +10,13 @@ export class TimeOfDay {
         return new TimeOfDay(date.getHours(), date.getMinutes(), date.getSeconds(), date.getMilliseconds());
     }
 
+    static equals(a: TimeOfDay | null | undefined, b: TimeOfDay | null | undefined): boolean {
+        return (a === b) || ((a != null && b != null) && a.hour === b.hour &&
+            a.minute === b.minute &&
+            a.second === b.second &&
+            a.millisecond === b.millisecond);
+    }
+
     readonly hour: number;
     readonly minute: number;
     readonly second: number;
@@ -47,6 +54,17 @@ export enum Month {
 }
 
 export class DateOfYear {
+    static equals(a: DateOfYear | null | undefined, b: DateOfYear | null | undefined): boolean {
+        return (a === b) || ((a instanceof DateOfYear && b instanceof DateOfYear) &&
+            a.day === b.day &&
+            a.month === b.month &&
+            a.year === b.year);
+    }
+
+    static fromMoment(m: Moment): DateOfYear {
+        return new DateOfYear(m.date(), m.month(), m.year());
+    }
+
     readonly day: number;
     readonly month: Month;
     readonly year: number;

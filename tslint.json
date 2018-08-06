@@ -32,7 +32,8 @@
     ],
     "no-submodule-imports": false,
     "jsx-boolean-value": [ true, "never" ],
-    "no-implicit-dependencies": false
+    "no-implicit-dependencies": false,
+    "curly": [ true, "ignore-same-line" ]
   },
   "rulesDirectory": []
 }

@@ -147,10 +147,7 @@ class ProgramPage extends React.Component<ProgramPageProps> {
                             <label><h4>Sequence</h4></label>
                             <ProgramSequenceView sequence={sequence} sections={this.device.sections} editing={editing}/>
                         </Form.Field>
-                        <Form.Field>
-                            <label><h4>Schedule</h4></label>
-                            <ScheduleView schedule={schedule} editing={editing}/>
-                        </Form.Field>
+                        <ScheduleView schedule={schedule} editing={editing} label={<h4>Schedule</h4>} />
                     </Form>
                 </Modal.Content>
                 {this.renderActions(program)}
