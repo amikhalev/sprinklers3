@@ -3,9 +3,9 @@ import { observer } from "mobx-react";
 import * as React from "react";
 import { Message, MessageProps, TransitionGroup } from "semantic-ui-react";
 
-import { AppState, injectState, UiMessage, UiStore } from "@app/state/";
+import { AppState, injectState, UiMessage, UiStore } from "@client/state/";
 
-import "@app/styles/MessagesView";
+import "@client/styles/MessagesView";
 
 @observer
 class MessageView extends React.Component<{

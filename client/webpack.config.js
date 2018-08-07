@@ -111,7 +111,7 @@ const rules = (env) => {
                 // Process TypeScript with TSC through HappyPack.
                 {
                     test: /\.tsx?$/, use: "happypack/loader?id=ts",
-                    include: [ paths.appDir, paths.commonDir ],
+                    include: [ paths.clientDir, paths.commonDir ],
                 },
                 // "file" loader makes sure those assets get served by WebpackDevServer.
                 // When you `import` an asset, you get its (virtual) filename.
@@ -147,7 +147,7 @@ const getConfig = module.exports = (env) => {
     const plugins = [
         new HtmlWebpackPlugin({
             inject: true,
-            template: paths.appHtml,
+            template: paths.clientHtml,
             minify: isProd ? {
                 removeComments: true,
                 collapseWhitespace: true,
@@ -161,7 +161,7 @@ const getConfig = module.exports = (env) => {
                 minifyURLs: true,
             } : undefined,
         }),
-        new FaviconsWebpackPlugin(path.resolve(paths.appDir, "images", "favicon-96x96.png")),
+        new FaviconsWebpackPlugin(path.resolve(paths.clientDir, "images", "favicon-96x96.png")),
         // Makes some environment variables available to the JS code, for example:
         // if (process.env.NODE_ENV === "production") { ... }. See `./env.js`.
         // It is absolutely essential that NODE_ENV was set to production here.
@@ -179,14 +179,14 @@ const getConfig = module.exports = (env) => {
             loaders: [{
                 loader: "ts-loader",
                 options: {
-                    configFile: paths.appTsConfig,
+                    configFile: paths.clientTsConfig,
                     happyPackMode: true,
                 },
             }],
         }),
         new ForkTsCheckerWebpackPlugin({
             checkSyntacticErrors: true,
-            tsconfig: paths.appTsConfig,
+            tsconfig: paths.clientTsConfig,
             tslint: paths.resolveRoot("tslint.json"),
         }),
         isDev && new DashboardPlugin(),
@@ -212,10 +212,10 @@ const getConfig = module.exports = (env) => {
             isDev && require.resolve("react-hot-loader/patch"),
             isDev && require.resolve("react-dev-utils/webpackHotDevClient"),
             require.resolve("./polyfills"),
-            paths.appEntry,
+            paths.clientEntry,
         ].filter(Boolean),
         output: {
-            path: paths.appBuildDir,
+            path: paths.clientBuildDir,
             pathinfo: isDev,
             filename: isProd ?
                 'static/js/[name].[chunkhash:8].js' :
@@ -231,7 +231,7 @@ const getConfig = module.exports = (env) => {
         resolve: {
             extensions: [".ts", ".tsx", ".js", ".json", ".scss"],
             alias: {
-                "@app": paths.appDir,
+                "@client": paths.clientDir,
                 "@common": paths.commonDir,
             }
         },

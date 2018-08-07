@@ -2,8 +2,8 @@ import { observer } from "mobx-react";
 import * as React from "react";
 import { Form, Header, Icon, Segment } from "semantic-ui-react";
 
-import { DurationView, SectionChooser } from "@app/components";
-import { UiStore } from "@app/state";
+import { DurationView, SectionChooser } from "@client/components";
+import { UiStore } from "@client/state";
 import { Duration } from "@common/Duration";
 import log from "@common/logger";
 import { Section, SprinklersDevice } from "@common/sprinklersRpc";

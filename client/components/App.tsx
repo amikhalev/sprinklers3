@@ -3,14 +3,14 @@ import * as React from "react";
 import { Redirect, Route, Switch } from "react-router";
 import { Container } from "semantic-ui-react";
 
-import { MessagesView, NavBar } from "@app/components";
-import * as p from "@app/pages";
-import * as rp from "@app/routePaths";
+import { MessagesView, NavBar } from "@client/components";
+import * as p from "@client/pages";
+import * as rp from "@client/routePaths";
 
 // tslint:disable:ordered-imports
 import "font-awesome/css/font-awesome.css";
 import "semantic-ui-css/semantic.css";
-import "@app/styles/app";
+import "@client/styles/app";
 
 function NavContainer() {
     return (

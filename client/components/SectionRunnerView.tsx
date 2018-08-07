@@ -7,7 +7,7 @@ import { Duration } from "@common/Duration";
 import log from "@common/logger";
 import { Section, SectionRun, SectionRunner } from "@common/sprinklersRpc";
 
-import "@app/styles/SectionRunnerView";
+import "@client/styles/SectionRunnerView";
 
 interface PausedStateProps {
     paused: boolean;

@@ -1,6 +1,6 @@
 import * as React from "react";
 
-import { AppState } from "@app/state";
+import { AppState } from "@client/state";
 
 const StateContext = React.createContext<AppState | null>(null);
 

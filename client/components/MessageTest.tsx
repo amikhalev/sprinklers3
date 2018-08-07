@@ -1,7 +1,7 @@
 import * as React from "react";
 import { Button, Segment } from "semantic-ui-react";
 
-import { AppState, injectState } from "@app/state";
+import { AppState, injectState } from "@client/state";
 import { getRandomId } from "@common/utils";
 
 class MessageTest extends React.Component<{ appState: AppState }> {

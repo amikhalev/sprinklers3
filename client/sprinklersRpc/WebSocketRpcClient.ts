@@ -1,7 +1,7 @@
 import { action, autorun, observable, when } from "mobx";
 import { update } from "serializr";
 
-import { TokenStore } from "@app/state/TokenStore";
+import { TokenStore } from "@client/state/TokenStore";
 import { ErrorCode } from "@common/ErrorCode";
 import * as rpc from "@common/jsonRpc";
 import logger from "@common/logger";

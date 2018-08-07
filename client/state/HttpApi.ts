@@ -1,4 +1,4 @@
-import { TokenStore } from "@app/state/TokenStore";
+import { TokenStore } from "@client/state/TokenStore";
 import ApiError from "@common/ApiError";
 import { ErrorCode } from "@common/ErrorCode";
 

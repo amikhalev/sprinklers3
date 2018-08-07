@@ -4,7 +4,7 @@ import { Form, Input, InputProps } from "semantic-ui-react";
 
 import { Duration } from "@common/Duration";
 
-import "@app/styles/DurationView";
+import "@client/styles/DurationView";
 
 export default class DurationView extends React.Component<{
     label?: string,

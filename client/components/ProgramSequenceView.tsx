@@ -4,11 +4,11 @@ import * as React from "react";
 import { SortableContainer, SortableElement, SortableHandle, SortEnd } from "react-sortable-hoc";
 import { Button, Form, Icon, List } from "semantic-ui-react";
 
-import { DurationView, SectionChooser } from "@app/components/index";
+import { DurationView, SectionChooser } from "@client/components/index";
 import { Duration } from "@common/Duration";
 import { ProgramItem, Section } from "@common/sprinklersRpc";
 
-import "@app/styles/ProgramSequenceView";
+import "@client/styles/ProgramSequenceView";
 
 type ItemChangeHandler = (index: number, newItem: ProgramItem) => void;
 type ItemRemoveHandler = (index: number) => void;

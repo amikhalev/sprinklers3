@@ -3,10 +3,10 @@ import { observer } from "mobx-react";
 import * as React from "react";
 import { Container, Dimmer, Form, Header, InputOnChangeData, Loader, Message, Segment } from "semantic-ui-react";
 
-import { AppState, injectState } from "@app/state";
+import { AppState, injectState } from "@client/state";
 import log from "@common/logger";
 
-import "@app/styles/LoginPage";
+import "@client/styles/LoginPage";
 
 class LoginPageState {
     @observable username = "";

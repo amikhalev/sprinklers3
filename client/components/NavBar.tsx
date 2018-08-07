@@ -3,8 +3,8 @@ import * as React from "react";
 import { Link } from "react-router-dom";
 import { Menu } from "semantic-ui-react";
 
-import * as rp from "@app/routePaths";
-import { AppState, ConsumeState, injectState } from "@app/state";
+import * as rp from "@client/routePaths";
+import { AppState, ConsumeState, injectState } from "@client/state";
 
 interface NavItemProps {
     to: string;

@@ -2,9 +2,9 @@ import { createBrowserHistory, History } from "history";
 import { computed } from "mobx";
 import { RouterStore, syncHistoryWithStore } from "mobx-react-router";
 
-import { WebSocketRpcClient } from "@app/sprinklersRpc/WebSocketRpcClient";
-import HttpApi from "@app/state/HttpApi";
-import { UiStore } from "@app/state/UiStore";
+import { WebSocketRpcClient } from "@client/sprinklersRpc/WebSocketRpcClient";
+import HttpApi from "@client/state/HttpApi";
+import { UiStore } from "@client/state/UiStore";
 import ApiError from "@common/ApiError";
 import { ErrorCode } from "@common/ErrorCode";
 import log from "@common/logger";

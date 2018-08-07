@@ -7,7 +7,7 @@ import ScheduleDate from "./ScheduleDate";
 import ScheduleTimes from "./ScheduleTimes";
 import WeekdaysView from "./WeekdaysView";
 
-import "@app/styles/ScheduleView";
+import "@client/styles/ScheduleView";
 
 export interface ScheduleViewProps {
     label?: string | React.ReactNode | undefined;

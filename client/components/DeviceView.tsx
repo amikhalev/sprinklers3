@@ -3,14 +3,14 @@ import { observer } from "mobx-react";
 import * as React from "react";
 import { Grid, Header, Icon, Item, SemanticICONS } from "semantic-ui-react";
 
-import * as p from "@app/pages";
-import * as rp from "@app/routePaths";
-import { AppState, injectState } from "@app/state";
+import * as p from "@client/pages";
+import * as rp from "@client/routePaths";
+import { AppState, injectState } from "@client/state";
 import { ConnectionState as ConState } from "@common/sprinklersRpc";
 import { Route, RouteComponentProps, withRouter } from "react-router";
 import { ProgramTable, RunSectionForm, SectionRunnerView, SectionTable } from ".";
 
-import "@app/styles/DeviceView";
+import "@client/styles/DeviceView";
 
 const ConnectionState = observer(({ connectionState, className }:
     { connectionState: ConState, className?: string }) => {
@@ -72,7 +72,7 @@ class DeviceView extends React.Component<DeviceViewProps & RouteComponentProps<a
         );
         return (
             <Item>
-                <Item.Image src={require("@app/images/raspberry_pi.png")} />
+                <Item.Image src={require("@client/images/raspberry_pi.png")} />
                 <Item.Content className="device">
                     <Header as="h1">
                         <div>Device <kbd>{id}</kbd></div>

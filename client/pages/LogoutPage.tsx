@@ -1,7 +1,7 @@
 import * as React from "react";
 import { Redirect } from "react-router";
 
-import { AppState, ConsumeState } from "@app/state";
+import { AppState, ConsumeState } from "@client/state";
 
 export function LogoutPage() {
     function consumeState(appState: AppState) {

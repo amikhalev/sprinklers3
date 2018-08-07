@@ -24,12 +24,12 @@ exports.publicPath = ensureSlash(url.parse(exports.publicUrl).pathname || "/", t
 
 exports.commonDir = resolveRoot("common");
 
-exports.appDir = resolveRoot("app");
-exports.appEntry = path.resolve(exports.appDir, "index.tsx");
-exports.appHtml = path.resolve(exports.appDir, "index.html");
-exports.appWebpackConfig = path.resolve(exports.appDir, "webpack.config.js");
-exports.appTsConfig = path.resolve(exports.appDir, "tsconfig.json");
-exports.appBuildDir = resolveRoot("public");
+exports.clientDir = resolveRoot("client");
+exports.clientEntry = path.resolve(exports.clientDir, "index.tsx");
+exports.clientHtml = path.resolve(exports.clientDir, "index.html");
+exports.clientWebpackConfig = path.resolve(exports.clientDir, "webpack.config.js");
+exports.clientTsConfig = path.resolve(exports.clientDir, "tsconfig.json");
+exports.clientBuildDir = resolveRoot("public");
 exports.publicDir = exports.appBuildDir;
 
 exports.serverDir = resolveRoot("server");

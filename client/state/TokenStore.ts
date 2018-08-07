@@ -1,7 +1,7 @@
 import { observable } from "mobx";
 
-import HttpApi, { ApiError } from "@app/state/HttpApi";
-import { Token } from "@app/state/Token";
+import HttpApi, { ApiError } from "@client/state/HttpApi";
+import { Token } from "@client/state/Token";
 import { TokenGrantPasswordRequest, TokenGrantRefreshRequest, TokenGrantResponse } from "@common/httpApi";
 import logger from "@common/logger";
 

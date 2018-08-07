@@ -1,7 +1,7 @@
 import * as React from "react";
 import { RouteComponentProps } from "react-router";
 
-import { DevicesView, MessageTest} from "@app/components";
+import { DevicesView, MessageTest} from "@client/components";
 
 export { LoginPage } from "./LoginPage";
 export { LogoutPage } from "./LogoutPage";

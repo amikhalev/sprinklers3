@@ -5,9 +5,9 @@ import * as React from "react";
 import { RouteComponentProps } from "react-router";
 import { Button, CheckboxProps, Form, Icon, Input, InputOnChangeData, Menu, Modal } from "semantic-ui-react";
 
-import { ProgramSequenceView, ScheduleView } from "@app/components";
-import * as rp from "@app/routePaths";
-import { AppState, injectState } from "@app/state";
+import { ProgramSequenceView, ScheduleView } from "@client/components";
+import * as rp from "@client/routePaths";
+import { AppState, injectState } from "@client/state";
 import log from "@common/logger";
 import { Program, SprinklersDevice } from "@common/sprinklersRpc";
 

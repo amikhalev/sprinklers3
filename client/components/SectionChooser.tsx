@@ -5,7 +5,7 @@ import { DropdownItemProps, DropdownProps, Form } from "semantic-ui-react";
 
 import { Section } from "@common/sprinklersRpc";
 
-import "@app/styles/SectionChooser";
+import "@client/styles/SectionChooser";
 
 @observer
 export default class SectionChooser extends React.Component<{

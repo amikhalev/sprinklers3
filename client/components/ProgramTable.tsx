@@ -4,8 +4,8 @@ import * as React from "react";
 import { Link } from "react-router-dom";
 import { Button, ButtonProps, Form, Icon, Table } from "semantic-ui-react";
 
-import { ProgramSequenceView, ScheduleView } from "@app/components";
-import * as rp from "@app/routePaths";
+import { ProgramSequenceView, ScheduleView } from "@client/components";
+import * as rp from "@client/routePaths";
 import { Program, SprinklersDevice } from "@common/sprinklersRpc";
 
 @observer

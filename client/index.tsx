@@ -3,8 +3,8 @@ import * as ReactDOM from "react-dom";
 import { AppContainer } from "react-hot-loader";
 import { Router } from "react-router-dom";
 
-import App from "@app/components/App";
-import { AppState, ProvideState } from "@app/state";
+import App from "@client/components/App";
+import { AppState, ProvideState } from "@client/state";
 import logger from "@common/logger";
 
 const state = new AppState();
@@ -30,8 +30,8 @@ const doRender = (Component: React.ComponentType) => {
 doRender(App);
 
 if (module.hot) {
-    module.hot.accept("@app/components/App", () => {
-        const NextApp = require<any>("@app/components/App").default as typeof App;
+    module.hot.accept("@client/components/App", () => {
+        const NextApp = require<any>("@client/components/App").default as typeof App;
         doRender(NextApp);
     });
 }

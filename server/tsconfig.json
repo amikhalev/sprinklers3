@@ -21,8 +21,8 @@
       "@common/*": [
         "./common/*"
       ],
-      "@app/*": [
-        "./app/*"
+      "@client/*": [
+        "./client/*"
       ]
     }
   },

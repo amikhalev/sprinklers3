@@ -2,7 +2,7 @@ import { observer } from "mobx-react";
 import * as React from "react";
 import { Item } from "semantic-ui-react";
 
-import DeviceView from "@app/components/DeviceView";
+import DeviceView from "@client/components/DeviceView";
 import { RouteComponentProps, withRouter } from "react-router";
 
 class DevicesView extends React.Component<{deviceId: string} & RouteComponentProps<any>> {
