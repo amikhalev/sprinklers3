@@ -59,7 +59,7 @@ class ProgramSequenceItem extends React.Component<{
     }
 
     render() {
-        const { editing }= this.props;
+        const { editing } = this.props;
         return (
             <li className="programSequence-item ui form">
                 {editing ? <Handle /> : <List.Icon name="caret right"/>}
