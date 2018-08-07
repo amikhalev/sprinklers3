@@ -21,8 +21,9 @@ interface ScheduleDateState {
 export default class ScheduleDate extends React.Component<ScheduleDateProps, ScheduleDateState> {
     static getDerivedStateFromProps(props: ScheduleDateProps, state: ScheduleDateState): Partial<ScheduleDateState> {
         if (!DateOfYear.equals(props.date, state.lastDate)) {
+            const thisYear = moment().year();
             const rawValue = props.date == null ? "" :
-                moment(props.date).format(HTML_DATE_INPUT_FORMAT);
+                moment(props.date).year(thisYear).format(HTML_DATE_INPUT_FORMAT);
             return { lastDate: props.date, rawValue };
         }
         return {};
@@ -44,10 +45,11 @@ export default class ScheduleDate extends React.Component<ScheduleDateProps, Sch
             }
             dayNode = <Input type="date" icon={clearIcon} value={this.state.rawValue} onChange={this.onChange} />;
         } else {
+            const m = moment(date || "");
             let dayString: string;
-            if (date) {
-                const format = (date.year === 0) ? "M/D" : "l";
-                dayString = moment(date).format(format);
+            if (m.isValid()) {
+                const format = (m.year() === 0) ? "M/D" : "l";
+                dayString = m.format(format);
             } else {
                 dayString = "N/A";
             }
@@ -68,7 +70,7 @@ export default class ScheduleDate extends React.Component<ScheduleDateProps, Sch
         const { onChange } = this.props;
         if (!onChange) return;
         const m = moment(data.value, HTML_DATE_INPUT_FORMAT);
-        onChange(DateOfYear.fromMoment(m));
+        onChange(DateOfYear.fromMoment(m).with({ year: 0 }));
     }
 
     private onClear = () => {

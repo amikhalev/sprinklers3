@@ -54,6 +54,8 @@ export enum Month {
 }
 
 export class DateOfYear {
+    static readonly DEFAULT = new DateOfYear({ day: 1, month: Month.January, year: 0 });
+
     static equals(a: DateOfYear | null | undefined, b: DateOfYear | null | undefined): boolean {
         return (a === b) || ((a instanceof DateOfYear && b instanceof DateOfYear) &&
             a.day === b.day &&
@@ -62,17 +64,19 @@ export class DateOfYear {
     }
 
     static fromMoment(m: Moment): DateOfYear {
-        return new DateOfYear(m.date(), m.month(), m.year());
+        return new DateOfYear({ day: m.date(), month: m.month(), year: m.year() });
     }
 
-    readonly day: number;
-    readonly month: Month;
-    readonly year: number;
+    readonly day!: number;
+    readonly month!: Month;
+    readonly year!: number;
 
-    constructor(day: number = 0, month: Month = Month.January, year: number = 0) {
-        this.day = day;
-        this.month = month;
-        this.year = year;
+    constructor(data?: Partial<DateOfYear>) {
+        Object.assign(this, DateOfYear.DEFAULT, data);
+    }
+
+    with(data: Partial<DateOfYear>): DateOfYear {
+        return new DateOfYear(Object.assign({}, this, data));
     }
 
     toString() {
@@ -85,4 +89,14 @@ export class Schedule {
     @observable weekdays: Weekday[] = [];
     @observable from: DateOfYear | null = null;
     @observable to: DateOfYear | null = null;
+
+    constructor(data?: Partial<Schedule>) {
+        if (typeof data === "object") {
+            Object.assign(this, data);
+        }
+    }
+
+    clone(): Schedule {
+        return new Schedule(this);
+    }
 }

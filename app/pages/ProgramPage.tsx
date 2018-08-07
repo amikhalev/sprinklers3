@@ -113,8 +113,7 @@ class ProgramPage extends React.Component<ProgramPageProps> {
             if (this.programView == null && this.program) {
                 // this.programView = createViewModel(this.program);
                 // this.programView = observable(toJS(this.program));
-                this.programView = new Program(this.program.device, this.program.id);
-                merge(this.programView, this.program);
+                this.programView = this.program.clone();
             }
         } else {
             if (this.programView != null) {

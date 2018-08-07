@@ -28,9 +28,12 @@ export class Program {
     @observable.shallow sequence: ProgramItem[] = [];
     @observable running: boolean = false;
 
-    constructor(device: SprinklersDevice, id: number) {
+    constructor(device: SprinklersDevice, id: number, data?: Partial<Program>) {
         this.device = device;
         this.id = id;
+        if (data) {
+            Object.assign(this, data);
+        }
     }
 
     run() {
@@ -46,8 +49,16 @@ export class Program {
         return this.device.updateProgram({ programId: this.id, data });
     }
 
+    clone(): Program {
+        return new Program(this.device, this.id, {
+            name: this.name, enabled: this.enabled, running: this.running,
+            schedule: this.schedule.clone(),
+            sequence: this.sequence.slice(),
+        });
+    }
+
     toString(): string {
         return `Program{name="${this.name}", enabled=${this.enabled}, schedule=${this.schedule}, ` +
-         `sequence=${this.sequence}, running=${this.running}}`;
+            `sequence=${this.sequence}, running=${this.running}}`;
     }
 }
