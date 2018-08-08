@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "description": "A frontend for mqtt based IoT sprinklers systems",
+  "main": "dist/server/index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "clean": "rm -rf ./dist ./build ./public",
