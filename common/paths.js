@@ -30,7 +30,7 @@ exports.clientHtml = path.resolve(exports.clientDir, "index.html");
 exports.clientWebpackConfig = path.resolve(exports.clientDir, "webpack.config.js");
 exports.clientTsConfig = path.resolve(exports.clientDir, "tsconfig.json");
 exports.clientBuildDir = resolveRoot("public");
-exports.publicDir = exports.appBuildDir;
+exports.publicDir = exports.clientBuildDir;
 
 exports.serverDir = resolveRoot("server");
 exports.serverBuildDir = resolveRoot("dist");
