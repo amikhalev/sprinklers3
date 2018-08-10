@@ -69,6 +69,9 @@ export class WebSocketClient {
             } catch (e) {
                 throw new ws.RpcError("invalid token", ErrorCode.BadToken, e);
             }
+            if (decoded.type !== "access") {
+                throw new ws.RpcError("not an access token", ErrorCode.BadToken);
+            }
             this.userId = decoded.aud;
             log.info({ userId: decoded.aud, name: decoded.name }, "authenticated websocket client");
             this.subscribeBrokerConnection();

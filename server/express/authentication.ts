@@ -10,7 +10,7 @@ import {
     TokenGrantRequest,
     TokenGrantResponse,
 } from "@common/httpApi";
-import TokenClaims from "@common/TokenClaims";
+import { TokenClaims } from "@common/TokenClaims";
 import { User } from "../entities";
 import { ServerState } from "../state";
 
@@ -28,6 +28,8 @@ const JWT_SECRET = process.env.JWT_SECRET!;
 if (!JWT_SECRET) {
     throw new Error("Must specify JWT_SECRET environment variable");
 }
+
+const ISSUER = "sprinklers3";
 
 const ACCESS_TOKEN_LIFETIME = (30 * 60); // 30 minutes
 const REFRESH_TOKEN_LIFETIME = (24 * 60 * 60); // 24 hours
@@ -53,7 +55,9 @@ function signToken(claims: TokenClaims): Promise<string> {
 
 export function verifyToken(token: string): Promise<TokenClaims> {
     return new Promise((resolve, reject) => {
-        jwt.verify(token, JWT_SECRET, (err, decoded) => {
+        jwt.verify(token, JWT_SECRET, {
+            issuer: ISSUER,
+        }, (err, decoded) => {
             if (err) {
                 if (err.name === "TokenExpiredError") {
                     reject(new ApiError("The specified token is expired", ErrorCode.BadToken, err));
@@ -71,7 +75,7 @@ export function verifyToken(token: string): Promise<TokenClaims> {
 
 function generateAccessToken(user: User, secret: string): Promise<string> {
     const access_token_claims: TokenClaims = {
-        iss: "sprinklers3",
+        iss: ISSUER,
         aud: user.id,
         name: user.name,
         type: "access",
@@ -83,7 +87,7 @@ function generateAccessToken(user: User, secret: string): Promise<string> {
 
 function generateRefreshToken(user: User, secret: string): Promise<string> {
     const refresh_token_claims: TokenClaims = {
-        iss: "sprinklers3",
+        iss: ISSUER,
         aud: user.id,
         name: user.name,
         type: "refresh",
@@ -91,6 +95,14 @@ function generateRefreshToken(user: User, secret: string): Promise<string> {
     };
 
     return signToken(refresh_token_claims);
+}
+
+function generateDeviceRegistrationToken(secret: string): Promise<string> {
+    const device_reg_token_claims: TokenClaims = {
+        iss: ISSUER,
+        type: "device_reg",
+    };
+    return signToken(device_reg_token_claims);
 }
 
 export function authentication(state: ServerState) {
@@ -149,7 +161,12 @@ export function authentication(state: ServerState) {
         res.json(response);
     });
 
-    router.post("/token/verify", authorizeAccess, async (req, res) => {
+    router.post("/token/grant_device_reg", verifyAuthorization(), async (req, res) => {
+        const token = await generateDeviceRegistrationToken(JWT_SECRET);
+        res.json({ token });
+    });
+
+    router.post("/token/verify", verifyAuthorization(), async (req, res) => {
         res.json({
             ok: true,
             token: req.token,
@@ -159,16 +176,34 @@ export function authentication(state: ServerState) {
     return router;
 }
 
-export async function authorizeAccess(req: Express.Request, res: Express.Response) {
-    const bearer = req.headers.authorization;
-    if (!bearer) {
-        throw new ApiError("No Authorization header specified", ErrorCode.BadToken);
-    }
-    const matches = /^Bearer (.*)$/.exec(bearer);
-    if (!matches || !matches[1]) {
-        throw new ApiError("Invalid Authorization header, must be Bearer", ErrorCode.BadToken);
-    }
-    const token = matches[1];
+export interface VerifyAuthorizationOpts {
+    type: TokenClaims["type"];
+}
 
-    req.token = await verifyToken(token);
+export function verifyAuthorization(options?: Partial<VerifyAuthorizationOpts>): Express.RequestHandler {
+    const opts: VerifyAuthorizationOpts = {
+        type: "access",
+        ...options,
+     };
+    return (req, res, next) => {
+        const fun = async () => {
+            const bearer = req.headers.authorization;
+            if (!bearer) {
+                throw new ApiError("No Authorization header specified", ErrorCode.BadToken);
+            }
+            const matches = /^Bearer (.*)$/.exec(bearer);
+            if (!matches || !matches[1]) {
+                throw new ApiError("Invalid Authorization header, must be Bearer", ErrorCode.BadToken);
+            }
+            const token = matches[1];
+
+            req.token = await verifyToken(token);
+
+            if (req.token.type !== opts.type) {
+                throw new ApiError(`Invalid token type "${req.token.type}", must be "${opts.type}"`,
+                    ErrorCode.BadToken);
+            }
+        };
+        fun().then(() => next(null), (err) => next(err));
+    };
 }
