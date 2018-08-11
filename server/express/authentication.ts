@@ -142,7 +142,7 @@ export function authentication(state: ServerState) {
         return user;
     }
 
-    router.post("/token/grant", async (req, res) => {
+    router.post("/grant", async (req, res) => {
         const body: TokenGrantRequest = req.body;
         let user: User;
         if (body.grant_type === "password") {
@@ -161,12 +161,12 @@ export function authentication(state: ServerState) {
         res.json(response);
     });
 
-    router.post("/token/grant_device_reg", verifyAuthorization(), async (req, res) => {
+    router.post("/grant_device_reg", verifyAuthorization(), async (req, res) => {
         const token = await generateDeviceRegistrationToken(JWT_SECRET);
         res.json({ token });
     });
 
-    router.post("/token/verify", verifyAuthorization(), async (req, res) => {
+    router.post("/verify", verifyAuthorization(), async (req, res) => {
         res.json({
             ok: true,
             token: req.token,

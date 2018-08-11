@@ -39,7 +39,9 @@ export class Database {
 
     async createAll() {
         await this.conn.synchronize();
-        await this.insertData();
+        if (process.env.INSERT_TEST_DATA) {
+            await this.insertData();
+        }
     }
 
     async insertData() {
@@ -62,10 +64,9 @@ export class Database {
             const name = "test" + i;
             let device = await this.sprinklersDevices.findByName(name);
             if (!device) {
-                device = await this.sprinklersDevices.create({
-                    name,
-                });
+                device = await this.sprinklersDevices.create();
             }
+            Object.assign(device, { name, deviceId: "grinklers" + (i === 1 ? "" : i) });
             await this.sprinklersDevices.save(device);
             for (let j = 0; j < 5; j++) {
                 const userIdx = (i + j * 10) % NUM;

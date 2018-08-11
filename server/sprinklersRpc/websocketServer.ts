@@ -82,8 +82,11 @@ export class WebSocketClient {
         },
         deviceSubscribe: async (data: ws.IDeviceSubscribeRequest) => {
             this.checkAuthorization();
+            const userId = this.userId!;
             const deviceId = data.deviceId;
-            if (deviceId !== "grinklers") { // TODO: somehow validate this device id?
+            const userDevice = await this.state.database.sprinklersDevices
+                .findUserDevice(userId, deviceId as any); // TODO: should be number device id
+            if (userDevice !== "grinklers") {
                 return {
                     result: "error", error: {
                         code: ErrorCode.NoPermission,
