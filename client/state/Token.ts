@@ -1,4 +1,4 @@
-import TokenClaims from "@common/TokenClaims";
+import { TokenClaims } from "@common/TokenClaims";
 import * as jwt from "jsonwebtoken";
 import { computed, createAtom, IAtom, observable } from "mobx";
 
@@ -38,7 +38,7 @@ export class Token {
         if (!this.isExpiredAtom.reportObserved()) {
             this.updateCurrentTime(false);
         }
-        if (this.claims == null) {
+        if (this.claims == null || this.claims.exp == null) {
             return Number.NEGATIVE_INFINITY;
         }
         return this.claims.exp - this.currentTime;
