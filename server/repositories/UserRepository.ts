@@ -1,4 +1,4 @@
-import { EntityRepository, Repository } from "typeorm";
+import { EntityRepository, FindOneOptions, Repository } from "typeorm";
 
 import { User } from "../entities";
 
@@ -6,23 +6,27 @@ export interface FindUserOptions {
     devices: boolean;
 }
 
-function applyDefaultOptions(options?: Partial<FindUserOptions>): FindUserOptions {
-    return { devices: false, ...options };
+function applyDefaultOptions(options?: Partial<FindUserOptions>): FindOneOptions<User> {
+    const opts: FindUserOptions = { devices: false, ...options };
+    const relations = [opts.devices && "devices"]
+        .filter(Boolean) as string[];
+    return { relations };
 }
 
 @EntityRepository(User)
 export class UserRepository extends Repository<User> {
     findAll(options?: Partial<FindUserOptions>) {
         const opts = applyDefaultOptions(options);
-        const relations = [ opts.devices && "devices" ]
-            .filter(Boolean) as string[];
-        return super.find({ relations });
+        return super.find(opts);
+    }
+    
+    findById(id: number, options?: Partial<FindUserOptions>) {
+        const opts = applyDefaultOptions(options);
+        return super.findOne(id, opts);
     }
 
     findByUsername(username: string, options?: Partial<FindUserOptions>) {
         const opts = applyDefaultOptions(options);
-        const relations = [ opts.devices && "devices" ]
-            .filter(Boolean) as string[];
-        return this.findOne({ username }, { relations });
+        return this.findOne({ username }, opts);
     }
 }

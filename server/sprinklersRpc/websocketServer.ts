@@ -8,8 +8,9 @@ import log from "@common/logger";
 import * as deviceRequests from "@common/sprinklersRpc/deviceRequests";
 import * as schema from "@common/sprinklersRpc/schema";
 import * as ws from "@common/sprinklersRpc/websocketData";
-import { TokenClaims, verifyToken } from "../express/authentication";
-import { ServerState } from "../state";
+import { User } from "@server/entities";
+import { TokenClaims, verifyToken } from "@server/express/authentication";
+import { ServerState } from "@server/state";
 
 // tslint:disable:member-ordering
 
@@ -22,6 +23,7 @@ export class WebSocketClient {
 
     /// This shall be the user id if the client has been authenticated, null otherwise
     userId: number | null = null;
+    user: User | null = null;
 
     get state() {
         return this.api.state;
@@ -52,10 +54,23 @@ export class WebSocketClient {
     }
 
     private checkAuthorization() {
-        if (!this.userId) {
+        if (!this.userId || !this.user) {
             throw new ws.RpcError("this WebSocket session has not been authenticated",
                 ErrorCode.Unauthorized);
         }
+    }
+
+    private checkDevice(devId: string) {
+        const userDevice = this.user!.devices!.find((dev) => dev.deviceId === devId);
+        if (userDevice == null) {
+            throw new ws.RpcError("you do not have permission to subscribe to this device",
+                ErrorCode.NoPermission);
+        }
+        const deviceId = userDevice.deviceId;
+        if (!deviceId) {
+            throw new ws.RpcError("device has no associated device prefix", ErrorCode.BadRequest);
+        }
+        return userDevice;
     }
 
     private requestHandlers: ws.ClientRequestHandlers = {
@@ -73,27 +88,19 @@ export class WebSocketClient {
                 throw new ws.RpcError("not an access token", ErrorCode.BadToken);
             }
             this.userId = decoded.aud;
+            this.user = await this.state.database.users.
+                findById(this.userId, { devices: true }) || null;
             log.info({ userId: decoded.aud, name: decoded.name }, "authenticated websocket client");
             this.subscribeBrokerConnection();
             return {
                 result: "success",
-                data: { authenticated: true, message: "authenticated" },
+                data: { authenticated: true, message: "authenticated", user: this.user!.toJSON() },
             };
         },
         deviceSubscribe: async (data: ws.IDeviceSubscribeRequest) => {
             this.checkAuthorization();
-            const userId = this.userId!;
-            const deviceId = data.deviceId;
-            const userDevice = await this.state.database.sprinklersDevices
-                .findUserDevice(userId, deviceId as any); // TODO: should be number device id
-            if (userDevice !== "grinklers") {
-                return {
-                    result: "error", error: {
-                        code: ErrorCode.NoPermission,
-                        message: "you do not have permission to subscribe to this device",
-                    },
-                };
-            }
+            const userDevice = this.checkDevice(data.deviceId);
+            const deviceId = userDevice.deviceId!;
             if (this.deviceSubscriptions.indexOf(deviceId) === -1) {
                 this.deviceSubscriptions.push(deviceId);
                 const device = this.state.mqttClient.getDevice(deviceId);
@@ -204,10 +211,10 @@ export class WebSocketClient {
     }
 
     private async doDeviceCallRequest(requestData: ws.IDeviceCallRequest): Promise<deviceRequests.Response> {
-        const { deviceId, data } = requestData;
+        const userDevice = this.checkDevice(requestData.deviceId);
+        const deviceId = userDevice.deviceId!;
         const device = this.state.mqttClient.getDevice(deviceId);
-        // TODO: authorize the requests
-        const request = schema.requests.deserializeRequest(data);
+        const request = schema.requests.deserializeRequest(requestData.data);
         return device.makeRequest(request);
     }
 }

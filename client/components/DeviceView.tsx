@@ -22,11 +22,11 @@ const ConnectionState = observer(({ connectionState, className }:
         connectionText = "Connected";
         iconName = "linkify";
         clazzName = "connected";
-    } else if (connected === false) {
-        connectionText = "Device Disconnected";
     } else if (connectionState.noPermission) {
         connectionText = "No permission for this device";
         iconName = "ban";
+    } else if (connected === false) {
+        connectionText = "Device Disconnected";
     } else if (connectionState.clientToServer === false) {
         connectionText = "Disconnected from server";
     } else {

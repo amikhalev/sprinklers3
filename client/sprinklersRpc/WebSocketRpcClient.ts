@@ -2,6 +2,7 @@ import { action, autorun, observable, when } from "mobx";
 import { update } from "serializr";
 
 import { TokenStore } from "@client/state/TokenStore";
+import { UserStore } from "@client/state/UserStore";
 import { ErrorCode } from "@common/ErrorCode";
 import * as rpc from "@common/jsonRpc";
 import logger from "@common/logger";
@@ -85,6 +86,7 @@ export class WebSocketRpcClient implements s.SprinklersRPC {
     authenticated: boolean = false;
 
     tokenStore: TokenStore;
+    userStore: UserStore;
 
     private nextRequestId = Math.round(Math.random() * 1000000);
     private responseCallbacks: ws.ServerResponseHandlers = {};
@@ -94,9 +96,10 @@ export class WebSocketRpcClient implements s.SprinklersRPC {
         return this.connectionState.isServerConnected || false;
     }
 
-    constructor(tokenStore: TokenStore, webSocketUrl: string = DEFAULT_URL) {
+    constructor(tokenStore: TokenStore, userStore: UserStore, webSocketUrl: string = DEFAULT_URL) {
         this.webSocketUrl = webSocketUrl;
         this.tokenStore = tokenStore;
+        this.userStore = userStore;
         this.connectionState.clientToServer = false;
         this.connectionState.serverToBroker = false;
     }
@@ -138,8 +141,10 @@ export class WebSocketRpcClient implements s.SprinklersRPC {
         when(() => this.connectionState.clientToServer === true
             && this.tokenStore.accessToken.isValid, async () => {
             try {
-                await this.authenticate(this.tokenStore.accessToken.token!);
-                this.authenticated = true;
+                const res = await this.authenticate(this.tokenStore.accessToken.token!);
+                this.authenticated = res.authenticated;
+                logger.info({ user: res.user }, "authenticated websocket connection");
+                this.userStore.userData = res.user;
             } catch (err) {
                 logger.error({ err }, "error authenticating websocket connection");
                 // TODO message?

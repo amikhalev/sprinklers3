@@ -25,7 +25,7 @@ export interface IClientRequestTypes {
 export interface IAuthenticateResponse {
     authenticated: boolean;
     message: string;
-    data?: any;
+    user: any;
 }
 
 export interface IDeviceSubscribeResponse {

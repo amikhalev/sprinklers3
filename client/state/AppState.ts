@@ -5,6 +5,7 @@ import { RouterStore, syncHistoryWithStore } from "mobx-react-router";
 import { WebSocketRpcClient } from "@client/sprinklersRpc/WebSocketRpcClient";
 import HttpApi from "@client/state/HttpApi";
 import { UiStore } from "@client/state/UiStore";
+import { UserStore } from "@client/state/UserStore";
 import ApiError from "@common/ApiError";
 import { ErrorCode } from "@common/ErrorCode";
 import log from "@common/logger";
@@ -13,9 +14,10 @@ export default class AppState {
     history: History = createBrowserHistory();
     routerStore = new RouterStore();
     uiStore = new UiStore();
+    userStore = new UserStore();
     httpApi = new HttpApi();
     tokenStore = this.httpApi.tokenStore;
-    sprinklersRpc = new WebSocketRpcClient(this.tokenStore);
+    sprinklersRpc = new WebSocketRpcClient(this.tokenStore, this.userStore);
 
     @computed get isLoggedIn() {
         return this.tokenStore.accessToken.isValid;
