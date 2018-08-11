@@ -10,16 +10,14 @@ import {
     TokenGrantRequest,
     TokenGrantResponse,
 } from "@common/httpApi";
-import { TokenClaims } from "@common/TokenClaims";
+import { AccessToken, DeviceRegistrationToken, RefreshToken, TokenClaims } from "@common/TokenClaims";
 import { User } from "../entities";
 import { ServerState } from "../state";
-
-export { TokenClaims };
 
 declare global {
     namespace Express {
         interface Request {
-            token?: TokenClaims;
+            token?: AccessToken;
         }
     }
 }
@@ -53,7 +51,9 @@ function signToken(claims: TokenClaims): Promise<string> {
     });
 }
 
-export function verifyToken(token: string): Promise<TokenClaims> {
+export function verifyToken<TClaims extends TokenClaims = TokenClaims>(
+    token: string, type?: TClaims["type"],
+): Promise<TClaims> {
     return new Promise((resolve, reject) => {
         jwt.verify(token, JWT_SECRET, {
             issuer: ISSUER,
@@ -67,14 +67,18 @@ export function verifyToken(token: string): Promise<TokenClaims> {
                     reject(err);
                 }
             } else {
-                resolve(decoded as any);
+                const claims: TokenClaims = decoded as any;
+                if (type != null && claims.type !== type) {
+                    reject(new ApiError(`Expected a "${type} token, received a "${claims.type}" token`));
+                }
+                resolve(claims as TClaims);
             }
         });
     });
 }
 
 function generateAccessToken(user: User, secret: string): Promise<string> {
-    const access_token_claims: TokenClaims = {
+    const access_token_claims: AccessToken = {
         iss: ISSUER,
         aud: user.id,
         name: user.name,
@@ -86,7 +90,7 @@ function generateAccessToken(user: User, secret: string): Promise<string> {
 }
 
 function generateRefreshToken(user: User, secret: string): Promise<string> {
-    const refresh_token_claims: TokenClaims = {
+    const refresh_token_claims: RefreshToken = {
         iss: ISSUER,
         aud: user.id,
         name: user.name,
@@ -98,7 +102,7 @@ function generateRefreshToken(user: User, secret: string): Promise<string> {
 }
 
 function generateDeviceRegistrationToken(secret: string): Promise<string> {
-    const device_reg_token_claims: TokenClaims = {
+    const device_reg_token_claims: DeviceRegistrationToken = {
         iss: ISSUER,
         type: "device_reg",
     };
@@ -197,7 +201,7 @@ export function verifyAuthorization(options?: Partial<VerifyAuthorizationOpts>):
             }
             const token = matches[1];
 
-            req.token = await verifyToken(token);
+            req.token = await verifyToken<AccessToken>(token, "access");
 
             if (req.token.type !== opts.type) {
                 throw new ApiError(`Invalid token type "${req.token.type}", must be "${opts.type}"`,

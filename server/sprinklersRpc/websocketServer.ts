@@ -9,8 +9,9 @@ import * as deviceRequests from "@common/sprinklersRpc/deviceRequests";
 import * as schema from "@common/sprinklersRpc/schema";
 import * as ws from "@common/sprinklersRpc/websocketData";
 import { User } from "@server/entities";
-import { TokenClaims, verifyToken } from "@server/express/authentication";
+import { verifyToken } from "@server/express/authentication";
 import { ServerState } from "@server/state";
+import { AccessToken } from "@common/TokenClaims";
 
 // tslint:disable:member-ordering
 
@@ -78,19 +79,16 @@ export class WebSocketClient {
             if (!data.accessToken) {
                 throw new ws.RpcError("no token specified", ErrorCode.BadRequest);
             }
-            let decoded: TokenClaims;
+            let claims: AccessToken;
             try {
-                decoded = await verifyToken(data.accessToken);
+                claims = await verifyToken<AccessToken>(data.accessToken, "access");
             } catch (e) {
                 throw new ws.RpcError("invalid token", ErrorCode.BadToken, e);
             }
-            if (decoded.type !== "access") {
-                throw new ws.RpcError("not an access token", ErrorCode.BadToken);
-            }
-            this.userId = decoded.aud;
+            this.userId = claims.aud;
             this.user = await this.state.database.users.
                 findById(this.userId, { devices: true }) || null;
-            log.info({ userId: decoded.aud, name: decoded.name }, "authenticated websocket client");
+            log.info({ userId: claims.aud, name: claims.name }, "authenticated websocket client");
             this.subscribeBrokerConnection();
             return {
                 result: "success",

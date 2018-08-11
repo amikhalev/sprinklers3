@@ -2,10 +2,10 @@ import { TokenClaims } from "@common/TokenClaims";
 import * as jwt from "jsonwebtoken";
 import { computed, createAtom, IAtom, observable } from "mobx";
 
-export class Token {
+export class Token<TClaims extends TokenClaims = TokenClaims> {
     @observable token: string | null;
 
-    @computed get claims(): TokenClaims | null {
+    @computed get claims(): TClaims | null {
         if (this.token == null) {
             return null;
         }
