@@ -3,7 +3,7 @@ import { Redirect } from "react-router";
 
 import { AppState, ConsumeState } from "@client/state";
 
-export function LogoutPage() {
+export default function LogoutPage() {
     function consumeState(appState: AppState) {
         appState.tokenStore.clear();
         return (

@@ -5,14 +5,15 @@ import { Item } from "semantic-ui-react";
 import DeviceView from "@client/components/DeviceView";
 import { RouteComponentProps, withRouter } from "react-router";
 
-class DevicesView extends React.Component<{deviceId: string} & RouteComponentProps<any>> {
+class DevicePage extends React.Component<RouteComponentProps<{ deviceId: string }>> {
     render() {
+        const { match: { params: { deviceId } } } = this.props;
         return (
             <Item.Group divided>
-                <DeviceView deviceId={this.props.deviceId} />
+                <DeviceView deviceId={deviceId} />
             </Item.Group>
         );
     }
 }
 
-export default withRouter(observer(DevicesView));
+export default withRouter(observer(DevicePage));

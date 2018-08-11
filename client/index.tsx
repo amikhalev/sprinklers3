@@ -3,7 +3,7 @@ import * as ReactDOM from "react-dom";
 import { AppContainer } from "react-hot-loader";
 import { Router } from "react-router-dom";
 
-import App from "@client/components/App";
+import App from "@client/App";
 import { AppState, ProvideState } from "@client/state";
 import logger from "@common/logger";
 
@@ -30,8 +30,8 @@ const doRender = (Component: React.ComponentType) => {
 doRender(App);
 
 if (module.hot) {
-    module.hot.accept("@client/components/App", () => {
-        const NextApp = require<any>("@client/components/App").default as typeof App;
+    module.hot.accept("@client/App", () => {
+        const NextApp = require<any>("@client/App").default as typeof App;
         doRender(NextApp);
     });
 }

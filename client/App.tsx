@@ -19,7 +19,7 @@ function NavContainer() {
 
             <Switch>
                 <Route path={route.device(":deviceId")} component={p.DevicePage}/>
-                <Route path={route.messagesTest} component={p.MessagesTestPage}/>
+                <Route path={route.messagesTest} component={p.MessageTest}/>
                 <Redirect to="/"/>
             </Switch>
 

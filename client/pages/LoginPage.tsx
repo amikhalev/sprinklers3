@@ -78,5 +78,4 @@ class LoginPage extends React.Component<{ appState: AppState }> {
     }
 }
 
-const DecoratedLoginPage = injectState(observer(LoginPage));
-export { DecoratedLoginPage as LoginPage };
+export default injectState(observer(LoginPage));
