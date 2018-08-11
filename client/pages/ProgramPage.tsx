@@ -6,7 +6,7 @@ import { RouteComponentProps } from "react-router";
 import { Button, CheckboxProps, Form, Icon, Input, InputOnChangeData, Menu, Modal } from "semantic-ui-react";
 
 import { ProgramSequenceView, ScheduleView } from "@client/components";
-import * as rp from "@client/routePaths";
+import * as route from "@client/routePaths";
 import { AppState, injectState } from "@client/state";
 import log from "@common/logger";
 import { Program, SprinklersDevice } from "@common/sprinklersRpc";
@@ -189,7 +189,7 @@ class ProgramPage extends React.Component<ProgramPageProps> {
 
     private close = () => {
         const { deviceId } = this.props.match.params;
-        this.props.history.push({ pathname: rp.device(deviceId), search: "" });
+        this.props.history.push({ pathname: route.device(deviceId), search: "" });
     }
 
     private onNameChange = (e: any, p: InputOnChangeData) => {

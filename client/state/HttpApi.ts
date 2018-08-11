@@ -1,6 +1,8 @@
 import { TokenStore } from "@client/state/TokenStore";
 import ApiError from "@common/ApiError";
 import { ErrorCode } from "@common/ErrorCode";
+import { TokenGrantPasswordRequest, TokenGrantRefreshRequest, TokenGrantResponse } from "@common/httpApi";
+import log from "@common/logger";
 
 export { ApiError };
 
@@ -22,7 +24,7 @@ export default class HttpApi {
         }
         this.baseUrl = baseUrl;
 
-        this.tokenStore = new TokenStore(this);
+        this.tokenStore = new TokenStore();
     }
 
     async makeRequest(url: string, options?: RequestInit, body?: any): Promise<any> {
@@ -49,4 +51,35 @@ export default class HttpApi {
         return responseBody;
     }
 
+    async grantPassword(username: string, password: string) {
+        const request: TokenGrantPasswordRequest = {
+            grant_type: "password", username, password,
+        };
+        const response: TokenGrantResponse = await this.makeRequest("/token/grant", {
+            method: "POST",
+        }, request);
+        this.tokenStore.accessToken.token = response.access_token;
+        this.tokenStore.refreshToken.token = response.refresh_token;
+        this.tokenStore.saveLocalStorage();
+        const { accessToken } = this.tokenStore;
+        log.debug({ aud: accessToken.claims!.aud }, "got password grant tokens");
+    }
+
+    async grantRefresh() {
+        const { refreshToken } = this.tokenStore;
+        if (!refreshToken.isValid) {
+            throw new ApiError("can not grant refresh with invalid refresh_token");
+        }
+        const request: TokenGrantRefreshRequest = {
+            grant_type: "refresh", refresh_token: refreshToken.token!,
+        };
+        const response: TokenGrantResponse = await this.makeRequest("/token/grant", {
+            method: "POST",
+        }, request);
+        this.tokenStore.accessToken.token = response.access_token;
+        this.tokenStore.refreshToken.token = response.refresh_token;
+        this.tokenStore.saveLocalStorage();
+        const { accessToken } = this.tokenStore;
+        log.debug({ aud: accessToken.claims!.aud }, "got refresh grant tokens");
+    }
 }

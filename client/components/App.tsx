@@ -5,7 +5,7 @@ import { Container } from "semantic-ui-react";
 
 import { MessagesView, NavBar } from "@client/components";
 import * as p from "@client/pages";
-import * as rp from "@client/routePaths";
+import * as route from "@client/routePaths";
 
 // tslint:disable:ordered-imports
 import "font-awesome/css/font-awesome.css";
@@ -18,8 +18,8 @@ function NavContainer() {
             <NavBar/>
 
             <Switch>
-                <Route path={rp.device(":deviceId")} component={p.DevicePage}/>
-                <Route path={rp.messagesTest} component={p.MessagesTestPage}/>
+                <Route path={route.device(":deviceId")} component={p.DevicePage}/>
+                <Route path={route.messagesTest} component={p.MessagesTestPage}/>
                 <Redirect to="/"/>
             </Switch>
 
@@ -31,8 +31,8 @@ function NavContainer() {
 export default function App() {
     return (
         <Switch>
-            <Route path={rp.login} component={p.LoginPage}/>
-            <Route path={rp.logout} component={p.LogoutPage}/>
+            <Route path={route.login} component={p.LoginPage}/>
+            <Route path={route.logout} component={p.LogoutPage}/>
             <NavContainer/>
         </Switch>
     );

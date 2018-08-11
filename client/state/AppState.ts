@@ -25,28 +25,32 @@ export default class AppState {
 
     async start() {
         syncHistoryWithStore(this.history, this.routerStore);
-
         this.tokenStore.loadLocalStorage();
 
-        if (!this.httpApi.tokenStore.accessToken.isValid) {
-            if (this.httpApi.tokenStore.refreshToken.isValid) {
-                try {
-                    await this.httpApi.tokenStore.grantRefresh();
-                } catch (err) {
-                    if (err instanceof ApiError && err.code === ErrorCode.BadToken) {
-                        log.warn({ err }, "refresh is bad for some reason, erasing");
-                        this.tokenStore.clear();
-                        this.history.push("/login");
-                    } else {
-                        log.error({ err }, "could not refresh access token");
-                        // TODO: some kind of error page?
-                    }
-                }
-            } else {
+        await this.checkToken();
+        await this.sprinklersRpc.start();
+    }
+
+    async checkToken() {
+        const { tokenStore: { accessToken, refreshToken } } = this.httpApi;
+        if (accessToken.isValid) { // if the access token is valid, we are good
+            return;
+        }
+        if (!refreshToken.isValid) { // if the refresh token is not valid, need to login again
+            this.history.push("/login");
+            return;
+        }
+        try {
+            await this.httpApi.grantRefresh();
+        } catch (err) {
+            if (err instanceof ApiError && err.code === ErrorCode.BadToken) {
+                log.warn({ err }, "refresh is bad for some reason, erasing");
+                this.tokenStore.clear();
                 this.history.push("/login");
+            } else {
+                log.error({ err }, "could not refresh access token");
+                // TODO: some kind of error page?
             }
         }
-
-        this.sprinklersRpc.start();
     }
 }

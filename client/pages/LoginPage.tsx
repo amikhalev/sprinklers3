@@ -30,7 +30,7 @@ class LoginPageState {
     login(appState: AppState) {
         this.loading = true;
         this.error = null;
-        appState.tokenStore.grantPassword(this.username, this.password)
+        appState.httpApi.grantPassword(this.username, this.password)
             .then(() => {
                 this.loading = false;
                 log.info("logged in");

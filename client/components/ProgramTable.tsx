@@ -5,7 +5,7 @@ import { Link } from "react-router-dom";
 import { Button, ButtonProps, Form, Icon, Table } from "semantic-ui-react";
 
 import { ProgramSequenceView, ScheduleView } from "@client/components";
-import * as rp from "@client/routePaths";
+import * as route from "@client/routePaths";
 import { Program, SprinklersDevice } from "@common/sprinklersRpc";
 
 @observer
@@ -21,7 +21,7 @@ class ProgramRows extends React.Component<{
         const { name, running, enabled, schedule, sequence } = program;
 
         const buttonStyle: ButtonProps = { size: "small", compact: false };
-        const detailUrl = rp.program(device.id, program.id);
+        const detailUrl = route.program(device.id, program.id);
 
         const stopStartButton = (
             <Button onClick={this.cancelOrRun} {...buttonStyle} positive={!running} negative={running}>

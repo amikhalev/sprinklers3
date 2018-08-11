@@ -4,7 +4,7 @@ import * as React from "react";
 import { Grid, Header, Icon, Item, SemanticICONS } from "semantic-ui-react";
 
 import * as p from "@client/pages";
-import * as rp from "@client/routePaths";
+import * as route from "@client/routePaths";
 import { AppState, injectState } from "@client/state";
 import { ConnectionState as ConState } from "@common/sprinklersRpc";
 import { Route, RouteComponentProps, withRouter } from "react-router";
@@ -67,7 +67,7 @@ class DeviceView extends React.Component<DeviceViewProps & RouteComponentProps<a
                     </Grid.Column>
                 </Grid>
                 <ProgramTable device={device} routerStore={routerStore} />
-                <Route path={rp.program(":deviceId", ":programId")} component={p.ProgramPage} />
+                <Route path={route.program(":deviceId", ":programId")} component={p.ProgramPage} />
             </React.Fragment>
         );
         return (

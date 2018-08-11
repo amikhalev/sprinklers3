@@ -105,7 +105,6 @@ export class WebSocketRpcClient implements s.SprinklersRPC {
     }
 
     start() {
-        log.debug({ url: this.webSocketUrl }, "connecting to websocket");
         this._connect();
     }
 
@@ -222,6 +221,12 @@ export class WebSocketRpcClient implements s.SprinklersRPC {
     }
 
     private _connect() {
+        if (this.socket != null &&
+            (this.socket.readyState === WebSocket.CLOSED)) {
+            this.tryAuthenticate();
+            return;
+        }
+        log.debug({ url: this.webSocketUrl }, "connecting to websocket");
         this.socket = new WebSocket(this.webSocketUrl);
         this.socket.onopen = this.onOpen.bind(this);
         this.socket.onclose = this.onClose.bind(this);

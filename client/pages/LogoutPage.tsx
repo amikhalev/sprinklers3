@@ -7,7 +7,7 @@ export function LogoutPage() {
     function consumeState(appState: AppState) {
         appState.tokenStore.clear();
         return (
-            <Redirect to="/" />
+            <Redirect to="/login" />
         );
     }
 
