@@ -1,3 +1,4 @@
+export { default as DeviceImage } from "./DeviceImage";
 export { default as DeviceView } from "./DeviceView";
 export { default as DurationView } from "./DurationView";
 export { default as MessagesView } from "./MessagesView";

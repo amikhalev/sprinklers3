@@ -35,7 +35,7 @@ function NavBar({ appState }: { appState: AppState }) {
     }
     return (
         <Menu>
-            <NavItem to={route.device("grinklers")}>Device grinklers</NavItem>
+            <NavItem to={route.device()}>Devices</NavItem>
             <NavItem to={route.messagesTest}>Messages test</NavItem>
             <Menu.Menu position="right">
                 {loginMenu}

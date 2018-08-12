@@ -1,12 +1,14 @@
 import * as classNames from "classnames";
 import { observer } from "mobx-react";
 import * as React from "react";
+import { Link } from "react-router-dom";
 import { Grid, Header, Icon, Item, SemanticICONS } from "semantic-ui-react";
 
+import { DeviceImage } from "@client/components";
 import * as p from "@client/pages";
 import * as route from "@client/routePaths";
 import { AppState, injectState } from "@client/state";
-import { ConnectionState as ConState } from "@common/sprinklersRpc";
+import { ConnectionState as ConState, SprinklersDevice } from "@common/sprinklersRpc";
 import { Route, RouteComponentProps, withRouter } from "react-router";
 import { ProgramTable, RunSectionForm, SectionRunnerView, SectionTable } from ".";
 
@@ -44,16 +46,19 @@ const ConnectionState = observer(({ connectionState, className }:
 });
 
 interface DeviceViewProps {
-    deviceId: string;
+    deviceId: number;
     appState: AppState;
+    inList?: boolean;
 }
 
 class DeviceView extends React.Component<DeviceViewProps & RouteComponentProps<any>> {
-    render() {
-        const { uiStore, sprinklersRpc, routerStore } = this.props.appState;
-        const device = sprinklersRpc.getDevice(this.props.deviceId);
-        const { id, connectionState, sections, sectionRunner } = device;
-        const deviceBody = connectionState.isAvailable && (
+    renderBody(device: SprinklersDevice) {
+        const { inList, appState: { uiStore, routerStore } } = this.props;
+        const { connectionState, sectionRunner, sections } = device;
+        if (!connectionState.isAvailable || inList) {
+            return null;
+        }
+        return (
             <React.Fragment>
                 <Grid>
                     <Grid.Column mobile="16" tablet="16" computer="16" largeScreen="6">
@@ -70,21 +75,44 @@ class DeviceView extends React.Component<DeviceViewProps & RouteComponentProps<a
                 <Route path={route.program(":deviceId", ":programId")} component={p.ProgramPage} />
             </React.Fragment>
         );
-        return (
-            <Item>
-                <Item.Image src={require("@client/images/raspberry_pi.png")} />
-                <Item.Content className="device">
-                    <Header as="h1">
-                        <div>Device <kbd>{id}</kbd></div>
-                        <ConnectionState connectionState={connectionState} />
-                    </Header>
-                    <Item.Meta>
-                        Raspberry Pi Grinklers Device
-                    </Item.Meta>
-                    {deviceBody}
-                </Item.Content>
-            </Item>
-        );
+    }
+
+    render() {
+        const { deviceId, inList, appState: { sprinklersRpc, userStore } } = this.props;
+        const { userData } = userStore;
+        const iDevice = userData &&
+            userData.devices &&
+            userData.devices.find((dev) => dev.id === deviceId);
+        let itemContent: React.ReactNode;
+        if (!iDevice || !iDevice.deviceId) {
+            // TODO: better and link back to devices list
+            itemContent = <span>You do not have access to this device</span>;
+        } else {
+            const device = sprinklersRpc.getDevice(iDevice.deviceId);
+            const { connectionState } = device;
+            let header: React.ReactNode;
+            if (inList) { // tslint:disable-line:prefer-conditional-expression
+                header = <Link to={route.device(iDevice.id)}>Device <kbd>{iDevice.name}</kbd></Link>;
+            } else {
+                header = <span>Device <kbd>{iDevice.name}</kbd></span>;
+            }
+            itemContent = (
+                <React.Fragment>
+                    <DeviceImage size={inList ? "tiny" : undefined} />
+                    <Item.Content className="device">
+                        <Header as={inList ? "h2" : "h1"}>
+                            {header}
+                            <ConnectionState connectionState={connectionState} />
+                        </Header>
+                        <Item.Meta>
+                            Raspberry Pi Grinklers Device
+                        </Item.Meta>
+                        {this.renderBody(device)}
+                    </Item.Content>
+                </React.Fragment>
+            );
+        }
+        return <Item>{itemContent}</Item>;
     }
 }
 

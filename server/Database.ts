@@ -61,7 +61,7 @@ export class Database {
         }
 
         for (let i = 0; i < NUM; i++) {
-            const name = "test" + i;
+            const name = "Test" + i;
             let device = await this.sprinklersDevices.findByName(name);
             if (!device) {
                 device = await this.sprinklersDevices.create();

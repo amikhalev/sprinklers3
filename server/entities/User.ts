@@ -2,12 +2,13 @@ import * as bcrypt from "bcrypt";
 import { omit } from "lodash";
 import { Column, Entity, JoinTable, ManyToMany, PrimaryGeneratedColumn } from "typeorm";
 
+import { IUser } from "@common/httpApi";
 import { SprinklersDevice} from "./SprinklersDevice";
 
 const HASH_ROUNDS = 1;
 
 @Entity()
-export class User {
+export class User implements IUser {
     @PrimaryGeneratedColumn()
     id!: number;
 

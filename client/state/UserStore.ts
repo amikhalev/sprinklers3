@@ -1,5 +1,6 @@
+import { IUser } from "@common/httpApi";
 import { observable } from "mobx";
 
 export class UserStore {
-    @observable userData: any = null;
+    @observable userData: IUser | null = null;
 }

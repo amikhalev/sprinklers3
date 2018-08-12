@@ -15,3 +15,17 @@ export interface TokenGrantResponse {
     access_token: string;
     refresh_token: string;
 }
+
+export interface IUser {
+    id: number;
+    username: string;
+    name: string;
+    devices: ISprinklersDevice[] | undefined;
+}
+
+export interface ISprinklersDevice {
+    id: number;
+    deviceId: string | null;
+    name: string;
+    users: IUser[] | undefined;
+}

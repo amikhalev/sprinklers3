@@ -19,7 +19,7 @@ export class UserRepository extends Repository<User> {
         const opts = applyDefaultOptions(options);
         return super.find(opts);
     }
-    
+
     findById(id: number, options?: Partial<FindUserOptions>) {
         const opts = applyDefaultOptions(options);
         return super.findOne(id, opts);

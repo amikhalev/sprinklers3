@@ -23,9 +23,9 @@ export function users(state: ServerState) {
 
     router.get("/", (req, res) => {
         state.database.users.findAll()
-            .then((users) => {
+            .then((users_) => {
                 res.json({
-                    data: users,
+                    data: users_,
                 });
             });
     });

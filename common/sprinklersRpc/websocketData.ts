@@ -1,6 +1,7 @@
 import * as rpc from "../jsonRpc/index";
 
 import { ErrorCode } from "@common/ErrorCode";
+import { IUser } from "@common/httpApi";
 import { Response as ResponseData } from "@common/sprinklersRpc/deviceRequests";
 
 export interface IAuthenticateRequest {
@@ -25,7 +26,7 @@ export interface IClientRequestTypes {
 export interface IAuthenticateResponse {
     authenticated: boolean;
     message: string;
-    user: any;
+    user: IUser;
 }
 
 export interface IDeviceSubscribeResponse {

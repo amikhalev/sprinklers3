@@ -8,10 +8,10 @@ import log from "@common/logger";
 import * as deviceRequests from "@common/sprinklersRpc/deviceRequests";
 import * as schema from "@common/sprinklersRpc/schema";
 import * as ws from "@common/sprinklersRpc/websocketData";
+import { AccessToken } from "@common/TokenClaims";
 import { User } from "@server/entities";
 import { verifyToken } from "@server/express/authentication";
 import { ServerState } from "@server/state";
-import { AccessToken } from "@common/TokenClaims";
 
 // tslint:disable:member-ordering
 

@@ -19,7 +19,9 @@ function NavContainer() {
 
             <Switch>
                 <Route path={route.device(":deviceId")} component={p.DevicePage}/>
+                <Route path={route.device()} component={p.DevicesPage}/>
                 <Route path={route.messagesTest} component={p.MessageTest}/>
+                <Redirect from="/" to={route.device()} />
                 <Redirect to="/"/>
             </Switch>
 

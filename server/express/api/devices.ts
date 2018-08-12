@@ -28,7 +28,7 @@ export function devices(state: ServerState) {
     router.post("/register", verifyAuthorization({
         type: "device_reg",
     }), async (req, res) => {
-        
+        // TODO: Implement device registration
     });
 
     return router;

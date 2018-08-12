@@ -1,9 +1,10 @@
 import { Column, Entity, ManyToMany, PrimaryGeneratedColumn } from "typeorm";
 
+import { ISprinklersDevice } from "@common/httpApi";
 import { User } from "./User";
 
 @Entity()
-export class SprinklersDevice {
+export class SprinklersDevice implements ISprinklersDevice {
     @PrimaryGeneratedColumn()
     id!: number;
 
