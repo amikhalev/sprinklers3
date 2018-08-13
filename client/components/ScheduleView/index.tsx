@@ -8,6 +8,7 @@ import ScheduleTimes from "./ScheduleTimes";
 import WeekdaysView from "./WeekdaysView";
 
 import "@client/styles/ScheduleView";
+import { action } from "mobx";
 
 export interface ScheduleViewProps {
     label?: string | React.ReactNode | undefined;
@@ -39,19 +40,23 @@ export default class ScheduleView extends React.Component<ScheduleViewProps> {
         );
     }
 
-    private updateTimes = (newTimes: TimeOfDay[]) => {
+    @action.bound
+    private updateTimes(newTimes: TimeOfDay[]) {
         this.props.schedule.times = newTimes;
     }
 
-    private updateWeekdays = (newWeekdays: Weekday[]) => {
+    @action.bound
+    private updateWeekdays(newWeekdays: Weekday[]) {
         this.props.schedule.weekdays = newWeekdays;
     }
 
-    private updateFromDate = (newFromDate: DateOfYear | null) => {
+    @action.bound
+    private updateFromDate(newFromDate: DateOfYear | null) {
         this.props.schedule.from = newFromDate;
     }
 
-    private updateToDate = (newToDate: DateOfYear | null) => {
+    @action.bound
+    private updateToDate(newToDate: DateOfYear | null) {
         this.props.schedule.to = newToDate;
     }
 }

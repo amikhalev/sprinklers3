@@ -1,4 +1,4 @@
-import { IObservableArray, observable } from "mobx";
+import { action, IObservableArray, observable } from "mobx";
 import { MessageProps } from "semantic-ui-react";
 
 import { getRandomId } from "@common/utils";
@@ -14,7 +14,8 @@ export interface UiMessageProps extends MessageProps {
 export class UiStore {
     messages: IObservableArray<UiMessage> = observable.array();
 
-    addMessage(message: UiMessageProps) {
+    @action
+    addMessage(message: UiMessageProps): UiMessage {
         const { timeout, ...otherProps } = message;
         const msg = observable({
             ...otherProps,
@@ -22,7 +23,15 @@ export class UiStore {
         });
         this.messages.push(msg);
         if (timeout) {
-            setTimeout(() => this.messages.remove(msg), timeout);
+            setTimeout(() => {
+                this.removeMessage(msg);
+            }, timeout);
         }
+        return msg;
+    }
+
+    @action
+    removeMessage(message: UiMessage) {
+        return this.messages.remove(message);
     }
 }

@@ -8,8 +8,10 @@ import { Button, CheckboxProps, Form, Icon, Input, InputOnChangeData, Menu, Moda
 import { ProgramSequenceView, ScheduleView } from "@client/components";
 import * as route from "@client/routePaths";
 import { AppState, injectState } from "@client/state";
+import { ISprinklersDevice } from "@common/httpApi";
 import log from "@common/logger";
 import { Program, SprinklersDevice } from "@common/sprinklersRpc";
+import { action } from "mobx";
 
 interface ProgramPageProps extends RouteComponentProps<{ deviceId: string, programId: string }> {
     appState: AppState;
@@ -21,6 +23,7 @@ class ProgramPage extends React.Component<ProgramPageProps> {
         return qs.parse(this.props.location.search).editing != null;
     }
 
+    iDevice!: ISprinklersDevice;
     device!: SprinklersDevice;
     program!: Program;
     programView: Program | null = null;
@@ -95,11 +98,16 @@ class ProgramPage extends React.Component<ProgramPageProps> {
     }
 
     render() {
-        const { deviceId, programId: pid } = this.props.match.params;
+        const { deviceId: did, programId: pid } = this.props.match.params;
+        const { userStore, sprinklersRpc } = this.props.appState;
+        const deviceId = Number(did);
         const programId = Number(pid);
         // tslint:disable-next-line:prefer-conditional-expression
-        if (!this.device || this.device.id !== deviceId) {
-            this.device = this.props.appState.sprinklersRpc.getDevice(deviceId);
+        if (!this.iDevice || this.iDevice.id !== deviceId) {
+            this.iDevice = userStore.findDevice(deviceId)!;
+        }
+        if (this.iDevice && this.iDevice.deviceId && (!this.device || this.device.id !== this.iDevice.deviceId)) {
+            this.device = sprinklersRpc.getDevice(this.iDevice.deviceId);
         }
         // tslint:disable-next-line:prefer-conditional-expression
         if (!this.program || this.program.id !== programId) {
@@ -158,18 +166,21 @@ class ProgramPage extends React.Component<ProgramPageProps> {
         );
     }
 
-    private cancelOrRun = () => {
+    @action.bound
+    private cancelOrRun() {
         if (!this.program) {
             return;
         }
         this.program.running ? this.program.cancel() : this.program.run();
     }
 
-    private startEditing = () => {
+    @action.bound
+    private startEditing() {
         this.props.history.push({ search: qs.stringify({ editing: true }) });
     }
 
-    private save = () => {
+    @action.bound
+    private save() {
         if (!this.programView || !this.program) {
             return;
         }
@@ -183,22 +194,26 @@ class ProgramPage extends React.Component<ProgramPageProps> {
         this.stopEditing();
     }
 
-    private stopEditing = () => {
+    @action.bound
+    private stopEditing() {
         this.props.history.push({ search: "" });
     }
 
-    private close = () => {
+    @action.bound
+    private close() {
         const { deviceId } = this.props.match.params;
         this.props.history.push({ pathname: route.device(deviceId), search: "" });
     }
 
-    private onNameChange = (e: any, p: InputOnChangeData) => {
+    @action.bound
+    private onNameChange(e: any, p: InputOnChangeData) {
         if (this.programView) {
             this.programView.name = p.value;
         }
     }
 
-    private onEnabledChange = (e: any, p: CheckboxProps) => {
+    @action.bound
+    private onEnabledChange(e: any, p: CheckboxProps) {
         if (this.programView) {
             this.programView.enabled = p.checked!;
         }

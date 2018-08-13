@@ -1,4 +1,4 @@
-import { action, autorun, observable, when } from "mobx";
+import { action, autorun, observable, runInAction, when } from "mobx";
 import { update } from "serializr";
 
 import { TokenStore } from "@client/state/TokenStore";
@@ -35,15 +35,19 @@ export class WSSprinklersDevice extends s.SprinklersDevice {
         this.api = api;
         this._id = id;
 
-        autorun(() => {
-            this.connectionState.clientToServer = this.api.connectionState.clientToServer;
-            this.connectionState.serverToBroker = this.api.connectionState.serverToBroker;
-        });
+        autorun(this.updateConnectionState);
         this.waitSubscribe();
     }
 
     get id() {
         return this._id;
+    }
+
+    private updateConnectionState = () => {
+        const { clientToServer, serverToBroker } = this.api.connectionState;
+        runInAction("updateConnectionState", () => {
+            Object.assign(this.connectionState, { clientToServer, serverToBroker });
+        });
     }
 
     async subscribe() {
@@ -52,14 +56,18 @@ export class WSSprinklersDevice extends s.SprinklersDevice {
         };
         try {
             await this.api.makeRequest("deviceSubscribe", subscribeRequest);
-            this.connectionState.brokerToDevice = true;
+            runInAction("deviceSubscribeSuccess", () => {
+                this.connectionState.brokerToDevice = true;
+            });
         } catch (err) {
-            this.connectionState.brokerToDevice = false;
-            if ((err as ws.IError).code === ErrorCode.NoPermission) {
-                this.connectionState.hasPermission = false;
-            } else {
-                log.error({ err });
-            }
+            runInAction("deviceSubscribeError", () => {
+                this.connectionState.brokerToDevice = false;
+                if ((err as ws.IError).code === ErrorCode.NoPermission) {
+                    this.connectionState.hasPermission = false;
+                } else {
+                    log.error({ err });
+                }
+            });
         }
     }
 
@@ -143,7 +151,7 @@ export class WebSocketRpcClient implements s.SprinklersRPC {
                 const res = await this.authenticate(this.tokenStore.accessToken.token!);
                 this.authenticated = res.authenticated;
                 logger.info({ user: res.user }, "authenticated websocket connection");
-                this.userStore.userData = res.user;
+                this.userStore.receiveUserData(res.user);
             } catch (err) {
                 logger.error({ err }, "error authenticating websocket connection");
                 // TODO message?
@@ -288,7 +296,7 @@ export class WebSocketRpcClient implements s.SprinklersRPC {
         try {
             rpc.handleNotification(this.notificationHandlers, data);
         } catch (err) {
-            logger.error({ err }, "error handling server notification");
+            logger.error(err, "error handling server notification");
         }
     }
 
@@ -300,19 +308,31 @@ export class WebSocketRpcClient implements s.SprinklersRPC {
         }
     }
 
-    private notificationHandlers: ws.ServerNotificationHandlers = {
-        brokerConnectionUpdate: (data: ws.IBrokerConnectionUpdate) => {
-            this.connectionState.serverToBroker = data.brokerConnected;
-        },
-        deviceUpdate: (data: ws.IDeviceUpdate) => {
-            const device = this.devices.get(data.deviceId);
-            if (!device) {
-                return log.warn({ data }, "invalid deviceUpdate received");
-            }
-            update(schema.sprinklersDevice, device, data.data);
-        },
-        error: (data: ws.IError) => {
-            log.warn({ err: data }, "server error");
-        },
-    };
+    private notificationHandlers = new WSClientNotificationHandlers(this);
 }
+
+class WSClientNotificationHandlers implements ws.ServerNotificationHandlers  {
+    client: WebSocketRpcClient;
+
+    constructor(client: WebSocketRpcClient) {
+        this.client = client;
+    }
+
+    @action.bound
+    brokerConnectionUpdate(data: ws.IBrokerConnectionUpdate) {
+        this.client.connectionState.serverToBroker = data.brokerConnected;
+    }
+
+    @action.bound
+    deviceUpdate(data: ws.IDeviceUpdate) {
+        const device = this.client.devices.get(data.deviceId);
+        if (!device) {
+            return log.warn({ data }, "invalid deviceUpdate received");
+        }
+        update(schema.sprinklersDevice, device, data.data);
+    }
+
+    error(data: ws.IError) {
+        log.warn({ err: data }, "server error");
+    }
+};

@@ -9,6 +9,7 @@ import { Duration } from "@common/Duration";
 import { ProgramItem, Section } from "@common/sprinklersRpc";
 
 import "@client/styles/ProgramSequenceView";
+import { action } from "mobx";
 
 type ItemChangeHandler = (index: number, newItem: ProgramItem) => void;
 type ItemRemoveHandler = (index: number) => void;
@@ -147,15 +148,18 @@ class ProgramSequenceView extends React.Component<{
         );
     }
 
+    @action.bound
     private changeItem: ItemChangeHandler = (index, newItem) => {
         this.props.sequence[index] = newItem;
     }
 
+    @action.bound
     private removeItem: ItemRemoveHandler = (index) => {
         this.props.sequence.splice(index, 1);
     }
 
-    private addItem = () => {
+    @action.bound
+    private addItem() {
         let sectionId = 0;
         for (const section of this.props.sections) {
             const sectionNotIncluded = this.props.sequence
@@ -173,7 +177,8 @@ class ProgramSequenceView extends React.Component<{
         this.props.sequence.push(item);
     }
 
-    private onSortEnd = ({oldIndex, newIndex}: SortEnd) => {
+    @action.bound
+    private onSortEnd({oldIndex, newIndex}: SortEnd) {
         const { sequence: array } = this.props;
         if (newIndex >= array.length) {
             return;

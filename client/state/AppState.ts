@@ -1,5 +1,5 @@
 import { createBrowserHistory, History } from "history";
-import { computed } from "mobx";
+import { computed, configure } from "mobx";
 import { RouterStore, syncHistoryWithStore } from "mobx-react-router";
 
 import { WebSocketRpcClient } from "@client/sprinklersRpc/WebSocketRpcClient";
@@ -24,6 +24,10 @@ export default class AppState {
     }
 
     async start() {
+        configure({
+            enforceActions: true,
+        });
+
         syncHistoryWithStore(this.history, this.routerStore);
         this.tokenStore.loadLocalStorage();
 

@@ -8,6 +8,7 @@ import { DeviceImage } from "@client/components";
 import * as p from "@client/pages";
 import * as route from "@client/routePaths";
 import { AppState, injectState } from "@client/state";
+import { ISprinklersDevice } from "@common/httpApi";
 import { ConnectionState as ConState, SprinklersDevice } from "@common/sprinklersRpc";
 import { Route, RouteComponentProps, withRouter } from "react-router";
 import { ProgramTable, RunSectionForm, SectionRunnerView, SectionTable } from ".";
@@ -52,7 +53,7 @@ interface DeviceViewProps {
 }
 
 class DeviceView extends React.Component<DeviceViewProps & RouteComponentProps<any>> {
-    renderBody(device: SprinklersDevice) {
+    renderBody(iDevice: ISprinklersDevice, device: SprinklersDevice) {
         const { inList, appState: { uiStore, routerStore } } = this.props;
         const { connectionState, sectionRunner, sections } = device;
         if (!connectionState.isAvailable || inList) {
@@ -71,7 +72,7 @@ class DeviceView extends React.Component<DeviceViewProps & RouteComponentProps<a
                         <RunSectionForm device={device} uiStore={uiStore} />
                     </Grid.Column>
                 </Grid>
-                <ProgramTable device={device} routerStore={routerStore} />
+                <ProgramTable iDevice={iDevice} device={device} routerStore={routerStore} />
                 <Route path={route.program(":deviceId", ":programId")} component={p.ProgramPage} />
             </React.Fragment>
         );
@@ -79,10 +80,7 @@ class DeviceView extends React.Component<DeviceViewProps & RouteComponentProps<a
 
     render() {
         const { deviceId, inList, appState: { sprinklersRpc, userStore } } = this.props;
-        const { userData } = userStore;
-        const iDevice = userData &&
-            userData.devices &&
-            userData.devices.find((dev) => dev.id === deviceId);
+        const iDevice = userStore.findDevice(deviceId);
         let itemContent: React.ReactNode;
         if (!iDevice || !iDevice.deviceId) {
             // TODO: better and link back to devices list
@@ -107,7 +105,7 @@ class DeviceView extends React.Component<DeviceViewProps & RouteComponentProps<a
                         <Item.Meta>
                             Raspberry Pi Grinklers Device
                         </Item.Meta>
-                        {this.renderBody(device)}
+                        {this.renderBody(iDevice, device)}
                     </Item.Content>
                 </React.Fragment>
             );

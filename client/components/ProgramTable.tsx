@@ -6,22 +6,25 @@ import { Button, ButtonProps, Form, Icon, Table } from "semantic-ui-react";
 
 import { ProgramSequenceView, ScheduleView } from "@client/components";
 import * as route from "@client/routePaths";
+import { ISprinklersDevice } from "@common/httpApi";
 import { Program, SprinklersDevice } from "@common/sprinklersRpc";
 
 @observer
 class ProgramRows extends React.Component<{
-    program: Program, device: SprinklersDevice,
+    program: Program,
+    iDevice: ISprinklersDevice,
+    device: SprinklersDevice,
     routerStore: RouterStore,
     expanded: boolean, toggleExpanded: (program: Program) => void,
 }> {
     render() {
-        const { program, device, expanded } = this.props;
+        const { program, iDevice, device, expanded } = this.props;
         const { sections } = device;
 
         const { name, running, enabled, schedule, sequence } = program;
 
         const buttonStyle: ButtonProps = { size: "small", compact: false };
-        const detailUrl = route.program(device.id, program.id);
+        const detailUrl = route.program(iDevice.id, program.id);
 
         const stopStartButton = (
             <Button onClick={this.cancelOrRun} {...buttonStyle} positive={!running} negative={running}>
@@ -81,7 +84,7 @@ class ProgramRows extends React.Component<{
 
 @observer
 export default class ProgramTable extends React.Component<{
-    device: SprinklersDevice, routerStore: RouterStore,
+    iDevice: ISprinklersDevice, device: SprinklersDevice, routerStore: RouterStore,
 }, {
     expandedPrograms: Program[],
 }> {
@@ -123,6 +126,7 @@ export default class ProgramTable extends React.Component<{
         return (
             <ProgramRows
                 program={program}
+                iDevice={this.props.iDevice}
                 device={this.props.device}
                 routerStore={this.props.routerStore}
                 expanded={expanded}

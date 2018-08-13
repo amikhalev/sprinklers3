@@ -3,6 +3,7 @@ import ApiError from "@common/ApiError";
 import { ErrorCode } from "@common/ErrorCode";
 import { TokenGrantPasswordRequest, TokenGrantRefreshRequest, TokenGrantResponse } from "@common/httpApi";
 import log from "@common/logger";
+import { runInAction } from "mobx";
 
 export { ApiError };
 
@@ -58,9 +59,11 @@ export default class HttpApi {
         const response: TokenGrantResponse = await this.makeRequest("/token/grant", {
             method: "POST",
         }, request);
-        this.tokenStore.accessToken.token = response.access_token;
-        this.tokenStore.refreshToken.token = response.refresh_token;
-        this.tokenStore.saveLocalStorage();
+        runInAction("grantPasswordSuccess", () => {
+            this.tokenStore.accessToken.token = response.access_token;
+            this.tokenStore.refreshToken.token = response.refresh_token;
+            this.tokenStore.saveLocalStorage();
+        });
         const { accessToken } = this.tokenStore;
         log.debug({ aud: accessToken.claims!.aud }, "got password grant tokens");
     }
@@ -76,9 +79,11 @@ export default class HttpApi {
         const response: TokenGrantResponse = await this.makeRequest("/token/grant", {
             method: "POST",
         }, request);
-        this.tokenStore.accessToken.token = response.access_token;
-        this.tokenStore.refreshToken.token = response.refresh_token;
-        this.tokenStore.saveLocalStorage();
+        runInAction("grantRefreshSuccess", () => {
+            this.tokenStore.accessToken.token = response.access_token;
+            this.tokenStore.refreshToken.token = response.refresh_token;
+            this.tokenStore.saveLocalStorage();
+        });
         const { accessToken } = this.tokenStore;
         log.debug({ aud: accessToken.claims!.aud }, "got refresh grant tokens");
     }

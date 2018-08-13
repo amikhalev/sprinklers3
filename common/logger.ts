@@ -107,7 +107,8 @@ function formatLevel(value: any): ColoredString {
 }
 
 const logger: pino.Logger = pino({
-    browser: { write },
+    serializers: pino.stdSerializers,
+    browser: { serialize: true, write },
     level: "trace",
 });
 

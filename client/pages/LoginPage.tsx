@@ -1,4 +1,4 @@
-import { computed, observable } from "mobx";
+import { action, computed, observable } from "mobx";
 import { observer } from "mobx-react";
 import * as React from "react";
 import { Container, Dimmer, Form, Header, InputOnChangeData, Loader, Message, Segment } from "semantic-ui-react";
@@ -19,28 +19,31 @@ class LoginPageState {
         return this.username.length > 0 && this.password.length > 0;
     }
 
-    onUsernameChange = (e: any, data: InputOnChangeData) => {
+    @action.bound
+    onUsernameChange(e: any, data: InputOnChangeData) {
         this.username = data.value;
     }
 
-    onPasswordChange = (e: any, data: InputOnChangeData) => {
+    @action.bound
+    onPasswordChange(e: any, data: InputOnChangeData) {
         this.password = data.value;
     }
 
+    @action.bound
     login(appState: AppState) {
         this.loading = true;
         this.error = null;
         appState.httpApi.grantPassword(this.username, this.password)
-            .then(() => {
+            .then(action("loginSuccess", () => {
                 this.loading = false;
                 log.info("logged in");
                 appState.history.push("/");
-            })
-            .catch((err) => {
+            }))
+            .catch(action("loginError", (err: any) => {
                 this.loading = false;
                 this.error = err.message;
                 log.error({ err }, "login error");
-            });
+            }));
     }
 }
 
