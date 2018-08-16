@@ -82,11 +82,13 @@ class ProgramRows extends React.Component<{
     }
 }
 
+type ProgramId = Program["id"];
+
 @observer
 export default class ProgramTable extends React.Component<{
     iDevice: ISprinklersDevice, device: SprinklersDevice, routerStore: RouterStore,
 }, {
-    expandedPrograms: Program[],
+    expandedPrograms: ProgramId[],
 }> {
     constructor(p: any) {
         super(p);
@@ -122,7 +124,7 @@ export default class ProgramTable extends React.Component<{
         if (!program) {
             return null;
         }
-        const expanded = this.state.expandedPrograms.indexOf(program) !== -1;
+        const expanded = this.state.expandedPrograms.indexOf(program.id) !== -1;
         return (
             <ProgramRows
                 program={program}
@@ -138,11 +140,11 @@ export default class ProgramTable extends React.Component<{
 
     private toggleExpanded = (program: Program) => {
         const { expandedPrograms } = this.state;
-        const idx = expandedPrograms.indexOf(program);
+        const idx = expandedPrograms.indexOf(program.id);
         if (idx !== -1) {
             expandedPrograms.splice(idx, 1);
         } else {
-            expandedPrograms.push(program);
+            expandedPrograms.push(program.id);
         }
         this.setState({
             expandedPrograms,
