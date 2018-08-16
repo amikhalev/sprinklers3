@@ -257,7 +257,7 @@ export class WebSocketRpcClient implements s.SprinklersRPC {
     });
 
     private onClose(event: CloseEvent) {
-        log.info({ reason: event.reason, wasClean: event.wasClean },
+        log.info({ event },
             "disconnected from websocket");
         this.onDisconnect();
         this.reconnectTimer = window.setTimeout(this._reconnect, RECONNECT_TIMEOUT_MS);
