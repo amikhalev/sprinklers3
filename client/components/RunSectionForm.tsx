@@ -15,18 +15,18 @@ export default class RunSectionForm extends React.Component<{
     uiStore: UiStore,
 }, {
     duration: Duration,
-    section: Section | undefined,
+    sectionId: number | undefined,
 }> {
     constructor(props: any, context?: any) {
         super(props, context);
         this.state = {
             duration: new Duration(0, 0),
-            section: undefined,
+            sectionId: undefined,
         };
     }
 
     render() {
-        const { section, duration } = this.state;
+        const { sectionId, duration } = this.state;
         return (
             <Segment>
                 <Header>Run Section</Header>
@@ -34,7 +34,7 @@ export default class RunSectionForm extends React.Component<{
                     <SectionChooser
                         label="Section"
                         sections={this.props.device.sections}
-                        value={section}
+                        sectionId={sectionId}
                         onChange={this.onSectionChange}
                     />
                     <DurationView
@@ -55,8 +55,8 @@ export default class RunSectionForm extends React.Component<{
         );
     }
 
-    private onSectionChange = (newSection: Section) => {
-        this.setState({ section: newSection });
+    private onSectionChange = (newSectionId: number) => {
+        this.setState({ sectionId: newSectionId });
     }
 
     private onDurationChange = (newDuration: Duration) => {
@@ -65,10 +65,11 @@ export default class RunSectionForm extends React.Component<{
 
     private run = (e: React.SyntheticEvent<HTMLElement>) => {
         e.preventDefault();
-        const { section, duration } = this.state;
-        if (!section) {
+        const { sectionId, duration } = this.state;
+        if (sectionId == null) {
             return;
         }
+        const section = this.props.device.sections[sectionId];
         section.run(duration.toSeconds())
             .then(this.onRunSuccess)
             .catch(this.onRunError);
@@ -91,6 +92,6 @@ export default class RunSectionForm extends React.Component<{
     }
 
     private get isValid(): boolean {
-        return this.state.section != null && this.state.duration.toSeconds() > 0;
+        return this.state.sectionId != null && this.state.duration.toSeconds() > 0;
     }
 }

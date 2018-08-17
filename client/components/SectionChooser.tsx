@@ -12,17 +12,16 @@ export default class SectionChooser extends React.Component<{
     label?: string,
     inline?: boolean,
     sections: Section[],
-    value?: Section,
-    onChange?: (section: Section) => void,
+    sectionId?: number,
+    onChange?: (sectionId: number) => void,
 }> {
     render() {
-        const { label, inline, sections, value, onChange } = this.props;
-        let section = (value == null) ? "" : sections.indexOf(value);
-        section = (section === -1) ? "" : section;
-        const onSectionChange = (onChange == null) ? undefined : this.onSectionChange;
+        const { label, inline, sections, sectionId, onChange } = this.props;
         if (onChange == null) {
-            return <React.Fragment>{label || ""} '{value ? value.toString() : ""}'</React.Fragment>;
+            const sectionStr = sectionId != null ? sections[sectionId].toString() : "";
+            return <React.Fragment>{label || ""} '{sectionStr}'</React.Fragment>;
         }
+        const section = (sectionId == null) ? "" : sectionId;
         return (
             <Form.Select
                 className="sectionChooser"
@@ -31,13 +30,13 @@ export default class SectionChooser extends React.Component<{
                 placeholder="Section"
                 options={this.sectionOptions}
                 value={section}
-                onChange={onSectionChange}
+                onChange={this.onSectionChange}
             />
         );
     }
 
     private onSectionChange = (e: React.SyntheticEvent<HTMLElement>, v: DropdownProps) => {
-        this.props.onChange!(this.props.sections[v.value as number]);
+        this.props.onChange!(this.props.sections[v.value as number].id);
     }
 
     @computed
