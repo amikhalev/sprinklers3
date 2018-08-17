@@ -3,11 +3,17 @@ import ApiError from "@common/ApiError";
 import { ErrorCode } from "@common/ErrorCode";
 import { TokenGrantPasswordRequest, TokenGrantRefreshRequest, TokenGrantResponse } from "@common/httpApi";
 import log from "@common/logger";
+import { DefaultEvents, TypedEventEmitter } from "@common/TypedEventEmitter";
 import { runInAction } from "mobx";
 
 export { ApiError };
 
-export default class HttpApi {
+interface HttpApiEvents extends DefaultEvents {
+    error(err: ApiError): void;
+    tokenError(err: ApiError): void;
+}
+
+export default class HttpApi extends TypedEventEmitter<HttpApiEvents> {
     baseUrl: string;
 
     tokenStore: TokenStore;
@@ -20,36 +26,53 @@ export default class HttpApi {
     }
 
     constructor(baseUrl: string = `${location.protocol}//${location.hostname}:${location.port}/api`) {
+        super();
         while (baseUrl.charAt(baseUrl.length - 1) === "/") {
             baseUrl = baseUrl.substring(0, baseUrl.length - 1);
         }
         this.baseUrl = baseUrl;
 
         this.tokenStore = new TokenStore();
+
+        this.on("error", (err: ApiError) => {
+            if (err.code === ErrorCode.BadToken) {
+                this.emit("tokenError", err);
+            }
+        });
     }
 
     async makeRequest(url: string, options?: RequestInit, body?: any): Promise<any> {
-        options = options || {};
-        options = {
-            headers: {
-                "Content-Type": "application/json",
-                ...this.authorizationHeader,
-                ...options.headers || {},
-            },
-            body: JSON.stringify(body),
-            ...options,
-        };
-        const response = await fetch(this.baseUrl + url, options);
-        let responseBody: any;
         try {
-            responseBody = await response.json() || {};
-        } catch (e) {
-            throw new ApiError("Invalid JSON response", ErrorCode.Internal, e);
+            options = options || {};
+            options = {
+                headers: {
+                    "Content-Type": "application/json",
+                    ...this.authorizationHeader,
+                    ...options.headers || {},
+                },
+                body: JSON.stringify(body),
+                ...options,
+            };
+            let response: Response;
+            try {
+                response = await fetch(this.baseUrl + url, options);
+            } catch (err) {
+                throw new ApiError("Http request error", ErrorCode.Internal, err);
+            }
+            let responseBody: any;
+            try {
+                responseBody = await response.json() || {};
+            } catch (e) {
+                throw new ApiError("Invalid JSON response", ErrorCode.Internal, e);
+            }
+            if (!response.ok) {
+                throw new ApiError(responseBody.message || response.statusText, responseBody.code, responseBody.data);
+            }
+            return responseBody;
+        } catch (err) {
+            this.emit("error", err);
+            throw err;
         }
-        if (!response.ok) {
-            throw new ApiError(responseBody.message || response.statusText, responseBody.code, responseBody.data);
-        }
-        return responseBody;
     }
 
     async grantPassword(username: string, password: string) {

@@ -27,7 +27,7 @@ export class Token<TClaims extends TokenClaims = TokenClaims> {
         return this.token;
     }
 
-    private updateCurrentTime = (reportChanged: boolean = true) => {
+    updateCurrentTime = (reportChanged: boolean = true) => {
         if (reportChanged) {
             this.isExpiredAtom.reportChanged();
         }

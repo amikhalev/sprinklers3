@@ -2,8 +2,8 @@ import { action, autorun, observable, runInAction, when } from "mobx";
 import { update } from "serializr";
 
 import { TokenStore } from "@client/state/TokenStore";
-import { UserStore } from "@client/state/UserStore";
 import { ErrorCode } from "@common/ErrorCode";
+import { IUser } from "@common/httpApi";
 import * as rpc from "@common/jsonRpc";
 import logger from "@common/logger";
 import * as deviceRequests from "@common/sprinklersRpc/deviceRequests";
@@ -11,6 +11,7 @@ import * as s from "@common/sprinklersRpc/index";
 import * as schema from "@common/sprinklersRpc/schema/index";
 import { seralizeRequest } from "@common/sprinklersRpc/schema/requests";
 import * as ws from "@common/sprinklersRpc/websocketData";
+import { DefaultEvents, TypedEventEmitter } from "@common/TypedEventEmitter";
 
 const log = logger.child({ source: "websocket" });
 
@@ -83,7 +84,13 @@ export class WSSprinklersDevice extends s.SprinklersDevice {
     }
 }
 
-export class WebSocketRpcClient implements s.SprinklersRPC {
+export interface WebSocketRpcClientEvents extends DefaultEvents {
+    newUserData(userData: IUser): void;
+    rpcError(error: ws.RpcError): void;
+    tokenError(error: ws.RpcError): void;
+}
+
+export class WebSocketRpcClient extends TypedEventEmitter<WebSocketRpcClientEvents> implements s.SprinklersRPC {
     readonly webSocketUrl: string;
 
     devices: Map<string, WSSprinklersDevice> = new Map();
@@ -94,7 +101,6 @@ export class WebSocketRpcClient implements s.SprinklersRPC {
     authenticated: boolean = false;
 
     tokenStore: TokenStore;
-    userStore: UserStore;
 
     private nextRequestId = Math.round(Math.random() * 1000000);
     private responseCallbacks: ws.ServerResponseHandlers = {};
@@ -104,12 +110,18 @@ export class WebSocketRpcClient implements s.SprinklersRPC {
         return this.connectionState.isServerConnected || false;
     }
 
-    constructor(tokenStore: TokenStore, userStore: UserStore, webSocketUrl: string = DEFAULT_URL) {
+    constructor(tokenStore: TokenStore, webSocketUrl: string = DEFAULT_URL) {
+        super();
         this.webSocketUrl = webSocketUrl;
         this.tokenStore = tokenStore;
-        this.userStore = userStore;
         this.connectionState.clientToServer = false;
         this.connectionState.serverToBroker = false;
+
+        this.on("rpcError", (err: ws.RpcError) => {
+            if (err.code === ErrorCode.BadToken) {
+                this.emit("tokenError", err);
+            }
+        });
     }
 
     start() {
@@ -149,13 +161,17 @@ export class WebSocketRpcClient implements s.SprinklersRPC {
             && this.tokenStore.accessToken.isValid, async () => {
             try {
                 const res = await this.authenticate(this.tokenStore.accessToken.token!);
-                this.authenticated = res.authenticated;
+                runInAction("authenticateSuccess", () => {
+                    this.authenticated = res.authenticated;
+                });
                 logger.info({ user: res.user }, "authenticated websocket connection");
-                this.userStore.receiveUserData(res.user);
+                this.emit("newUserData", res.user);
             } catch (err) {
                 logger.error({ err }, "error authenticating websocket connection");
                 // TODO message?
-                this.authenticated = false;
+                runInAction("authenticateSuccess", () => {
+                    this.authenticated = false;
+                });
             }
         });
     }
@@ -167,17 +183,13 @@ export class WebSocketRpcClient implements s.SprinklersRPC {
                 code: ErrorCode.ServerDisconnected,
                 message: "the server is not connected",
             };
-            throw error;
+            throw new ws.RpcError("the server is not connected", ErrorCode.ServerDisconnected);
         }
         const requestData = seralizeRequest(request);
         const data: ws.IDeviceCallRequest = { deviceId, data: requestData };
         const resData = await this.makeRequest("deviceCall", data);
         if (resData.data.result === "error") {
-            throw {
-                code: resData.data.code,
-                message: resData.data.message,
-                data: resData.data,
-            };
+            throw new ws.RpcError(resData.data.message, resData.data.code, resData.data);
         } else {
             return resData.data;
         }
@@ -194,21 +206,22 @@ export class WebSocketRpcClient implements s.SprinklersRPC {
                 if (response.result === "success") {
                     resolve(response.data);
                 } else {
-                    reject(response.error);
+                    const { error } = response;
+                    reject(new ws.RpcError(error.message, error.code, error.data));
                 }
             };
             timeoutHandle = window.setTimeout(() => {
                 delete this.responseCallbacks[id];
-                const res: ws.ErrorData = {
-                    result: "error", error: {
-                        code: ErrorCode.Timeout,
-                        message: "the request timed out",
-                    },
-                };
-                reject(res);
+                reject(new ws.RpcError("the request timed out", ErrorCode.Timeout));
             }, TIMEOUT_MS);
             this.sendRequest(id, method, params);
-        });
+        })
+            .catch((err) => {
+                if (err instanceof ws.RpcError) {
+                    this.emit("rpcError", err);
+                }
+                throw err;
+            });
     }
 
     private sendMessage(data: ws.ClientMessage) {
@@ -230,7 +243,7 @@ export class WebSocketRpcClient implements s.SprinklersRPC {
 
     private _connect() {
         if (this.socket != null &&
-            (this.socket.readyState === WebSocket.CLOSED)) {
+            (this.socket.readyState === WebSocket.OPEN)) {
             this.tryAuthenticate();
             return;
         }
@@ -242,6 +255,7 @@ export class WebSocketRpcClient implements s.SprinklersRPC {
         this.socket.onmessage = this.onMessage.bind(this);
     }
 
+    @action
     private onOpen() {
         log.info("established websocket connection");
         this.connectionState.clientToServer = true;
@@ -250,6 +264,7 @@ export class WebSocketRpcClient implements s.SprinklersRPC {
     }
 
     /* tslint:disable-next-line:member-ordering */
+    @action
     private onDisconnect = action(() => {
         this.connectionState.serverToBroker = null;
         this.connectionState.clientToServer = false;
@@ -263,12 +278,11 @@ export class WebSocketRpcClient implements s.SprinklersRPC {
         this.reconnectTimer = window.setTimeout(this._reconnect, RECONNECT_TIMEOUT_MS);
     }
 
+    @action
     private onError(event: Event) {
         log.error({ event }, "websocket error");
-        action(() => {
-            this.connectionState.serverToBroker = null;
-            this.connectionState.clientToServer = false;
-        });
+        this.connectionState.serverToBroker = null;
+        this.connectionState.clientToServer = false;
         this.onDisconnect();
     }
 
@@ -335,4 +349,4 @@ class WSClientNotificationHandlers implements ws.ServerNotificationHandlers  {
     error(data: ws.IError) {
         log.warn({ err: data }, "server error");
     }
-};
+}

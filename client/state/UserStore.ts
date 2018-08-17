@@ -4,7 +4,7 @@ import { action, observable } from "mobx";
 export class UserStore {
     @observable userData: IUser | null = null;
 
-    @action
+    @action.bound
     receiveUserData(userData: IUser) {
         this.userData = userData;
     }

@@ -1,5 +1,5 @@
 import { createBrowserHistory, History } from "history";
-import { computed, configure } from "mobx";
+import { computed, configure, when } from "mobx";
 import { RouterStore, syncHistoryWithStore } from "mobx-react-router";
 
 import { WebSocketRpcClient } from "@client/sprinklersRpc/WebSocketRpcClient";
@@ -8,16 +8,37 @@ import { UiStore } from "@client/state/UiStore";
 import { UserStore } from "@client/state/UserStore";
 import ApiError from "@common/ApiError";
 import { ErrorCode } from "@common/ErrorCode";
+import { IUser } from "@common/httpApi";
 import log from "@common/logger";
+import { TypedEventEmitter, DefaultEvents } from "@common/TypedEventEmitter";
 
-export default class AppState {
+interface AppEvents extends DefaultEvents {
+    checkToken(): void;
+    hasToken(): void;
+}
+
+export default class AppState extends TypedEventEmitter<AppEvents> {
     history: History = createBrowserHistory();
     routerStore = new RouterStore();
     uiStore = new UiStore();
     userStore = new UserStore();
     httpApi = new HttpApi();
     tokenStore = this.httpApi.tokenStore;
-    sprinklersRpc = new WebSocketRpcClient(this.tokenStore, this.userStore);
+    sprinklersRpc = new WebSocketRpcClient(this.tokenStore);
+
+    constructor() {
+        super();
+        this.sprinklersRpc.on("newUserData", this.userStore.receiveUserData);
+        this.sprinklersRpc.on("tokenError", this.checkToken);
+        this.httpApi.on("tokenError", this.checkToken);
+
+        this.on("checkToken", this.doCheckToken);
+
+        this.on("hasToken", () => {
+            when(() => !this.tokenStore.accessToken.isValid, this.checkToken);
+            this.sprinklersRpc.start();
+        });
+    }
 
     @computed get isLoggedIn() {
         return this.tokenStore.accessToken.isValid;
@@ -29,15 +50,20 @@ export default class AppState {
         });
 
         syncHistoryWithStore(this.history, this.routerStore);
-        this.tokenStore.loadLocalStorage();
+        await this.tokenStore.loadLocalStorage();
 
         await this.checkToken();
-        await this.sprinklersRpc.start();
     }
 
-    async checkToken() {
-        const { tokenStore: { accessToken, refreshToken } } = this.httpApi;
+    checkToken = () => {
+        this.emit("checkToken");
+    }
+
+    private doCheckToken = async () => {
+        const { accessToken, refreshToken } = this.tokenStore;
+        accessToken.updateCurrentTime();
         if (accessToken.isValid) { // if the access token is valid, we are good
+            this.emit("hasToken");
             return;
         }
         if (!refreshToken.isValid) { // if the refresh token is not valid, need to login again
@@ -46,6 +72,7 @@ export default class AppState {
         }
         try {
             await this.httpApi.grantRefresh();
+            this.emit("hasToken");
         } catch (err) {
             if (err instanceof ApiError && err.code === ErrorCode.BadToken) {
                 log.warn({ err }, "refresh is bad for some reason, erasing");
