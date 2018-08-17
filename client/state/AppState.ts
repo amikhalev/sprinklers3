@@ -8,9 +8,8 @@ import { UiStore } from "@client/state/UiStore";
 import { UserStore } from "@client/state/UserStore";
 import ApiError from "@common/ApiError";
 import { ErrorCode } from "@common/ErrorCode";
-import { IUser } from "@common/httpApi";
 import log from "@common/logger";
-import { TypedEventEmitter, DefaultEvents } from "@common/TypedEventEmitter";
+import { DefaultEvents, TypedEventEmitter } from "@common/TypedEventEmitter";
 
 interface AppEvents extends DefaultEvents {
     checkToken(): void;

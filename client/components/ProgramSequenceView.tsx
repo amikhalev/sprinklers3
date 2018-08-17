@@ -39,7 +39,7 @@ class ProgramSequenceItem extends React.Component<{
                     <SectionChooser
                         label="Section"
                         sections={sections}
-                        value={section}
+                        sectionId={section.id}
                         onChange={this.onSectionChange}
                     />
                     <DurationView
@@ -69,9 +69,9 @@ class ProgramSequenceItem extends React.Component<{
         );
     }
 
-    private onSectionChange = (newSection: Section) => {
+    private onSectionChange = (newSectionId: number) => {
         this.props.onChange(this.props.idx, new ProgramItem({
-            ...this.props.sequenceItem, section: newSection.id,
+            ...this.props.sequenceItem, section: newSectionId,
         }));
     }
 

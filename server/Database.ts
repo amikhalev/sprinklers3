@@ -45,7 +45,6 @@ export class Database {
     }
 
     async insertData() {
-        this.conn.subscribers
         const NUM = 100;
         const users: User[] = [];
         for (let i = 0; i < NUM; i++) {
