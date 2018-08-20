@@ -1,5 +1,7 @@
 import chalk from "chalk";
-import { pretty } from "pino";
+import * as pump from "pump";
+import * as split from "split2";
+import * as through from "through2";
 
 type Level = "default" | 60 | 50 | 40 | 30 | 20 | 10;
 
@@ -51,6 +53,7 @@ function formatter(value: any) {
     } else {
         line += filter(value);
     }
+    line += "\n";
     return line;
 }
 
@@ -118,6 +121,14 @@ function asColoredLevel(value: any) {
     }
 }
 
-process.stdin.pipe(pretty({
-    formatter,
-})).pipe(process.stdout);
+const prettyTransport = through.obj((chunk, enc, cb) => {
+    const value = JSON.parse(chunk.toString());
+    const line = formatter(value);
+    if (!line) {
+        return cb();
+    }
+    process.stdout.write(line);
+    cb();
+});
+
+pump(process.stdin, split(), prettyTransport);
