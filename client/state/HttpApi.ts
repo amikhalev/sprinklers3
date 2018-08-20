@@ -1,14 +1,16 @@
+import { action } from "mobx";
+
 import { TokenStore } from "@client/state/TokenStore";
 import ApiError from "@common/ApiError";
 import { ErrorCode } from "@common/ErrorCode";
 import { TokenGrantPasswordRequest, TokenGrantRefreshRequest, TokenGrantResponse } from "@common/httpApi";
 import log from "@common/logger";
 import { DefaultEvents, TypedEventEmitter } from "@common/TypedEventEmitter";
-import { runInAction } from "mobx";
 
 export { ApiError };
 
 interface HttpApiEvents extends DefaultEvents {
+    tokenGranted(response: TokenGrantResponse): void;
     error(err: ApiError): void;
     tokenError(err: ApiError): void;
 }
@@ -39,6 +41,8 @@ export default class HttpApi extends TypedEventEmitter<HttpApiEvents> {
                 this.emit("tokenError", err);
             }
         });
+
+        this.on("tokenGranted", this.onTokenGranted);
     }
 
     async makeRequest(url: string, options?: RequestInit, body?: any): Promise<any> {
@@ -82,13 +86,7 @@ export default class HttpApi extends TypedEventEmitter<HttpApiEvents> {
         const response: TokenGrantResponse = await this.makeRequest("/token/grant", {
             method: "POST",
         }, request);
-        runInAction("grantPasswordSuccess", () => {
-            this.tokenStore.accessToken.token = response.access_token;
-            this.tokenStore.refreshToken.token = response.refresh_token;
-            this.tokenStore.saveLocalStorage();
-        });
-        const { accessToken } = this.tokenStore;
-        log.debug({ aud: accessToken.claims!.aud }, "got password grant tokens");
+        this.emit("tokenGranted", response);
     }
 
     async grantRefresh() {
@@ -102,12 +100,17 @@ export default class HttpApi extends TypedEventEmitter<HttpApiEvents> {
         const response: TokenGrantResponse = await this.makeRequest("/token/grant", {
             method: "POST",
         }, request);
-        runInAction("grantRefreshSuccess", () => {
-            this.tokenStore.accessToken.token = response.access_token;
-            this.tokenStore.refreshToken.token = response.refresh_token;
-            this.tokenStore.saveLocalStorage();
-        });
-        const { accessToken } = this.tokenStore;
-        log.debug({ aud: accessToken.claims!.aud }, "got refresh grant tokens");
+        this.emit("tokenGranted", response);
+    }
+
+    @action.bound
+    private onTokenGranted(response: TokenGrantResponse) {
+        this.tokenStore.accessToken.token = response.access_token;
+        this.tokenStore.refreshToken.token = response.refresh_token;
+        this.tokenStore.saveLocalStorage();
+        const { accessToken, refreshToken } = this.tokenStore;
+        log.debug({
+            accessToken: accessToken.claims, refreshToken: refreshToken.claims,
+        }, "got new tokens");
     }
 }

@@ -29,6 +29,7 @@ export default class AppState extends TypedEventEmitter<AppEvents> {
         super();
         this.sprinklersRpc.on("newUserData", this.userStore.receiveUserData);
         this.sprinklersRpc.on("tokenError", this.checkToken);
+        this.httpApi.on("tokenGranted", () => this.emit("hasToken"));
         this.httpApi.on("tokenError", this.checkToken);
 
         this.on("checkToken", this.doCheckToken);
