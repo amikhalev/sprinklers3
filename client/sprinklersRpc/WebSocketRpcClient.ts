@@ -1,4 +1,4 @@
-import { action, autorun, observable, runInAction, when } from "mobx";
+import { action, observable, runInAction, when } from "mobx";
 import { update } from "serializr";
 
 import { TokenStore } from "@client/state/TokenStore";
@@ -12,8 +12,9 @@ import * as schema from "@common/sprinklersRpc/schema/index";
 import { seralizeRequest } from "@common/sprinklersRpc/schema/requests";
 import * as ws from "@common/sprinklersRpc/websocketData";
 import { DefaultEvents, TypedEventEmitter } from "@common/TypedEventEmitter";
+import { WSSprinklersDevice } from "./WSSprinklersDevice";
 
-const log = logger.child({ source: "websocket" });
+export const log = logger.child({ source: "websocket" });
 
 const TIMEOUT_MS = 5000;
 const RECONNECT_TIMEOUT_MS = 5000;
@@ -24,66 +25,6 @@ const websocketPort = isDev ? 8080 : location.port;
 
 const DEFAULT_URL = `${websocketProtocol}//${location.hostname}:${websocketPort}`;
 
-// tslint:disable:member-ordering
-
-export class WSSprinklersDevice extends s.SprinklersDevice {
-    readonly api: WebSocketRpcClient;
-
-    private _id: string;
-
-    constructor(api: WebSocketRpcClient, id: string) {
-        super();
-        this.api = api;
-        this._id = id;
-
-        autorun(this.updateConnectionState);
-        this.waitSubscribe();
-    }
-
-    get id() {
-        return this._id;
-    }
-
-    private updateConnectionState = () => {
-        const { clientToServer, serverToBroker } = this.api.connectionState;
-        runInAction("updateConnectionState", () => {
-            Object.assign(this.connectionState, { clientToServer, serverToBroker });
-        });
-    }
-
-    async subscribe() {
-        const subscribeRequest: ws.IDeviceSubscribeRequest = {
-            deviceId: this.id,
-        };
-        try {
-            await this.api.makeRequest("deviceSubscribe", subscribeRequest);
-            runInAction("deviceSubscribeSuccess", () => {
-                this.connectionState.brokerToDevice = true;
-            });
-        } catch (err) {
-            runInAction("deviceSubscribeError", () => {
-                this.connectionState.brokerToDevice = false;
-                if ((err as ws.IError).code === ErrorCode.NoPermission) {
-                    this.connectionState.hasPermission = false;
-                } else {
-                    log.error({ err });
-                }
-            });
-        }
-    }
-
-    makeRequest(request: deviceRequests.Request): Promise<deviceRequests.Response> {
-        return this.api.makeDeviceCall(this.id, request);
-    }
-
-    waitSubscribe = () => {
-        when(() => this.api.authenticated, () => {
-            this.subscribe();
-            when(() => !this.api.authenticated, this.waitSubscribe);
-        });
-    }
-}
-
 export interface WebSocketRpcClientEvents extends DefaultEvents {
     newUserData(userData: IUser): void;
     rpcError(error: ws.RpcError): void;
@@ -91,6 +32,10 @@ export interface WebSocketRpcClientEvents extends DefaultEvents {
 }
 
 export class WebSocketRpcClient extends TypedEventEmitter<WebSocketRpcClientEvents> implements s.SprinklersRPC {
+
+    get connected(): boolean {
+        return this.connectionState.isServerConnected || false;
+    }
     readonly webSocketUrl: string;
 
     devices: Map<string, WSSprinklersDevice> = new Map();
@@ -106,9 +51,15 @@ export class WebSocketRpcClient extends TypedEventEmitter<WebSocketRpcClientEven
     private responseCallbacks: ws.ServerResponseHandlers = {};
     private reconnectTimer: number | null = null;
 
-    get connected(): boolean {
-        return this.connectionState.isServerConnected || false;
-    }
+    /* tslint:disable-next-line:member-ordering */
+    @action
+    private onDisconnect = action(() => {
+        this.connectionState.serverToBroker = null;
+        this.connectionState.clientToServer = false;
+        this.authenticated = false;
+    });
+
+    private notificationHandlers = new WSClientNotificationHandlers(this);
 
     constructor(tokenStore: TokenStore, webSocketUrl: string = DEFAULT_URL) {
         super();
@@ -263,14 +214,6 @@ export class WebSocketRpcClient extends TypedEventEmitter<WebSocketRpcClientEven
         this.tryAuthenticate();
     }
 
-    /* tslint:disable-next-line:member-ordering */
-    @action
-    private onDisconnect = action(() => {
-        this.connectionState.serverToBroker = null;
-        this.connectionState.clientToServer = false;
-        this.authenticated = false;
-    });
-
     private onClose(event: CloseEvent) {
         log.info({ event },
             "disconnected from websocket");
@@ -321,8 +264,6 @@ export class WebSocketRpcClient extends TypedEventEmitter<WebSocketRpcClientEven
             log.error({ err }, "error handling server response");
         }
     }
-
-    private notificationHandlers = new WSClientNotificationHandlers(this);
 }
 
 class WSClientNotificationHandlers implements ws.ServerNotificationHandlers  {
