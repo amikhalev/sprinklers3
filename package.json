@@ -65,6 +65,7 @@
     "@types/express": "^4.16.0",
     "@types/jsonwebtoken": "^7.2.8",
     "@types/lodash": "^4.14.116",
+    "@types/module-alias": "^2.0.0",
     "@types/node": "^10.5.7",
     "@types/object-assign": "^4.0.30",
     "@types/pino": "^4.16.1",
