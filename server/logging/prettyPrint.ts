@@ -122,7 +122,13 @@ function asColoredLevel(value: any) {
 }
 
 const prettyTransport = through.obj((chunk, enc, cb) => {
-    const value = JSON.parse(chunk.toString());
+    let value: any;
+    try {
+        value = JSON.parse(chunk.toString());
+    } catch (e) {
+        process.stdout.write(chunk.toString() + "\n");
+        return cb();
+    }
     const line = formatter(value);
     if (!line) {
         return cb();
