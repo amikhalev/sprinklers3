@@ -1,0 +1,11 @@
+FROM debian:stretch
+
+LABEL Author="Alex Mikhalev"
+LABEL Description="Eclipse Mosquitto MQTT Broker"
+
+RUN apt-get update && \
+    apt-get install -y mosquitto mosquitto-auth-plugin
+
+COPY sprinklers3.mosquitto.conf /etc/mosquitto/conf.d/
+
+CMD ["/usr/sbin/mosquitto", "-c", "/etc/mosquitto/mosquitto.conf"]

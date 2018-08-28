@@ -28,9 +28,9 @@ export default class AppState extends TypedEventEmitter<AppEvents> {
     constructor() {
         super();
         this.sprinklersRpc.on("newUserData", this.userStore.receiveUserData);
-        this.sprinklersRpc.on("tokenError", this.checkToken);
+        this.sprinklersRpc.on("tokenError", this.clearToken);
         this.httpApi.on("tokenGranted", () => this.emit("hasToken"));
-        this.httpApi.on("tokenError", this.checkToken);
+        this.httpApi.on("tokenError", this.clearToken);
 
         this.on("checkToken", this.doCheckToken);
 
@@ -55,6 +55,11 @@ export default class AppState extends TypedEventEmitter<AppEvents> {
         await this.checkToken();
     }
 
+    clearToken = (err?: any) => {
+        this.tokenStore.clearAccessToken();
+        this.checkToken();
+    }
+
     checkToken = () => {
         this.emit("checkToken");
     }
@@ -76,7 +81,7 @@ export default class AppState extends TypedEventEmitter<AppEvents> {
         } catch (err) {
             if (err instanceof ApiError && err.code === ErrorCode.BadToken) {
                 log.warn({ err }, "refresh is bad for some reason, erasing");
-                this.tokenStore.clear();
+                this.tokenStore.clearAll();
                 this.history.push("/login");
             } else {
                 log.error({ err }, "could not refresh access token");

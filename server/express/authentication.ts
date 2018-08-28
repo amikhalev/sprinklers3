@@ -10,7 +10,7 @@ import {
     TokenGrantRequest,
     TokenGrantResponse,
 } from "@common/httpApi";
-import { AccessToken, DeviceRegistrationToken, DeviceToken, RefreshToken, TokenClaims } from "@common/TokenClaims";
+import { AccessToken, DeviceRegistrationToken, DeviceToken, RefreshToken, TokenClaims, SuperuserToken } from "@common/TokenClaims";
 import { User } from "../entities";
 import { ServerState } from "../state";
 
@@ -110,13 +110,22 @@ function generateDeviceRegistrationToken(secret: string): Promise<string> {
     return signToken(device_reg_token_claims);
 }
 
-export function generateDeviceToken(deviceId: string): Promise<string> {
+export function generateDeviceToken(id: number, deviceId: string): Promise<string> {
     const device_token_claims: DeviceToken = {
         iss: ISSUER,
         type: "device",
         aud: deviceId,
+        id,
     };
     return signToken(device_token_claims);
+}
+
+export function generateSuperuserToken(): Promise<string> {
+    const superuser_claims: SuperuserToken = {
+        iss: ISSUER,
+        type: "superuser",
+    };
+    return signToken(superuser_claims);
 }
 
 export function authentication(state: ServerState) {
@@ -143,15 +152,15 @@ export function authentication(state: ServerState) {
     async function refreshGrant(body: TokenGrantRefreshRequest, res: Express.Response): Promise<User> {
         const { refresh_token } = body;
         if (!body || !refresh_token) {
-            throw new ApiError("Must specify a refresh_token");
+            throw new ApiError("Must specify a refresh_token", ErrorCode.BadToken);
         }
         const claims = await verifyToken(refresh_token);
         if (claims.type !== "refresh") {
-            throw new ApiError("Not a refresh token");
+            throw new ApiError("Not a refresh token", ErrorCode.BadToken);
         }
         const user = await state.database.users.findOne(claims.aud);
         if (!user) {
-            throw new ApiError("User no longer exists");
+            throw new ApiError("User no longer exists", ErrorCode.BadToken);
         }
         return user;
     }

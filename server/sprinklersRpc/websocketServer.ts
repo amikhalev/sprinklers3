@@ -88,11 +88,14 @@ export class WebSocketClient {
             this.userId = claims.aud;
             this.user = await this.state.database.users.
                 findById(this.userId, { devices: true }) || null;
+            if (!this.user) {
+                throw new ws.RpcError("user no longer exists", ErrorCode.BadToken);
+            }
             log.info({ userId: claims.aud, name: claims.name }, "authenticated websocket client");
             this.subscribeBrokerConnection();
             return {
                 result: "success",
-                data: { authenticated: true, message: "authenticated", user: this.user!.toJSON() },
+                data: { authenticated: true, message: "authenticated", user: this.user.toJSON() },
             };
         },
         deviceSubscribe: async (data: ws.IDeviceSubscribeRequest) => {
