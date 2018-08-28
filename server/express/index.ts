@@ -12,6 +12,7 @@ export function createApp(state: ServerState) {
 
     app.use(requestLogger);
     app.use(bodyParser.json());
+    app.use(bodyParser.urlencoded({ extended: true }));
 
     app.use("/api", createApi(state));
 

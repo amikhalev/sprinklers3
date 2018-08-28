@@ -5,6 +5,7 @@ import { ErrorCode } from "@common/ErrorCode";
 import { authentication } from "@server/express/authentication";
 import { ServerState } from "@server/state";
 import { devices } from "./devices";
+import { mosquitto } from "./mosquitto";
 import { users } from "./users";
 
 export default function createApi(state: ServerState) {
@@ -12,6 +13,7 @@ export default function createApi(state: ServerState) {
 
     router.use("/devices", devices(state));
     router.use("/users", users(state));
+    router.use("/mosquitto", mosquitto(state));
     router.use("/token", authentication(state));
 
     router.use("*", (req, res) => {
