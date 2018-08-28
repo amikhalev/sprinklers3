@@ -1,5 +1,7 @@
 import logger from "@common/logger";
 import * as mqtt from "@common/sprinklersRpc/mqtt";
+import { SUPERUSER } from "@server/express/api/mosquitto";
+import { generateSuperuserToken } from "@server/express/authentication";
 import { Database } from "./Database";
 
 export class ServerState {
@@ -13,7 +15,9 @@ export class ServerState {
             throw new Error("Must specify a MQTT_URL to connect to");
         }
         this.mqttUrl = mqttUrl;
-        this.mqttClient = new mqtt.MqttRpcClient(mqttUrl);
+        this.mqttClient = new mqtt.MqttRpcClient({
+            mqttUri: mqttUrl,
+        });
         this.database = new Database();
     }
 
@@ -22,6 +26,8 @@ export class ServerState {
         await this.database.createAll();
         logger.info("created database and tables");
 
+        this.mqttClient.username = SUPERUSER;
+        this.mqttClient.password = await generateSuperuserToken();
         this.mqttClient.start();
     }
 }

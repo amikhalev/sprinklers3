@@ -10,7 +10,13 @@ export class TokenStore {
     @observable refreshToken: Token<RefreshToken> = new Token();
 
     @action
-    clear() {
+    clearAccessToken() {
+        this.accessToken.token = null;
+        this.saveLocalStorage();
+    }
+
+    @action
+    clearAll() {
         this.accessToken.token = null;
         this.refreshToken.token = null;
         this.saveLocalStorage();

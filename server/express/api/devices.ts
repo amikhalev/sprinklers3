@@ -49,7 +49,7 @@ export function devices(state: ServerState) {
             name: "Sprinklers Device", deviceId,
         });
         await state.database.sprinklersDevices.save(newDevice);
-        const token = await generateDeviceToken(deviceId);
+        const token = await generateDeviceToken(newDevice.id, deviceId);
         res.send({
             data: newDevice, token,
         });

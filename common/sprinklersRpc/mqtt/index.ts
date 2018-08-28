@@ -17,7 +17,15 @@ interface WithRid {
     rid: number;
 }
 
-export class MqttRpcClient implements s.SprinklersRPC {
+export const DEVICE_PREFIX = "devices";
+
+export interface MqttRpcClientOptions {
+    mqttUri: string;
+    username?: string;
+    password?: string;
+}
+
+export class MqttRpcClient implements s.SprinklersRPC, MqttRpcClientOptions {
     get connected(): boolean {
         return this.connectionState.isServerConnected || false;
     }
@@ -26,21 +34,26 @@ export class MqttRpcClient implements s.SprinklersRPC {
         return "sprinklers3-MqttApiClient-" + getRandomId();
     }
 
-    readonly mqttUri: string;
+    mqttUri!: string;
+    username?: string;
+    password?: string;
+
     client!: mqtt.Client;
     @observable connectionState: s.ConnectionState = new s.ConnectionState();
     devices: Map<string, MqttSprinklersDevice> = new Map();
 
-    constructor(mqttUri: string) {
-        this.mqttUri = mqttUri;
+    constructor(opts: MqttRpcClientOptions) {
+        Object.assign(this, opts);
         this.connectionState.serverToBroker = false;
     }
 
     start() {
         const clientId = MqttRpcClient.newClientId();
-        log.info({ mqttUri: this.mqttUri, clientId }, "connecting to mqtt broker with client id");
-        this.client = mqtt.connect(this.mqttUri, {
+        const mqttUri = this.mqttUri;
+        log.info({ mqttUri, clientId }, "connecting to mqtt broker with client id");
+        this.client = mqtt.connect(mqttUri, {
             clientId, connectTimeout: 5000, reconnectPeriod: 5000,
+            username: this.username, password: this.password,
         });
         this.client.on("message", this.onMessageArrived.bind(this));
         this.client.on("close", () => {
@@ -90,12 +103,16 @@ export class MqttRpcClient implements s.SprinklersRPC {
     private processMessage(topic: string, payloadBuf: Buffer, packet: mqtt.Packet) {
         const payload = payloadBuf.toString("utf8");
         log.trace({ topic, payload }, "message arrived: ");
-        const topicIdx = topic.indexOf("/"); // find the first /
-        const prefix = topic.substr(0, topicIdx); // assume prefix does not contain a /
-        const topicSuffix = topic.substr(topicIdx + 1);
-        const device = this.devices.get(prefix);
+        const regexp = new RegExp(`^${DEVICE_PREFIX}\\/([^\\/]+)\\/?(.*)$`);
+        const matches = regexp.exec(topic);
+        if (!matches) {
+            return log.warn({ topic }, "received message on invalid topic");
+        }
+        const id = matches[1];
+        const topicSuffix = matches[2];
+        const device = this.devices.get(id);
         if (!device) {
-            log.debug({ prefix }, "received message for unknown device");
+            log.debug({ id }, "received message for unknown device");
             return;
         }
         device.onMessage(topicSuffix, payload);
@@ -131,20 +148,22 @@ const handler = (test: RegExp) =>
 
 class MqttSprinklersDevice extends s.SprinklersDevice {
     readonly apiClient: MqttRpcClient;
-    readonly prefix: string;
+    readonly id: string;
 
     handlers!: IHandlerEntry[];
+    private subscriptions: string[];
     private nextRequestId: number = Math.floor(Math.random() * 1000000000);
     private responseCallbacks: Map<number, ResponseCallback> = new Map();
 
-    constructor(apiClient: MqttRpcClient, prefix: string) {
+    constructor(apiClient: MqttRpcClient, id: string) {
         super();
         this.sectionConstructor = MqttSection;
         this.sectionRunnerConstructor = MqttSectionRunner;
         this.programConstructor = MqttProgram;
         this.apiClient = apiClient;
-        this.prefix = prefix;
+        this.id = id;
         this.sectionRunner = new MqttSectionRunner(this);
+        this.subscriptions = subscriptions.map((filter) => this.prefix + filter);
 
         autorun(() => {
             const brokerConnected = apiClient.connected;
@@ -160,14 +179,13 @@ class MqttSprinklersDevice extends s.SprinklersDevice {
         });
     }
 
-    get id(): string {
-        return this.prefix;
+    get prefix(): string {
+        return DEVICE_PREFIX + "/" + this.id;
     }
 
     doSubscribe(): Promise<void> {
-        const topics = subscriptions.map((filter) => this.prefix + filter);
         return new Promise((resolve, reject) => {
-            this.apiClient.client.subscribe(topics, { qos: 1 }, (err) => {
+            this.apiClient.client.subscribe(this.subscriptions, { qos: 1 }, (err) => {
                 if (err) {
                     reject(err);
                 } else {
@@ -178,9 +196,8 @@ class MqttSprinklersDevice extends s.SprinklersDevice {
     }
 
     doUnsubscribe(): Promise<void> {
-        const topics = subscriptions.map((filter) => this.prefix + filter);
         return new Promise((resolve, reject) => {
-            this.apiClient.client.unsubscribe(topics, (err) => {
+            this.apiClient.client.unsubscribe(this.subscriptions, (err) => {
                 if (err) {
                     reject(err);
                 } else {

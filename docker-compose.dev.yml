@@ -7,6 +7,7 @@ services:
       dockerfile: Dockerfile.dev
     depends_on:
       - database
+      - mosquitto
     ports:
       - "8080:8080"
       - "8081:8081"
@@ -23,9 +24,19 @@ services:
       - TYPEORM_DATABASE=postgres
       - TYPEORM_USERNAME=postgres
       - TYPEORM_PASSWORD=8JN4w0UsN5dbjMjNvPe452P2yYOqg5PV
+      - MQTT_URL=tcp://mosquitto:1883
       # Must specify JWT_SECRET and MQTT_URL
+
+  mosquitto:
+    build:
+      context: .
+      dockerfile: Dockerfile.mosquitto
+    ports:
+      - "1883:1883"
 
   database:
     image: "postgres:11-alpine"
+    ports:
+      - "5432:5432"
     environment:
       - POSTGRES_PASSWORD=8JN4w0UsN5dbjMjNvPe452P2yYOqg5PV

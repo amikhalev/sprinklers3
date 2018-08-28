@@ -22,6 +22,11 @@ export interface DeviceRegistrationToken extends BaseClaims {
 export interface DeviceToken extends BaseClaims {
     type: "device";
     aud: string;
+    id: number;
 }
 
-export type TokenClaims = AccessToken | RefreshToken | DeviceRegistrationToken | DeviceToken;
+export interface SuperuserToken extends BaseClaims {
+    type: "superuser";
+}
+
+export type TokenClaims = AccessToken | RefreshToken | DeviceRegistrationToken | DeviceToken | SuperuserToken;
