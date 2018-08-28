@@ -10,7 +10,7 @@ import {
     TokenGrantRequest,
     TokenGrantResponse,
 } from "@common/httpApi";
-import { AccessToken, DeviceRegistrationToken, RefreshToken, TokenClaims } from "@common/TokenClaims";
+import { AccessToken, DeviceRegistrationToken, DeviceToken, RefreshToken, TokenClaims } from "@common/TokenClaims";
 import { User } from "../entities";
 import { ServerState } from "../state";
 
@@ -69,7 +69,8 @@ export function verifyToken<TClaims extends TokenClaims = TokenClaims>(
             } else {
                 const claims: TokenClaims = decoded as any;
                 if (type != null && claims.type !== type) {
-                    reject(new ApiError(`Expected a "${type} token, received a "${claims.type}" token`));
+                    reject(new ApiError(`Expected a "${type}" token, received a "${claims.type}" token`,
+                        ErrorCode.BadToken));
                 }
                 resolve(claims as TClaims);
             }
@@ -107,6 +108,15 @@ function generateDeviceRegistrationToken(secret: string): Promise<string> {
         type: "device_reg",
     };
     return signToken(device_reg_token_claims);
+}
+
+export function generateDeviceToken(deviceId: string): Promise<string> {
+    const device_token_claims: DeviceToken = {
+        iss: ISSUER,
+        type: "device",
+        aud: deviceId,
+    };
+    return signToken(device_token_claims);
 }
 
 export function authentication(state: ServerState) {
@@ -158,7 +168,7 @@ export function authentication(state: ServerState) {
         }
         const [access_token, refresh_token] = await Promise.all(
             [await generateAccessToken(user, JWT_SECRET),
-                await generateRefreshToken(user, JWT_SECRET)]);
+            await generateRefreshToken(user, JWT_SECRET)]);
         const response: TokenGrantResponse = {
             access_token, refresh_token,
         };
@@ -188,7 +198,7 @@ export function verifyAuthorization(options?: Partial<VerifyAuthorizationOpts>):
     const opts: VerifyAuthorizationOpts = {
         type: "access",
         ...options,
-     };
+    };
     return (req, res, next) => {
         const fun = async () => {
             const bearer = req.headers.authorization;
@@ -201,12 +211,7 @@ export function verifyAuthorization(options?: Partial<VerifyAuthorizationOpts>):
             }
             const token = matches[1];
 
-            req.token = await verifyToken<AccessToken>(token, "access");
-
-            if (req.token.type !== opts.type) {
-                throw new ApiError(`Invalid token type "${req.token.type}", must be "${opts.type}"`,
-                    ErrorCode.BadToken);
-            }
+            req.token = await verifyToken(token, opts.type) as any;
         };
         fun().then(() => next(null), (err) => next(err));
     };

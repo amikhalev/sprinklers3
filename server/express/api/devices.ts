@@ -4,9 +4,25 @@ import { serialize} from "serializr";
 import ApiError from "@common/ApiError";
 import { ErrorCode } from "@common/ErrorCode";
 import * as schema from "@common/sprinklersRpc/schema";
-import { AccessToken } from "@common/TokenClaims";
-import { verifyAuthorization } from "@server/express/authentication";
+import { generateDeviceToken, verifyAuthorization } from "@server/express/authentication";
 import { ServerState } from "@server/state";
+
+const DEVICE_ID_LEN = 20;
+
+function randomDeviceId(): string {
+    let deviceId = "";
+    for (let i = 0; i < DEVICE_ID_LEN; i++) {
+        const j = Math.floor(Math.random() * 36);
+        let ch; // tslint:disable-next-line
+        if (j < 10) { // 0-9
+            ch = String.fromCharCode(48 + j);
+        } else { // a-z
+            ch = String.fromCharCode(97 + (j - 10));
+        }
+        deviceId += ch;
+    }
+    return deviceId;
+}
 
 export function devices(state: ServerState) {
     const router = PromiseRouter();
@@ -28,7 +44,23 @@ export function devices(state: ServerState) {
     router.post("/register", verifyAuthorization({
         type: "device_reg",
     }), async (req, res) => {
-        // TODO: Implement device registration
+        const deviceId = randomDeviceId();
+        const newDevice = state.database.sprinklersDevices.create({
+            name: "Sprinklers Device", deviceId,
+        });
+        await state.database.sprinklersDevices.save(newDevice);
+        const token = await generateDeviceToken(deviceId);
+        res.send({
+            data: newDevice, token,
+        });
+    });
+
+    router.post("/connect", verifyAuthorization({
+        type: "device",
+    }), async (req, res) => {
+        res.send({
+            url: state.mqttUrl,
+        });
     });
 
     return router;
