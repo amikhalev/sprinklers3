@@ -16,6 +16,6 @@ export function mosquitto(state: ServerState) {
     router.post("/acl", async (req, res) => {
         res.status(200).send();
     });
-    
+
     return router;
 }

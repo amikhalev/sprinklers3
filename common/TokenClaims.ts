@@ -19,4 +19,9 @@ export interface DeviceRegistrationToken extends BaseClaims {
     type: "device_reg";
 }
 
-export type TokenClaims = AccessToken | RefreshToken | DeviceRegistrationToken;
+export interface DeviceToken extends BaseClaims {
+    type: "device";
+    aud: string;
+}
+
+export type TokenClaims = AccessToken | RefreshToken | DeviceRegistrationToken | DeviceToken;
