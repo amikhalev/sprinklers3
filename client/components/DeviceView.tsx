@@ -122,14 +122,18 @@ class DeviceView extends React.Component<DeviceViewProps> {
         } else {
             const { connectionState } = this.device;
             let header: React.ReactNode;
+            let image: React.ReactNode;
             if (inList) { // tslint:disable-line:prefer-conditional-expression
-                header = <Link to={route.device(this.deviceInfo.id)}>Device <kbd>{this.deviceInfo.name}</kbd></Link>;
+                const devicePath = route.device(this.deviceInfo.id);
+                header = <Link to={devicePath}>Device <kbd>{this.deviceInfo.name}</kbd></Link>;
+                image = <DeviceImage size="tiny" as={Link} to={devicePath} />;
             } else {
                 header = <span>Device <kbd>{this.deviceInfo.name}</kbd></span>;
+                image = <DeviceImage />;
             }
             itemContent = (
                 <React.Fragment>
-                    <DeviceImage size={inList ? "tiny" : undefined} />
+                    {image}
                     <Item.Content className="device">
                         <Header as={inList ? "h2" : "h1"}>
                             {header}
