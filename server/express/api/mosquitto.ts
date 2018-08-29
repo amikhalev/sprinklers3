@@ -4,7 +4,7 @@ import ApiError from "@common/ApiError";
 import { ErrorCode } from "@common/ErrorCode";
 import { DEVICE_PREFIX } from "@common/sprinklersRpc/mqtt";
 import { DeviceToken, SuperuserToken } from "@common/TokenClaims";
-import { verifyToken } from "@server/express/authentication";
+import { verifyToken } from "@server/authentication";
 import { ServerState } from "@server/state";
 
 export const SUPERUSER = "sprinklers3";

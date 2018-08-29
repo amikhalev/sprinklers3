@@ -3,30 +3,32 @@ export interface BaseClaims {
     exp?: number;
 }
 
-export interface AccessToken extends BaseClaims {
+export interface AccessToken {
     type: "access";
     aud: number;
     name: string;
 }
 
-export interface RefreshToken extends BaseClaims {
+export interface RefreshToken {
     type: "refresh";
     aud: number;
     name: string;
 }
 
-export interface DeviceRegistrationToken extends BaseClaims {
+export interface DeviceRegistrationToken {
     type: "device_reg";
 }
 
-export interface DeviceToken extends BaseClaims {
+export interface DeviceToken {
     type: "device";
     aud: string;
     id: number;
 }
 
-export interface SuperuserToken extends BaseClaims {
+export interface SuperuserToken {
     type: "superuser";
 }
 
-export type TokenClaims = AccessToken | RefreshToken | DeviceRegistrationToken | DeviceToken | SuperuserToken;
+export type TokenClaimTypes = AccessToken | RefreshToken | DeviceRegistrationToken | DeviceToken | SuperuserToken;
+
+export type TokenClaims = TokenClaimTypes & BaseClaims;
