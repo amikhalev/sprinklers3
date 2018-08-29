@@ -10,7 +10,7 @@ import * as WebSocket from "ws";
 
 import { ServerState } from "./state";
 import { createApp } from "./express";
-import { WebSocketApi } from "./sprinklersRpc/websocketServer";
+import { WebSocketApi } from "./sprinklersRpc/WebSocketApi";
 
 const state = new ServerState();
 const app = createApp(state);

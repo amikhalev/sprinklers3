@@ -36,9 +36,10 @@ export function devices(state: ServerState) {
         if (!userDevice)  {
             throw new ApiError("User does not have access to the specified device", ErrorCode.NoPermission);
         }
-        const device = state.mqttClient.getDevice(req.params.deviceId);
+        const device = state.mqttClient.acquireDevice(req.params.deviceId);
         const j = serialize(schema.sprinklersDevice, device);
         res.send(j);
+        device.release();
     });
 
     router.post("/register", verifyAuthorization({

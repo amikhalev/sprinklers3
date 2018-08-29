@@ -9,17 +9,15 @@ import { log, WebSocketRpcClient } from "./WebSocketRpcClient";
 // tslint:disable:member-ordering
 export class WSSprinklersDevice extends s.SprinklersDevice {
     readonly api: WebSocketRpcClient;
-    private _id: string;
+
     constructor(api: WebSocketRpcClient, id: string) {
-        super();
+        super(api, id);
         this.api = api;
-        this._id = id;
+
         autorun(this.updateConnectionState);
         this.waitSubscribe();
     }
-    get id() {
-        return this._id;
-    }
+
     private updateConnectionState = () => {
         const { clientToServer, serverToBroker } = this.api.connectionState;
         runInAction("updateConnectionState", () => {
@@ -34,7 +32,7 @@ export class WSSprinklersDevice extends s.SprinklersDevice {
         try {
             await this.api.makeRequest("deviceSubscribe", subscribeRequest);
             runInAction("deviceSubscribeSuccess", () => {
-                this.connectionState.brokerToDevice = true;
+                this.connectionState.hasPermission = true;
             });
         } catch (err) {
             runInAction("deviceSubscribeError", () => {
@@ -45,6 +43,20 @@ export class WSSprinklersDevice extends s.SprinklersDevice {
                     log.error({ err });
                 }
             });
+        }
+    }
+
+    async unsubscribe() {
+        const unsubscribeRequest: ws.IDeviceSubscribeRequest = {
+            deviceId: this.id,
+        };
+        try {
+            await this.api.makeRequest("deviceUnsubscribe", unsubscribeRequest);
+            runInAction("deviceUnsubscribeSuccess", () => {
+                this.connectionState.brokerToDevice = false;
+            });
+        } catch (err) {
+            log.error({ err }, "error unsubscribing from device");
         }
     }
 

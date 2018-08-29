@@ -10,14 +10,14 @@ import {
     TokenGrantRequest,
     TokenGrantResponse,
 } from "@common/httpApi";
-import { AccessToken, DeviceRegistrationToken, DeviceToken, RefreshToken, TokenClaims, SuperuserToken } from "@common/TokenClaims";
+import * as tok from "@common/TokenClaims";
 import { User } from "../entities";
 import { ServerState } from "../state";
 
 declare global {
     namespace Express {
         interface Request {
-            token?: AccessToken;
+            token?: tok.AccessToken;
         }
     }
 }
@@ -39,7 +39,7 @@ function getExpTime(lifetime: number) {
     return Math.floor(Date.now() / 1000) + lifetime;
 }
 
-function signToken(claims: TokenClaims): Promise<string> {
+function signToken(claims: tok.TokenClaims): Promise<string> {
     return new Promise((resolve, reject) => {
         jwt.sign(claims, JWT_SECRET, (err: Error, encoded: string) => {
             if (err) {
@@ -51,7 +51,7 @@ function signToken(claims: TokenClaims): Promise<string> {
     });
 }
 
-export function verifyToken<TClaims extends TokenClaims = TokenClaims>(
+export function verifyToken<TClaims extends tok.TokenClaims = tok.TokenClaims>(
     token: string, type?: TClaims["type"],
 ): Promise<TClaims> {
     return new Promise((resolve, reject) => {
@@ -67,7 +67,7 @@ export function verifyToken<TClaims extends TokenClaims = TokenClaims>(
                     reject(err);
                 }
             } else {
-                const claims: TokenClaims = decoded as any;
+                const claims: tok.TokenClaims = decoded as any;
                 if (type != null && claims.type !== type) {
                     reject(new ApiError(`Expected a "${type}" token, received a "${claims.type}" token`,
                         ErrorCode.BadToken));
@@ -79,7 +79,7 @@ export function verifyToken<TClaims extends TokenClaims = TokenClaims>(
 }
 
 function generateAccessToken(user: User, secret: string): Promise<string> {
-    const access_token_claims: AccessToken = {
+    const access_token_claims: tok.AccessToken = {
         iss: ISSUER,
         aud: user.id,
         name: user.name,
@@ -91,7 +91,7 @@ function generateAccessToken(user: User, secret: string): Promise<string> {
 }
 
 function generateRefreshToken(user: User, secret: string): Promise<string> {
-    const refresh_token_claims: RefreshToken = {
+    const refresh_token_claims: tok.RefreshToken = {
         iss: ISSUER,
         aud: user.id,
         name: user.name,
@@ -103,7 +103,7 @@ function generateRefreshToken(user: User, secret: string): Promise<string> {
 }
 
 function generateDeviceRegistrationToken(secret: string): Promise<string> {
-    const device_reg_token_claims: DeviceRegistrationToken = {
+    const device_reg_token_claims: tok.DeviceRegistrationToken = {
         iss: ISSUER,
         type: "device_reg",
     };
@@ -111,7 +111,7 @@ function generateDeviceRegistrationToken(secret: string): Promise<string> {
 }
 
 export function generateDeviceToken(id: number, deviceId: string): Promise<string> {
-    const device_token_claims: DeviceToken = {
+    const device_token_claims: tok.DeviceToken = {
         iss: ISSUER,
         type: "device",
         aud: deviceId,
@@ -121,7 +121,7 @@ export function generateDeviceToken(id: number, deviceId: string): Promise<strin
 }
 
 export function generateSuperuserToken(): Promise<string> {
-    const superuser_claims: SuperuserToken = {
+    const superuser_claims: tok.SuperuserToken = {
         iss: ISSUER,
         type: "superuser",
     };
@@ -200,7 +200,7 @@ export function authentication(state: ServerState) {
 }
 
 export interface VerifyAuthorizationOpts {
-    type: TokenClaims["type"];
+    type: tok.TokenClaims["type"];
 }
 
 export function verifyAuthorization(options?: Partial<VerifyAuthorizationOpts>): Express.RequestHandler {

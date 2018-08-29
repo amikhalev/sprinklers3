@@ -16,3 +16,11 @@ export function checkedIndexOf<T>(o: T | number, arr: T[], type: string = "objec
 export function getRandomId() {
     return Math.floor(Math.random() * 1000000000);
 }
+
+export function applyMixins(derivedCtor: any, baseCtors: any[]) {
+    baseCtors.forEach((baseCtor) => {
+        Object.getOwnPropertyNames(baseCtor.prototype).forEach((name) => {
+            derivedCtor.prototype[name] = baseCtor.prototype[name];
+        });
+    });
+}

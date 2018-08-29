@@ -4,8 +4,12 @@ import * as req from "./deviceRequests";
 import { Program } from "./Program";
 import { Section } from "./Section";
 import { SectionRunner } from "./SectionRunner";
+import { SprinklersRPC } from "./SprinklersRPC";
 
 export abstract class SprinklersDevice {
+    readonly rpc: SprinklersRPC;
+    readonly id: string;
+
     @observable connectionState: ConnectionState = new ConnectionState();
     @observable sections: Section[] = [];
     @observable programs: Program[] = [];
@@ -19,13 +23,36 @@ export abstract class SprinklersDevice {
     sectionRunnerConstructor: typeof SectionRunner = SectionRunner;
     programConstructor: typeof Program = Program;
 
-    protected constructor() {
+    private references: number = 0;
+
+    protected constructor(rpc: SprinklersRPC, id: string) {
+        this.rpc = rpc;
+        this.id = id;
         this.sectionRunner = new (this.sectionRunnerConstructor)(this);
     }
 
-    abstract get id(): string;
-
     abstract makeRequest(request: req.Request): Promise<req.Response>;
+
+    /**
+     * Increase the reference count for this sprinklers device
+     * @returns The new reference count
+     */
+    acquire(): number {
+        return ++this.references;
+    }
+
+    /**
+     * Releases one reference to this device. When the reference count reaches 0, the device
+     * will be released and no longer updated.
+     * @returns The reference count after being updated
+     */
+    release(): number {
+        this.references--;
+        if (this.references <= 0) {
+            this.rpc.releaseDevice(this.id);
+        }
+        return this.references;
+    }
 
     runProgram(opts: req.WithProgram) {
         return this.makeRequest({ ...opts, type: "runProgram" });

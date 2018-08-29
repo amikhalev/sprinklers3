@@ -52,10 +52,22 @@ interface DeviceViewProps {
     inList?: boolean;
 }
 
-class DeviceView extends React.Component<DeviceViewProps & RouteComponentProps<any>> {
-    renderBody(iDevice: ISprinklersDevice, device: SprinklersDevice) {
+class DeviceView extends React.Component<DeviceViewProps> {
+    deviceInfo: ISprinklersDevice | null = null;
+    device: SprinklersDevice | null = null;
+
+    componentWillUnmount() {
+        if (this.device) {
+            this.device.release();
+        }
+    }
+
+    renderBody() {
         const { inList, appState: { uiStore, routerStore } } = this.props;
-        const { connectionState, sectionRunner, sections } = device;
+        if (!this.deviceInfo || !this.device) {
+            return null;
+        }
+        const { connectionState, sectionRunner, sections } = this.device;
         if (!connectionState.isAvailable || inList) {
             return null;
         }
@@ -69,30 +81,51 @@ class DeviceView extends React.Component<DeviceViewProps & RouteComponentProps<a
                         <SectionTable sections={sections} />
                     </Grid.Column>
                     <Grid.Column mobile="16" tablet="7" computer="7" largeScreen="4">
-                        <RunSectionForm device={device} uiStore={uiStore} />
+                        <RunSectionForm device={this.device} uiStore={uiStore} />
                     </Grid.Column>
                 </Grid>
-                <ProgramTable iDevice={iDevice} device={device} routerStore={routerStore} />
+                <ProgramTable iDevice={this.deviceInfo} device={this.device} routerStore={routerStore} />
                 <Route path={route.program(":deviceId", ":programId")} component={p.ProgramPage} />
             </React.Fragment>
         );
     }
 
+    updateDevice() {
+        const { userStore, sprinklersRpc } = this.props.appState;
+        const id = this.props.deviceId;
+        // tslint:disable-next-line:prefer-conditional-expression
+        if (this.deviceInfo == null || this.deviceInfo.id !== id) {
+            this.deviceInfo = userStore.findDevice(id);
+        }
+        if (!this.deviceInfo || !this.deviceInfo.deviceId) {
+            if (this.device) {
+                this.device.release();
+                this.device = null;
+            }
+        } else {
+            if (this.device == null || this.device.id !== this.deviceInfo.deviceId) {
+                if (this.device) {
+                    this.device.release();
+                }
+                this.device = sprinklersRpc.acquireDevice(this.deviceInfo.deviceId);
+            }
+        }
+    }
+
     render() {
-        const { deviceId, inList, appState: { sprinklersRpc, userStore } } = this.props;
-        const iDevice = userStore.findDevice(deviceId);
+        this.updateDevice();
+        const { inList } = this.props;
         let itemContent: React.ReactNode;
-        if (!iDevice || !iDevice.deviceId) {
+        if (!this.deviceInfo || !this.device) {
             // TODO: better and link back to devices list
             itemContent = <span>You do not have access to this device</span>;
         } else {
-            const device = sprinklersRpc.getDevice(iDevice.deviceId);
-            const { connectionState } = device;
+            const { connectionState } = this.device;
             let header: React.ReactNode;
             if (inList) { // tslint:disable-line:prefer-conditional-expression
-                header = <Link to={route.device(iDevice.id)}>Device <kbd>{iDevice.name}</kbd></Link>;
+                header = <Link to={route.device(this.deviceInfo.id)}>Device <kbd>{this.deviceInfo.name}</kbd></Link>;
             } else {
-                header = <span>Device <kbd>{iDevice.name}</kbd></span>;
+                header = <span>Device <kbd>{this.deviceInfo.name}</kbd></span>;
             }
             itemContent = (
                 <React.Fragment>
@@ -105,7 +138,7 @@ class DeviceView extends React.Component<DeviceViewProps & RouteComponentProps<a
                         <Item.Meta>
                             Raspberry Pi Grinklers Device
                         </Item.Meta>
-                        {this.renderBody(iDevice, device)}
+                        {this.renderBody()}
                     </Item.Content>
                 </React.Fragment>
             );
@@ -114,4 +147,4 @@ class DeviceView extends React.Component<DeviceViewProps & RouteComponentProps<a
     }
 }
 
-export default injectState(withRouter(observer(DeviceView)));
+export default injectState(observer(DeviceView));

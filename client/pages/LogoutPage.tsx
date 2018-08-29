@@ -5,7 +5,7 @@ import { AppState, ConsumeState } from "@client/state";
 
 export default function LogoutPage() {
     function consumeState(appState: AppState) {
-        appState.tokenStore.clear();
+        appState.tokenStore.clearAll();
         return (
             <Redirect to="/login" />
         );

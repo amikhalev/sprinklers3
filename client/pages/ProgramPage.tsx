@@ -1,4 +1,4 @@
-import { assign, merge } from "lodash";
+import { assign } from "lodash";
 import { observer } from "mobx-react";
 import * as qs from "query-string";
 import * as React from "react";
@@ -23,10 +23,59 @@ class ProgramPage extends React.Component<ProgramPageProps> {
         return qs.parse(this.props.location.search).editing != null;
     }
 
-    iDevice!: ISprinklersDevice;
-    device!: SprinklersDevice;
-    program!: Program;
+    deviceInfo: ISprinklersDevice | null = null;
+    device: SprinklersDevice | null = null;
+    program: Program | null = null;
     programView: Program | null = null;
+
+    componentWillUnmount() {
+        if (this.device) {
+            this.device.release();
+        }
+    }
+
+    updateProgram() {
+        const { userStore, sprinklersRpc } = this.props.appState;
+        const devId = Number(this.props.match.params.deviceId);
+        const programId = Number(this.props.match.params.programId);
+        // tslint:disable-next-line:prefer-conditional-expression
+        if (this.deviceInfo == null || this.deviceInfo.id !== devId) {
+            this.deviceInfo = userStore.findDevice(devId);
+        }
+        if (!this.deviceInfo || !this.deviceInfo.deviceId) {
+            if (this.device) {
+                this.device.release();
+                this.device = null;
+            }
+            return;
+        } else {
+            if (this.device == null || this.device.id !== this.deviceInfo.deviceId) {
+                if (this.device) {
+                    this.device.release();
+                }
+                this.device = sprinklersRpc.acquireDevice(this.deviceInfo.deviceId);
+            }
+        }
+        if (!this.program || this.program.id !== programId) {
+            if (this.device.programs.length > programId && programId >= 0) {
+                this.program = this.device.programs[programId];
+            } else {
+                return;
+            }
+        }
+        if (this.isEditing) {
+            if (this.programView == null && this.program) {
+                // this.programView = createViewModel(this.program);
+                // this.programView = observable(toJS(this.program));
+                this.programView = this.program.clone();
+            }
+        } else {
+            if (this.programView != null) {
+                // this.programView.reset();
+                this.programView = null;
+            }
+        }
+    }
 
     renderName(program: Program) {
         const { name } = program;
@@ -98,39 +147,12 @@ class ProgramPage extends React.Component<ProgramPageProps> {
     }
 
     render() {
-        const { deviceId: did, programId: pid } = this.props.match.params;
-        const { userStore, sprinklersRpc } = this.props.appState;
-        const deviceId = Number(did);
-        const programId = Number(pid);
-        // tslint:disable-next-line:prefer-conditional-expression
-        if (!this.iDevice || this.iDevice.id !== deviceId) {
-            this.iDevice = userStore.findDevice(deviceId)!;
-        }
-        if (this.iDevice && this.iDevice.deviceId && (!this.device || this.device.id !== this.iDevice.deviceId)) {
-            this.device = sprinklersRpc.getDevice(this.iDevice.deviceId);
-        }
-        // tslint:disable-next-line:prefer-conditional-expression
-        if (!this.program || this.program.id !== programId) {
-            if (this.device.programs.length > programId && programId >= 0) {
-                this.program = this.device.programs[programId];
-            } else {
-                return null;
-            }
-        }
-        if (this.isEditing) {
-            if (this.programView == null && this.program) {
-                // this.programView = createViewModel(this.program);
-                // this.programView = observable(toJS(this.program));
-                this.programView = this.program.clone();
-            }
-        } else {
-            if (this.programView != null) {
-                // this.programView.reset();
-                this.programView = null;
-            }
-        }
+        this.updateProgram();
 
         const program = this.programView || this.program;
+        if (!this.device || !program) {
+            return null;
+        }
         const editing = this.isEditing;
 
         const { running, enabled, schedule, sequence } = program;

@@ -1,9 +1,11 @@
 import { autorun, observable } from "mobx";
 import * as mqtt from "mqtt";
 
+import { ErrorCode } from "@common/ErrorCode";
 import logger from "@common/logger";
 import * as s from "@common/sprinklersRpc";
 import * as requests from "@common/sprinklersRpc/deviceRequests";
+import { RpcError } from "@common/sprinklersRpc/RpcError";
 import { seralizeRequest } from "@common/sprinklersRpc/schema/requests";
 import { getRandomId } from "@common/utils";
 
@@ -18,6 +20,7 @@ interface WithRid {
 }
 
 export const DEVICE_PREFIX = "devices";
+const REQUEST_TIMEOUT = 5000;
 
 export interface MqttRpcClientOptions {
     mqttUri: string;
@@ -25,7 +28,7 @@ export interface MqttRpcClientOptions {
     password?: string;
 }
 
-export class MqttRpcClient implements s.SprinklersRPC, MqttRpcClientOptions {
+export class MqttRpcClient extends s.SprinklersRPC implements MqttRpcClientOptions {
     get connected(): boolean {
         return this.connectionState.isServerConnected || false;
     }
@@ -43,6 +46,7 @@ export class MqttRpcClient implements s.SprinklersRPC, MqttRpcClientOptions {
     devices: Map<string, MqttSprinklersDevice> = new Map();
 
     constructor(opts: MqttRpcClientOptions) {
+        super();
         Object.assign(this, opts);
         this.connectionState.serverToBroker = false;
     }
@@ -69,7 +73,16 @@ export class MqttRpcClient implements s.SprinklersRPC, MqttRpcClientOptions {
         });
     }
 
-    getDevice(id: string): s.SprinklersDevice {
+    releaseDevice(id: string) {
+        const device = this.devices.get(id);
+        if (!device) {
+            return;
+        }
+        device.doUnsubscribe();
+        this.devices.delete(id);
+    }
+
+    protected getDevice(id: string): s.SprinklersDevice {
         if (/\//.test(id)) {
             throw new Error("Device id cannot contain a /");
         }
@@ -81,15 +94,6 @@ export class MqttRpcClient implements s.SprinklersRPC, MqttRpcClientOptions {
             }
         }
         return device;
-    }
-
-    removeDevice(id: string) {
-        const device = this.devices.get(id);
-        if (!device) {
-            return;
-        }
-        device.doUnsubscribe();
-        this.devices.delete(id);
     }
 
     private onMessageArrived(topic: string, payload: Buffer, packet: mqtt.Packet) {
@@ -118,6 +122,8 @@ export class MqttRpcClient implements s.SprinklersRPC, MqttRpcClientOptions {
         device.onMessage(topicSuffix, payload);
     }
 }
+
+type ResponseCallback = (response: requests.Response) => void;
 
 const subscriptions = [
     "/connected",
@@ -148,7 +154,6 @@ const handler = (test: RegExp) =>
 
 class MqttSprinklersDevice extends s.SprinklersDevice {
     readonly apiClient: MqttRpcClient;
-    readonly id: string;
 
     handlers!: IHandlerEntry[];
     private subscriptions: string[];
@@ -156,12 +161,11 @@ class MqttSprinklersDevice extends s.SprinklersDevice {
     private responseCallbacks: Map<number, ResponseCallback> = new Map();
 
     constructor(apiClient: MqttRpcClient, id: string) {
-        super();
+        super(apiClient, id);
         this.sectionConstructor = MqttSection;
         this.sectionRunnerConstructor = MqttSectionRunner;
         this.programConstructor = MqttProgram;
         this.apiClient = apiClient;
-        this.id = id;
         this.sectionRunner = new MqttSectionRunner(this);
         this.subscriptions = subscriptions.map((filter) => this.prefix + filter);
 
@@ -183,27 +187,23 @@ class MqttSprinklersDevice extends s.SprinklersDevice {
         return DEVICE_PREFIX + "/" + this.id;
     }
 
-    doSubscribe(): Promise<void> {
-        return new Promise((resolve, reject) => {
-            this.apiClient.client.subscribe(this.subscriptions, { qos: 1 }, (err) => {
-                if (err) {
-                    reject(err);
-                } else {
-                    resolve();
-                }
-            });
+    doSubscribe() {
+        this.apiClient.client.subscribe(this.subscriptions, { qos: 1 }, (err) => {
+            if (err) {
+                log.error({ err, id: this.id }, "error subscribing to device");
+            } else {
+                log.debug({ id: this.id }, "subscribed to device");
+            }
         });
     }
 
-    doUnsubscribe(): Promise<void> {
-        return new Promise((resolve, reject) => {
-            this.apiClient.client.unsubscribe(this.subscriptions, (err) => {
-                if (err) {
-                    reject(err);
-                } else {
-                    resolve();
-                }
-            });
+    doUnsubscribe() {
+        this.apiClient.client.unsubscribe(this.subscriptions, (err) => {
+            if (err) {
+                log.error({ err, id: this.id }, "error unsubscribing to device");
+            } else {
+                log.debug({ id: this.id }, "unsubscribed to device");
+            }
         });
     }
 
@@ -226,14 +226,25 @@ class MqttSprinklersDevice extends s.SprinklersDevice {
             const json = seralizeRequest(request);
             const requestId = json.rid = this.getRequestId();
             const payloadStr = JSON.stringify(json);
-            this.responseCallbacks.set(requestId, (data) => {
+
+            let timeoutHandle: any;
+            const callback: ResponseCallback = (data) => {
                 if (data.result === "error") {
-                    reject(data);
+                    reject(new RpcError(data.message, data.code, data));
                 } else {
                     resolve(data);
                 }
                 this.responseCallbacks.delete(requestId);
-            });
+                clearTimeout(timeoutHandle);
+            };
+
+            timeoutHandle = setTimeout(() => {
+                reject(new RpcError("the request has timed out", ErrorCode.Timeout));
+                this.responseCallbacks.delete(requestId);
+                clearTimeout(timeoutHandle);
+            }, REQUEST_TIMEOUT);
+
+            this.responseCallbacks.set(requestId, callback);
             this.apiClient.client.publish(topic, payloadStr, { qos: 1 });
         });
     }
@@ -298,5 +309,3 @@ class MqttSprinklersDevice extends s.SprinklersDevice {
 
     /* tslint:enable:no-unused-variable */
 }
-
-type ResponseCallback = (response: requests.Response) => void;
