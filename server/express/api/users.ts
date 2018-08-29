@@ -3,7 +3,7 @@ import PromiseRouter from "express-promise-router";
 import ApiError from "@common/ApiError";
 import { ErrorCode } from "@common/ErrorCode";
 import { User } from "@server/entities";
-import { verifyAuthorization } from "@server/express/authentication";
+import { verifyAuthorization } from "@server/express/verifyAuthorization";
 import { ServerState } from "@server/state";
 
 export function users(state: ServerState) {

@@ -4,7 +4,8 @@ import { serialize} from "serializr";
 import ApiError from "@common/ApiError";
 import { ErrorCode } from "@common/ErrorCode";
 import * as schema from "@common/sprinklersRpc/schema";
-import { generateDeviceToken, verifyAuthorization } from "@server/express/authentication";
+import { generateDeviceToken } from "@server/authentication";
+import { verifyAuthorization } from "@server/express/verifyAuthorization";
 import { ServerState } from "@server/state";
 
 const DEVICE_ID_LEN = 20;

@@ -1,7 +1,7 @@
 import logger from "@common/logger";
 import * as mqtt from "@common/sprinklersRpc/mqtt";
+import { generateSuperuserToken } from "@server/authentication";
 import { SUPERUSER } from "@server/express/api/mosquitto";
-import { generateSuperuserToken } from "@server/express/authentication";
 import { Database } from "./Database";
 
 export class ServerState {

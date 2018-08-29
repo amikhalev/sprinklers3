@@ -1,13 +1,13 @@
 import { action, observable } from "mobx";
 
 import { Token } from "@client/state/Token";
-import { AccessToken, RefreshToken } from "@common/TokenClaims";
+import { AccessToken, BaseClaims, RefreshToken } from "@common/TokenClaims";
 
 const LOCAL_STORAGE_KEY = "TokenStore";
 
 export class TokenStore {
-    @observable accessToken: Token<AccessToken> = new Token();
-    @observable refreshToken: Token<RefreshToken> = new Token();
+    @observable accessToken: Token<AccessToken & BaseClaims> = new Token();
+    @observable refreshToken: Token<RefreshToken & BaseClaims> = new Token();
 
     @action
     clearAccessToken() {
