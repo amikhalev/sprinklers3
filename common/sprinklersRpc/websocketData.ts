@@ -1,6 +1,5 @@
 import * as rpc from "../jsonRpc/index";
 
-import { ErrorCode } from "@common/ErrorCode";
 import { IUser } from "@common/httpApi";
 import { Response as ResponseData } from "@common/sprinklersRpc/deviceRequests";
 
@@ -20,6 +19,7 @@ export interface IDeviceCallRequest {
 export interface IClientRequestTypes {
     "authenticate": IAuthenticateRequest;
     "deviceSubscribe": IDeviceSubscribeRequest;
+    "deviceUnsubscribe": IDeviceSubscribeRequest;
     "deviceCall": IDeviceCallRequest;
 }
 
@@ -40,6 +40,7 @@ export interface IDeviceCallResponse {
 export interface IServerResponseTypes {
     "authenticate": IAuthenticateResponse;
     "deviceSubscribe": IDeviceSubscribeResponse;
+    "deviceUnsubscribe": IDeviceSubscribeResponse;
     "deviceCall": IDeviceCallResponse;
 }
 
@@ -63,25 +64,6 @@ export type ServerNotificationMethod = keyof IServerNotificationTypes;
 
 export type IError = rpc.DefaultErrorType;
 export type ErrorData = rpc.ErrorData<IError>;
-
-export class RpcError extends Error implements IError {
-    name = "RpcError";
-    code: number;
-    data: any;
-
-    constructor(message: string, code: number = ErrorCode.BadRequest, data: any = {}) {
-        super(message);
-        this.code = code;
-        if (data instanceof Error) {
-            this.data = data.toString();
-        }
-        this.data = data;
-    }
-
-    toJSON(): IError {
-        return { code: this.code, message: this.message, data: this.data };
-    }
-}
 
 export type ServerMessage = rpc.Message<{}, IServerResponseTypes, IError, IServerNotificationTypes>;
 export type ServerNotification = rpc.Notification<IServerNotificationTypes>;

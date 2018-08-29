@@ -45,4 +45,20 @@ const TypedEventEmitter = EventEmitter as {
 };
 type TypedEventEmitter<TEvents extends DefaultEvents = AnyEvents> = ITypedEventEmitter<TEvents>;
 
+type Constructable = new (...args: any[]) => any;
+
+export function typedEventEmitter<TBase extends Constructable, TEvents extends DefaultEvents = AnyEvents>(Base: TBase):
+    TBase & TypedEventEmitter<TEvents> {
+    const NewClass = class extends Base {
+        constructor(...args: any[]) {
+            super(...args);
+            EventEmitter.call(this);
+        }
+    };
+    Object.getOwnPropertyNames(EventEmitter.prototype).forEach((name) => {
+        NewClass.prototype[name] = (EventEmitter.prototype as any)[name];
+    });
+    return NewClass as any;
+}
+
 export { TypedEventEmitter };

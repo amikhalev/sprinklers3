@@ -1,4 +1,4 @@
-import { action, observable, runInAction, when } from "mobx";
+import { action, computed, observable, runInAction, when } from "mobx";
 import { update } from "serializr";
 
 import { TokenStore } from "@client/state/TokenStore";
@@ -6,12 +6,12 @@ import { ErrorCode } from "@common/ErrorCode";
 import { IUser } from "@common/httpApi";
 import * as rpc from "@common/jsonRpc";
 import logger from "@common/logger";
+import * as s from "@common/sprinklersRpc";
 import * as deviceRequests from "@common/sprinklersRpc/deviceRequests";
-import * as s from "@common/sprinklersRpc/index";
-import * as schema from "@common/sprinklersRpc/schema/index";
+import * as schema from "@common/sprinklersRpc/schema/";
 import { seralizeRequest } from "@common/sprinklersRpc/schema/requests";
 import * as ws from "@common/sprinklersRpc/websocketData";
-import { DefaultEvents, TypedEventEmitter } from "@common/TypedEventEmitter";
+import { DefaultEvents, TypedEventEmitter, typedEventEmitter } from "@common/TypedEventEmitter";
 import { WSSprinklersDevice } from "./WSSprinklersDevice";
 
 export const log = logger.child({ source: "websocket" });
@@ -27,15 +27,22 @@ const DEFAULT_URL = `${websocketProtocol}//${location.hostname}:${websocketPort}
 
 export interface WebSocketRpcClientEvents extends DefaultEvents {
     newUserData(userData: IUser): void;
-    rpcError(error: ws.RpcError): void;
-    tokenError(error: ws.RpcError): void;
+    rpcError(error: s.RpcError): void;
+    tokenError(error: s.RpcError): void;
 }
 
-export class WebSocketRpcClient extends TypedEventEmitter<WebSocketRpcClientEvents> implements s.SprinklersRPC {
+// tslint:disable:member-ordering
 
+export interface WebSocketRpcClient extends TypedEventEmitter<WebSocketRpcClientEvents> {
+}
+
+@typedEventEmitter
+export class WebSocketRpcClient extends s.SprinklersRPC {
+    @computed
     get connected(): boolean {
         return this.connectionState.isServerConnected || false;
     }
+
     readonly webSocketUrl: string;
 
     devices: Map<string, WSSprinklersDevice> = new Map();
@@ -51,7 +58,6 @@ export class WebSocketRpcClient extends TypedEventEmitter<WebSocketRpcClientEven
     private responseCallbacks: ws.ServerResponseHandlers = {};
     private reconnectTimer: number | null = null;
 
-    /* tslint:disable-next-line:member-ordering */
     @action
     private onDisconnect = action(() => {
         this.connectionState.serverToBroker = null;
@@ -68,7 +74,7 @@ export class WebSocketRpcClient extends TypedEventEmitter<WebSocketRpcClientEven
         this.connectionState.clientToServer = false;
         this.connectionState.serverToBroker = false;
 
-        this.on("rpcError", (err: ws.RpcError) => {
+        this.on("rpcError", (err: s.RpcError) => {
             if (err.code === ErrorCode.BadToken) {
                 this.emit("tokenError", err);
             }
@@ -90,7 +96,9 @@ export class WebSocketRpcClient extends TypedEventEmitter<WebSocketRpcClientEven
         }
     }
 
-    getDevice(id: string): s.SprinklersDevice {
+    acquireDevice = s.SprinklersRPC.prototype.acquireDevice;
+
+    protected getDevice(id: string): s.SprinklersDevice {
         let device = this.devices.get(id);
         if (!device) {
             device = new WSSprinklersDevice(this, id);
@@ -99,8 +107,14 @@ export class WebSocketRpcClient extends TypedEventEmitter<WebSocketRpcClientEven
         return device;
     }
 
-    removeDevice(id: string) {
-        // NOT IMPLEMENTED
+    releaseDevice(id: string): void {
+        const device = this.devices.get(id);
+        if (!device) return;
+        device.unsubscribe()
+            .then(() => {
+                log.debug({ id }, "released device");
+                this.devices.delete(id);
+            });
     }
 
     async authenticate(accessToken: string): Promise<ws.IAuthenticateResponse> {
@@ -120,7 +134,7 @@ export class WebSocketRpcClient extends TypedEventEmitter<WebSocketRpcClientEven
             } catch (err) {
                 logger.error({ err }, "error authenticating websocket connection");
                 // TODO message?
-                runInAction("authenticateSuccess", () => {
+                runInAction("authenticateError", () => {
                     this.authenticated = false;
                 });
             }
@@ -134,13 +148,13 @@ export class WebSocketRpcClient extends TypedEventEmitter<WebSocketRpcClientEven
                 code: ErrorCode.ServerDisconnected,
                 message: "the server is not connected",
             };
-            throw new ws.RpcError("the server is not connected", ErrorCode.ServerDisconnected);
+            throw new s.RpcError("the server is not connected", ErrorCode.ServerDisconnected);
         }
         const requestData = seralizeRequest(request);
         const data: ws.IDeviceCallRequest = { deviceId, data: requestData };
         const resData = await this.makeRequest("deviceCall", data);
         if (resData.data.result === "error") {
-            throw new ws.RpcError(resData.data.message, resData.data.code, resData.data);
+            throw new s.RpcError(resData.data.message, resData.data.code, resData.data);
         } else {
             return resData.data;
         }
@@ -158,17 +172,17 @@ export class WebSocketRpcClient extends TypedEventEmitter<WebSocketRpcClientEven
                     resolve(response.data);
                 } else {
                     const { error } = response;
-                    reject(new ws.RpcError(error.message, error.code, error.data));
+                    reject(new s.RpcError(error.message, error.code, error.data));
                 }
             };
             timeoutHandle = window.setTimeout(() => {
                 delete this.responseCallbacks[id];
-                reject(new ws.RpcError("the request timed out", ErrorCode.Timeout));
+                reject(new s.RpcError("the request timed out", ErrorCode.Timeout));
             }, TIMEOUT_MS);
             this.sendRequest(id, method, params);
         })
             .catch((err) => {
-                if (err instanceof ws.RpcError) {
+                if (err instanceof s.RpcError) {
                     this.emit("rpcError", err);
                 }
                 throw err;

@@ -126,30 +126,35 @@ export async function handleRequest<RequestTypes,
     ResponseTypes extends { [Method in keyof RequestTypes]: any }, ErrorType>(
     handlers: RequestHandlers<RequestTypes, ResponseTypes, ErrorType>,
     message: Request<RequestTypes>,
+    thisParam?: any,
 ): Promise<ResponseData<ResponseTypes, ErrorType>> {
     const handler = handlers[message.method];
     if (!handler) {
         throw new Error("No handler for request method " + message.method);
     }
-    return handler(message.params);
+    return handler.call(thisParam, message.params);
 }
 
 export function handleResponse<ResponseTypes, ErrorType>(
     handlers: ResponseHandlers<ResponseTypes, ErrorType>,
-    message: Response<ResponseTypes, ErrorType>) {
+    message: Response<ResponseTypes, ErrorType>,
+    thisParam?: any,
+) {
     const handler = handlers[message.id];
     if (!handler) {
         return;
     }
-    return handler(message);
+    return handler.call(thisParam, message);
 }
 
 export function handleNotification<NotificationTypes>(
     handlers: NotificationHandlers<NotificationTypes>,
-    message: Notification<NotificationTypes>) {
+    message: Notification<NotificationTypes>,
+    thisParam?: any,
+) {
     const handler = handlers[message.method];
     if (!handler) {
         throw new Error("No handler for notification method " + message.method);
     }
-    return handler(message.data);
+    return handler.call(thisParam, message.data);
 }
