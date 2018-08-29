@@ -1,0 +1,7 @@
+pipeline:
+  build:
+    image: node:10-alpine
+    commands:
+      - apk add yarn python make g++
+      - yarn install --frozen-lockfile
+      - yarn build
