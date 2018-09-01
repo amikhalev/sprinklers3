@@ -1,7 +1,7 @@
 import chalk from "chalk";
 import * as pump from "pump";
 import * as split from "split2";
-import * as through from "through2";
+import { Transform, TransformCallback } from "stream";
 
 type Level = "default" | 60 | 50 | 40 | 30 | 20 | 10;
 
@@ -121,20 +121,22 @@ function asColoredLevel(value: any) {
     }
 }
 
-const prettyTransport = through.obj((chunk, enc, cb) => {
-    let value: any;
-    try {
-        value = JSON.parse(chunk.toString());
-    } catch (e) {
-        process.stdout.write(chunk.toString() + "\n");
-        return cb();
+class PrettyPrintTranform extends Transform {
+    _transform(chunk: any, encoding: string, cb: TransformCallback) {
+        let value: any;
+        try {
+            value = JSON.parse(chunk.toString());
+        } catch (e) {
+            process.stdout.write(chunk.toString() + "\n");
+            return cb();
+        }
+        const line = formatter(value);
+        if (!line) {
+            return cb();
+        }
+        process.stdout.write(line);
+        cb();
     }
-    const line = formatter(value);
-    if (!line) {
-        return cb();
-    }
-    process.stdout.write(line);
-    cb();
-});
+}
 
-pump(process.stdin, split(), prettyTransport);
+pump(process.stdin, split(), new PrettyPrintTranform());
