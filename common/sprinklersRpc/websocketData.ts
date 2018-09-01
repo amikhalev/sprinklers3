@@ -1,6 +1,5 @@
-import * as rpc from "../jsonRpc/index";
-
 import { IUser } from "@common/httpApi";
+import * as rpc from "@common/jsonRpc/index";
 import { Response as ResponseData } from "@common/sprinklersRpc/deviceRequests";
 
 export interface IAuthenticateRequest {

@@ -1,7 +1,7 @@
 import * as bodyParser from "body-parser";
 import * as express from "express";
 
-import { ServerState } from "../state";
+import { ServerState } from "@server/state";
 import createApi from "./api";
 import errorHandler from "./errorHandler";
 import requestLogger from "./requestLogger";

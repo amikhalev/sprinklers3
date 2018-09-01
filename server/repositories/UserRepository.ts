@@ -1,6 +1,6 @@
 import { EntityRepository, FindOneOptions, Repository } from "typeorm";
 
-import { User } from "../entities";
+import { User } from "@server/entities";
 
 export interface FindUserOptions {
     devices: boolean;
