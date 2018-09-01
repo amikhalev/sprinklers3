@@ -10,6 +10,7 @@ WORKDIR /app/
 COPY package.json yarn.lock /app/
 RUN yarn install --frozen-lockfile
 
+COPY paths.js /app
 COPY tslint.json /app
 
 EXPOSE 8080

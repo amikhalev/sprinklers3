@@ -1,5 +1,5 @@
-const path = require("path");
 const fs = require("fs");
+const path = require("path");
 const url = require("url");
 
 exports.rootDir = fs.realpathSync(process.cwd());
@@ -8,7 +8,7 @@ const resolveRoot = exports.resolveRoot = (p) => path.resolve(exports.rootDir, p
 function ensureSlash(p, needsSlash) {
     const hasSlash = p.endsWith("/");
     if (hasSlash && !needsSlash) {
-        return p.substr(p, p.length - 1);
+        return p.substr(0, p.length - 1);
     } else if (!hasSlash && needsSlash) {
         return `${p}/`;
     } else {

@@ -11,8 +11,8 @@ const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 const HappyPack = require("happypack");
 const ForkTsCheckerWebpackPlugin = require("fork-ts-checker-webpack-plugin");
 
-const {getClientEnvironment} = require("../common/env");
-const paths = require("../common/paths");
+const {getClientEnvironment} = require("./env");
+const paths = require("../paths");
 
 // Webpack uses `publicPath` to determine where the app is being served from.
 // It requires a trailing slash, or the file assets will get an incorrect path.
@@ -23,14 +23,8 @@ const publicPath = paths.publicPath;
 const publicUrl = paths.publicUrl.slice(0, -1);
 // Source maps are resource heavy and can cause out of memory issue for large source files.
 const shouldUseSourceMap = process.env.GENERATE_SOURCEMAP !== 'false';
-// Some apps do not use client-side routing with pushState.
-// For these, "homepage" can be set to "." to enable relative asset paths.
-const shouldUseRelativeAssetPaths = publicPath === "./";
 // Get environment variables to inject into our app.
 const environ = getClientEnvironment(publicUrl);
-
-// Note: defined here because it will be used more than once.
-const cssFilename = "static/css/[name].[contenthash:8].css";
 
 const postCssConfig = {
     loader: require.resolve("postcss-loader"),

@@ -1,5 +1,6 @@
 {
     "compilerOptions": {
+        "outDir": "../dist/common",
         "experimentalDecorators": true,
         "target": "es2017",
         "lib": [
@@ -10,15 +11,14 @@
         ],
         "module": "commonjs",
         "strict": true,
-        "allowJs": true,
         "baseUrl": "..",
+        "composite": true,
+        "declaration": true,
         "sourceMap": true,
+        "declarationMap": true,
         "paths": {
             "@common/*": [
                 "./common/*"
-            ],
-            "@client/*": [
-                "./client/*"
             ]
         }
     },

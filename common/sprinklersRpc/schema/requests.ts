@@ -1,5 +1,6 @@
 import { createSimpleSchema, deserialize, ModelSchema, primitive, serialize } from "serializr";
-import * as requests from "../deviceRequests";
+
+import * as requests from "@common/sprinklersRpc/deviceRequests";
 import * as common from "./common";
 
 export const withType: ModelSchema<requests.WithType> = createSimpleSchema({

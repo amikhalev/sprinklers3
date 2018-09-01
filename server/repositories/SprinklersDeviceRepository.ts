@@ -1,6 +1,6 @@
 import { EntityRepository, Repository } from "typeorm";
 
-import { SprinklersDevice, User } from "../entities";
+import { SprinklersDevice, User } from "@server/entities";
 
 @EntityRepository(SprinklersDevice)
 export class SprinklersDeviceRepository extends Repository<SprinklersDevice> {

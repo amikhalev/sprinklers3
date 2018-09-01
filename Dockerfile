@@ -11,6 +11,7 @@ COPY package.json yarn.lock /app/
 RUN yarn install --frozen-lockfile
 
 COPY tslint.json /app
+COPY paths.js /app
 COPY app/ /app/app
 COPY common/ /app/common
 COPY server/ /app/server
