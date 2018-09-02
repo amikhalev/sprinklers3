@@ -19,6 +19,7 @@ function ensureSlash(p, needsSlash) {
 exports.dotenv = resolveRoot(".env");
 exports.nodeModulesDir = resolveRoot("node_modules");
 exports.packageJson = resolveRoot("package.json");
+exports.tslintConfig = resolveRoot("tslint.json");
 exports.publicUrl = ensureSlash(process.env.PUBLIC_URL || "http://localhost:8080/", true);
 exports.publicPath = ensureSlash(url.parse(exports.publicUrl).pathname || "/", true);
 
