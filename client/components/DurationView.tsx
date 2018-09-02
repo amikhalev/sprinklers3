@@ -7,70 +7,71 @@ import { Duration } from "@common/Duration";
 import "@client/styles/DurationView";
 
 export default class DurationView extends React.Component<{
-    label?: string,
-    inline?: boolean,
-    duration: Duration,
-    onDurationChange?: (newDuration: Duration) => void,
-    className?: string,
+  label?: string;
+  inline?: boolean;
+  duration: Duration;
+  onDurationChange?: (newDuration: Duration) => void;
+  className?: string;
 }> {
-    render() {
-        const { duration, label, inline, onDurationChange, className } = this.props;
-        const inputsClassName = classNames("durationInputs", { inline });
-        if (onDurationChange) {
-            return (
-                <React.Fragment>
-                    <Form.Field inline={inline} className={className}>
-                        {label && <label>{label}</label>}
-                        <div className={inputsClassName}>
-                            <Input
-                                type="number"
-                                className="durationInput minutes"
-                                value={duration.minutes}
-                                onChange={this.onMinutesChange}
-                                label="M"
-                                labelPosition="right"
-                                onWheel={this.onWheel}
-                            />
-                            <Input
-                                type="number"
-                                className="durationInput seconds"
-                                value={duration.seconds}
-                                onChange={this.onSecondsChange}
-                                max="60"
-                                label="S"
-                                labelPosition="right"
-                                onWheel={this.onWheel}
-                            />
-                        </div>
-                    </Form.Field>
-                </React.Fragment>
-            );
-        } else {
-            return (
-                <span className={className}>
-                    {label && <label>{label}</label>} {duration.minutes}M {duration.seconds}S
-                </span>
-            );
-        }
+  render() {
+    const { duration, label, inline, onDurationChange, className } = this.props;
+    const inputsClassName = classNames("durationInputs", { inline });
+    if (onDurationChange) {
+      return (
+        <React.Fragment>
+          <Form.Field inline={inline} className={className}>
+            {label && <label>{label}</label>}
+            <div className={inputsClassName}>
+              <Input
+                type="number"
+                className="durationInput minutes"
+                value={duration.minutes}
+                onChange={this.onMinutesChange}
+                label="M"
+                labelPosition="right"
+                onWheel={this.onWheel}
+              />
+              <Input
+                type="number"
+                className="durationInput seconds"
+                value={duration.seconds}
+                onChange={this.onSecondsChange}
+                max="60"
+                label="S"
+                labelPosition="right"
+                onWheel={this.onWheel}
+              />
+            </div>
+          </Form.Field>
+        </React.Fragment>
+      );
+    } else {
+      return (
+        <span className={className}>
+          {label && <label>{label}</label>} {duration.minutes}M{" "}
+          {duration.seconds}S
+        </span>
+      );
     }
+  }
 
-    private onMinutesChange: InputProps["onChange"] = (e, { value }) => {
-        if (!this.props.onDurationChange || isNaN(Number(value))) {
-            return;
-        }
-        const newMinutes = Number(value);
-        this.props.onDurationChange(this.props.duration.withMinutes(newMinutes));
+  private onMinutesChange: InputProps["onChange"] = (e, { value }) => {
+    if (!this.props.onDurationChange || isNaN(Number(value))) {
+      return;
     }
+    const newMinutes = Number(value);
+    this.props.onDurationChange(this.props.duration.withMinutes(newMinutes));
+  };
 
-    private onSecondsChange: InputProps["onChange"] = (e, { value }) => {
-        if (!this.props.onDurationChange || isNaN(Number(value))) {
-            return;
-        }
-        const newSeconds = Number(value);
-        this.props.onDurationChange(this.props.duration.withSeconds(newSeconds));
+  private onSecondsChange: InputProps["onChange"] = (e, { value }) => {
+    if (!this.props.onDurationChange || isNaN(Number(value))) {
+      return;
     }
+    const newSeconds = Number(value);
+    this.props.onDurationChange(this.props.duration.withSeconds(newSeconds));
+  };
 
-    private onWheel = () => {
-        // do nothing
-    }
+  private onWheel = () => {
+    // do nothing
+  };
 }

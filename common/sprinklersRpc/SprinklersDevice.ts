@@ -7,85 +7,94 @@ import { SectionRunner } from "./SectionRunner";
 import { SprinklersRPC } from "./SprinklersRPC";
 
 export abstract class SprinklersDevice {
-    readonly rpc: SprinklersRPC;
-    readonly id: string;
+  readonly rpc: SprinklersRPC;
+  readonly id: string;
 
-    @observable connectionState: ConnectionState = new ConnectionState();
-    @observable sections: Section[] = [];
-    @observable programs: Program[] = [];
-    @observable sectionRunner: SectionRunner;
+  @observable
+  connectionState: ConnectionState = new ConnectionState();
+  @observable
+  sections: Section[] = [];
+  @observable
+  programs: Program[] = [];
+  @observable
+  sectionRunner: SectionRunner;
 
-    @computed get connected(): boolean {
-        return this.connectionState.isDeviceConnected || false;
+  @computed
+  get connected(): boolean {
+    return this.connectionState.isDeviceConnected || false;
+  }
+
+  sectionConstructor: typeof Section = Section;
+  sectionRunnerConstructor: typeof SectionRunner = SectionRunner;
+  programConstructor: typeof Program = Program;
+
+  private references: number = 0;
+
+  protected constructor(rpc: SprinklersRPC, id: string) {
+    this.rpc = rpc;
+    this.id = id;
+    this.sectionRunner = new this.sectionRunnerConstructor(this);
+  }
+
+  abstract makeRequest(request: req.Request): Promise<req.Response>;
+
+  /**
+   * Increase the reference count for this sprinklers device
+   * @returns The new reference count
+   */
+  acquire(): number {
+    return ++this.references;
+  }
+
+  /**
+   * Releases one reference to this device. When the reference count reaches 0, the device
+   * will be released and no longer updated.
+   * @returns The reference count after being updated
+   */
+  release(): number {
+    this.references--;
+    if (this.references <= 0) {
+      this.rpc.releaseDevice(this.id);
     }
+    return this.references;
+  }
 
-    sectionConstructor: typeof Section = Section;
-    sectionRunnerConstructor: typeof SectionRunner = SectionRunner;
-    programConstructor: typeof Program = Program;
+  runProgram(opts: req.WithProgram) {
+    return this.makeRequest({ ...opts, type: "runProgram" });
+  }
 
-    private references: number = 0;
+  cancelProgram(opts: req.WithProgram) {
+    return this.makeRequest({ ...opts, type: "cancelProgram" });
+  }
 
-    protected constructor(rpc: SprinklersRPC, id: string) {
-        this.rpc = rpc;
-        this.id = id;
-        this.sectionRunner = new (this.sectionRunnerConstructor)(this);
-    }
+  updateProgram(
+    opts: req.UpdateProgramData
+  ): Promise<req.UpdateProgramResponse> {
+    return this.makeRequest({ ...opts, type: "updateProgram" }) as Promise<any>;
+  }
 
-    abstract makeRequest(request: req.Request): Promise<req.Response>;
+  runSection(opts: req.RunSectionData): Promise<req.RunSectionResponse> {
+    return this.makeRequest({ ...opts, type: "runSection" }) as Promise<any>;
+  }
 
-    /**
-     * Increase the reference count for this sprinklers device
-     * @returns The new reference count
-     */
-    acquire(): number {
-        return ++this.references;
-    }
+  cancelSection(opts: req.WithSection) {
+    return this.makeRequest({ ...opts, type: "cancelSection" });
+  }
 
-    /**
-     * Releases one reference to this device. When the reference count reaches 0, the device
-     * will be released and no longer updated.
-     * @returns The reference count after being updated
-     */
-    release(): number {
-        this.references--;
-        if (this.references <= 0) {
-            this.rpc.releaseDevice(this.id);
-        }
-        return this.references;
-    }
+  cancelSectionRunId(opts: req.CancelSectionRunIdData) {
+    return this.makeRequest({ ...opts, type: "cancelSectionRunId" });
+  }
 
-    runProgram(opts: req.WithProgram) {
-        return this.makeRequest({ ...opts, type: "runProgram" });
-    }
+  pauseSectionRunner(opts: req.PauseSectionRunnerData) {
+    return this.makeRequest({ ...opts, type: "pauseSectionRunner" });
+  }
 
-    cancelProgram(opts: req.WithProgram) {
-        return this.makeRequest({ ...opts, type: "cancelProgram" });
-    }
-
-    updateProgram(opts: req.UpdateProgramData): Promise<req.UpdateProgramResponse> {
-        return this.makeRequest({ ...opts, type: "updateProgram" }) as Promise<any>;
-    }
-
-    runSection(opts: req.RunSectionData): Promise<req.RunSectionResponse> {
-        return this.makeRequest({ ...opts, type: "runSection" }) as Promise<any>;
-    }
-
-    cancelSection(opts: req.WithSection) {
-        return this.makeRequest({ ...opts, type: "cancelSection" });
-    }
-
-    cancelSectionRunId(opts: req.CancelSectionRunIdData) {
-        return this.makeRequest({ ...opts, type: "cancelSectionRunId" });
-    }
-
-    pauseSectionRunner(opts: req.PauseSectionRunnerData) {
-        return this.makeRequest({ ...opts, type: "pauseSectionRunner" });
-    }
-
-    toString(): string {
-        return `SprinklersDevice{id="${this.id}", connected=${this.connected}, ` +
-            `sections=[${this.sections}], ` +
-            `programs=[${this.programs}], ` +
-            `sectionRunner=${this.sectionRunner} }`;
-    }
+  toString(): string {
+    return (
+      `SprinklersDevice{id="${this.id}", connected=${this.connected}, ` +
+      `sections=[${this.sections}], ` +
+      `programs=[${this.programs}], ` +
+      `sectionRunner=${this.sectionRunner} }`
+    );
+  }
 }

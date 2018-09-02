@@ -12,13 +12,13 @@ const dotenvFiles: string[] = [
   // since normally you expect tests to produce the same
   // results for everyone
   NODE_ENV !== "test" && `${paths.dotenv}.local`,
-  paths.dotenv,
+  paths.dotenv
 ].filter(Boolean) as string[];
 
-dotenvFiles.forEach((dotenvFile) => {
+dotenvFiles.forEach(dotenvFile => {
   if (fs.existsSync(dotenvFile)) {
     require("dotenv").config({
-      path: dotenvFile,
+      path: dotenvFile
     });
   }
 });

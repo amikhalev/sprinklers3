@@ -5,7 +5,7 @@ import "./env";
 import "./configureLogger";
 
 import log from "@common/logger";
-import {Server} from "http";
+import { Server } from "http";
 import * as WebSocket from "ws";
 
 import { ServerState } from "./state";
@@ -20,15 +20,16 @@ const port = +(process.env.PORT || 8080);
 const host = process.env.HOST || "0.0.0.0";
 
 const server = new Server(app);
-const webSocketServer = new WebSocket.Server({server});
+const webSocketServer = new WebSocket.Server({ server });
 webSocketApi.listen(webSocketServer);
 
-state.start()
-    .then(() => {
-        server.listen(port, host, () => {
-            log.info(`listening at ${host}:${port}`);
-        });
-    })
-    .catch((err) => {
-        log.error({ err }, "error starting server");
+state
+  .start()
+  .then(() => {
+    server.listen(port, host, () => {
+      log.info(`listening at ${host}:${port}`);
     });
+  })
+  .catch(err => {
+    log.error({ err }, "error starting server");
+  });

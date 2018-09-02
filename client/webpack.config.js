@@ -11,7 +11,9 @@ const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 const HappyPack = require("happypack");
 const ForkTsCheckerWebpackPlugin = require("fork-ts-checker-webpack-plugin");
 
-const {getClientEnvironment} = require("./env");
+const {
+    getClientEnvironment
+} = require("./env");
 const paths = require("../paths");
 
 // Webpack uses `publicPath` to determine where the app is being served from.
@@ -83,49 +85,48 @@ const rules = (env) => {
             sassConfig,
         ],
     };
-    return [
-        {
-            // "oneOf" will traverse all following loaders until one will
-            // match the requirements. when no loader matches it will fall
-            // back to the "file" loader at the end of the loader list.
-            oneOf: [
-                // "url" loader works like "file" loader except that it embeds assets
-                // smaller than specified limit in bytes as data urls to avoid requests.
-                // a missing `test` is equivalent to a match.
-                {
-                    test: [/\.bmp$/, /\.gif$/, /\.jpe?g$/, /\.png$/],
-                    loader: require.resolve("url-loader"),
-                    options: {
-                        limit: (env === "prod") ? 10000 : 0,
-                        name: "static/media/[name].[hash:8].[ext]",
-                    },
+    return [{
+        // "oneOf" will traverse all following loaders until one will
+        // match the requirements. when no loader matches it will fall
+        // back to the "file" loader at the end of the loader list.
+        oneOf: [
+            // "url" loader works like "file" loader except that it embeds assets
+            // smaller than specified limit in bytes as data urls to avoid requests.
+            // a missing `test` is equivalent to a match.
+            {
+                test: [/\.bmp$/, /\.gif$/, /\.jpe?g$/, /\.png$/],
+                loader: require.resolve("url-loader"),
+                options: {
+                    limit: (env === "prod") ? 10000 : 0,
+                    name: "static/media/[name].[hash:8].[ext]",
                 },
-                cssRule,
-                sassRule,
-                // Process TypeScript with TSC through HappyPack.
-                {
-                    test: /\.tsx?$/, use: "happypack/loader?id=ts",
-                    include: [ paths.clientDir, paths.commonDir ],
+            },
+            cssRule,
+            sassRule,
+            // Process TypeScript with TSC through HappyPack.
+            {
+                test: /\.tsx?$/,
+                use: "happypack/loader?id=ts",
+                include: [paths.clientDir, paths.commonDir],
+            },
+            // "file" loader makes sure those assets get served by WebpackDevServer.
+            // When you `import` an asset, you get its (virtual) filename.
+            // In production, they would get copied to the `build` folder.
+            // This loader doesn"t use a "test" so it will catch all modules
+            // that fall through the other loaders.
+            {
+                // Exclude `js` files to keep "css" loader working as it injects
+                // it"s runtime that would otherwise processed through "file" loader.
+                // Also exclude `html` and `json` extensions so they get processed
+                // by webpacks internal loaders.
+                exclude: [/\.js$/, /\.html$/, /\.json$/],
+                loader: require.resolve("file-loader"),
+                options: {
+                    name: "static/media/[name].[hash:8].[ext]",
                 },
-                // "file" loader makes sure those assets get served by WebpackDevServer.
-                // When you `import` an asset, you get its (virtual) filename.
-                // In production, they would get copied to the `build` folder.
-                // This loader doesn"t use a "test" so it will catch all modules
-                // that fall through the other loaders.
-                {
-                    // Exclude `js` files to keep "css" loader working as it injects
-                    // it"s runtime that would otherwise processed through "file" loader.
-                    // Also exclude `html` and `json` extensions so they get processed
-                    // by webpacks internal loaders.
-                    exclude: [/\.js$/, /\.html$/, /\.json$/],
-                    loader: require.resolve("file-loader"),
-                    options: {
-                        name: "static/media/[name].[hash:8].[ext]",
-                    },
-                },
-            ],
-        },
-    ];
+            },
+        ],
+    }, ];
 }
 
 
@@ -200,8 +201,7 @@ const getConfig = module.exports = (env) => {
         mode: isProd ? "production" : "development",
         bail: isProd,
         devtool: shouldUseSourceMap ?
-            isProd ? "source-map" : "inline-source-map" :
-            false,
+            isProd ? "source-map" : "inline-source-map" : false,
         entry: [
             isDev && require.resolve("react-hot-loader/patch"),
             isDev && require.resolve("react-dev-utils/webpackHotDevClient"),
@@ -212,15 +212,13 @@ const getConfig = module.exports = (env) => {
             path: paths.clientBuildDir,
             pathinfo: isDev,
             filename: isProd ?
-                'static/js/[name].[chunkhash:8].js' :
-                "static/js/bundle.js",
+                'static/js/[name].[chunkhash:8].js' : "static/js/bundle.js",
             chunkFilename: isProd ?
-                'static/js/[name].[chunkhash:8].chunk.js' :
-                "static/js/[name].chunk.js",
+                'static/js/[name].[chunkhash:8].chunk.js' : "static/js/[name].chunk.js",
             publicPath: publicPath,
             devtoolModuleFilenameTemplate: isDev ?
                 (info) =>
-                    "webpack://" + path.resolve(info.absoluteResourcePath).replace(/\\/g, "/") : undefined,
+                "webpack://" + path.resolve(info.absoluteResourcePath).replace(/\\/g, "/") : undefined,
         },
         resolve: {
             extensions: [".ts", ".tsx", ".js", ".json", ".scss"],

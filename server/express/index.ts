@@ -8,17 +8,17 @@ import requestLogger from "./requestLogger";
 import serveApp from "./serveApp";
 
 export function createApp(state: ServerState) {
-    const app = express();
+  const app = express();
 
-    app.use(requestLogger);
-    app.use(bodyParser.json());
-    app.use(bodyParser.urlencoded({ extended: true }));
+  app.use(requestLogger);
+  app.use(bodyParser.json());
+  app.use(bodyParser.urlencoded({ extended: true }));
 
-    app.use("/api", createApi(state));
+  app.use("/api", createApi(state));
 
-    serveApp(app);
+  serveApp(app);
 
-    app.use(errorHandler);
+  app.use(errorHandler);
 
-    return app;
+  return app;
 }

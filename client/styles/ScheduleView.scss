@@ -1,13 +1,14 @@
 .scheduleView {
-    >.field, >.fields {
-        >label {
-            width: 2rem !important;
-        }
+  > .field,
+  > .fields {
+    > label {
+      width: 2rem !important;
     }
+  }
 }
 
 .scheduleTimes {
-    input {
-        margin: 0 .5rem;
-    }
+  input {
+    margin: 0 0.5rem;
+  }
 }
