@@ -8,8 +8,8 @@ const paths = require("paths");
 const index = path.join(paths.publicDir, "index.html");
 
 export default function serveApp(app: Express) {
-    app.use(serveStatic(paths.clientBuildDir));
-    app.get("/*", (req, res) => {
-        res.sendFile(index);
-    });
+  app.use(serveStatic(paths.clientBuildDir));
+  app.get("/*", (req, res) => {
+    res.sendFile(index);
+  });
 }

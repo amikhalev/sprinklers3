@@ -1,4 +1,4 @@
-$durationInput-spacing: 1.0em;
+$durationInput-spacing: 1em;
 $durationInput-inputWidth: 4em;
 $durationInput-labelWidth: 2.5em;
 
@@ -10,7 +10,7 @@ $durationInput-labelWidth: 2.5em;
 
   width: auto;
 
-  .ui.input.durationInput>input {
+  .ui.input.durationInput > input {
     width: 0 !important;
   }
 
@@ -22,7 +22,7 @@ $durationInput-labelWidth: 2.5em;
     flex-shrink: 0;
     flex-grow: 1;
 
-    >input {
+    > input {
       min-width: $durationInput-inputWidth;
       width: auto;
       flex-basis: $durationInput-inputWidth;
@@ -30,7 +30,7 @@ $durationInput-labelWidth: 2.5em;
       flex-shrink: 0;
     }
 
-    >.label {
+    > .label {
       min-width: $durationInput-labelWidth;
       width: $durationInput-labelWidth;
       flex: $durationInput-labelWidth;

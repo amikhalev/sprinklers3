@@ -26,9 +26,7 @@
             ]
         }
     },
-    "references": [
-        {
-            "path": "../common"
-        }
-    ]
+    "references": [{
+        "path": "../common"
+    }]
 }

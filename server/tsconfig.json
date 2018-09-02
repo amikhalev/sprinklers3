@@ -26,11 +26,9 @@
       ]
     }
   },
-  "references": [
-    {
-      "path": "../common"
-    }
-  ],
+  "references": [{
+    "path": "../common"
+  }],
   "include": [
     "./**/*.ts"
   ]
