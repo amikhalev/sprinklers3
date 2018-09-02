@@ -1,21 +1,18 @@
 {
+    "extends": "../tsconfig.json",
     "compilerOptions": {
         "sourceMap": true,
         "jsx": "react",
-        "experimentalDecorators": true,
-        "target": "es2017",
         "lib": [
             "es2017",
             "dom",
             "scripthost"
         ],
-        "module": "commonjs",
         "types": [
             "webpack-env",
             "core-js",
             "node"
         ],
-        "strict": true,
         "baseUrl": "..",
         "paths": {
             "@common/*": [
@@ -26,6 +23,10 @@
             ]
         }
     },
+    "include": [
+        "./client/**/*.ts",
+        "./client/**/*.tsx"
+    ],
     "references": [{
         "path": "../common"
     }]

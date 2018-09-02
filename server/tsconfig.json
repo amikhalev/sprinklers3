@@ -1,35 +1,25 @@
 {
-  "compilerOptions": {
-    "outDir": "../dist",
-    "sourceMap": true,
-    "experimentalDecorators": true,
-    "emitDecoratorMetadata": true,
-    "target": "es2017",
-    "module": "commonjs",
-    "lib": [
-      "es6",
-      "dom"
-    ],
-    "types": [
-      "webpack-env",
-      "node"
-    ],
-    "strict": true,
-    "allowJs": true,
-    "baseUrl": "..",
-    "paths": {
-      "@common/*": [
-        "./common/*"
-      ],
-      "@server/*": [
-        "./server/*"
-      ]
-    }
-  },
-  "references": [{
-    "path": "../common"
-  }],
-  "include": [
-    "./**/*.ts"
-  ]
+    "extends": "../tsconfig.json",
+    "compilerOptions": {
+        "outDir": "../dist",
+        "sourceMap": true,
+        "emitDecoratorMetadata": true,
+        "strict": true,
+        "allowJs": true,
+        "baseUrl": "..",
+        "paths": {
+            "@common/*": [
+                "./common/*"
+            ],
+            "@server/*": [
+                "./server/*"
+            ]
+        }
+    },
+    "references": [{
+        "path": "../common"
+    }],
+    "include": [
+        "./**/*.ts"
+    ]
 }
