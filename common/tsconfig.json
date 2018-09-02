@@ -1,16 +1,7 @@
 {
+    "extends": "../tsconfig.json",
     "compilerOptions": {
         "outDir": "../dist/common",
-        "experimentalDecorators": true,
-        "target": "es2017",
-        "lib": [
-            "es2017"
-        ],
-        "types": [
-            "node"
-        ],
-        "module": "commonjs",
-        "strict": true,
         "baseUrl": "..",
         "composite": true,
         "declaration": true,

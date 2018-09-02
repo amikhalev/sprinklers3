@@ -1,0 +1,14 @@
+{
+    "compilerOptions": {
+        "experimentalDecorators": true,
+        "target": "es2017",
+        "module": "commonjs",
+        "lib": [
+            "es2017"
+        ],
+        "types": [
+            "node"
+        ],
+        "strict": true
+    }
+}

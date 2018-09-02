@@ -1,15 +1,9 @@
 import * as path from "path";
-import {
-  Connection,
-  createConnection,
-  EntityManager,
-  getConnectionOptions,
-  Repository
-} from "typeorm";
+import { Connection, createConnection, getConnectionOptions } from "typeorm";
 
 import logger from "@common/logger";
 
-import { SprinklersDevice, User } from "./entities";
+import { User } from "./entities";
 import { SprinklersDeviceRepository, UserRepository } from "./repositories/";
 
 export class Database {
