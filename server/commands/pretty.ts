@@ -150,7 +150,8 @@ export class PinoPrettyTransform extends Transform {
 }
 
 export default class PrettyCommand extends Command {
-  static description = "Transforms sprinklers3 log output into a pretty, colorized format";
+  static description =
+    "Transforms sprinklers3 log output into a pretty, colorized format";
 
   async run(): Promise<any> {
     pump(process.stdin, split(), new PinoPrettyTransform(), process.stdout);
