@@ -21,13 +21,25 @@ export class ServerState {
     this.database = new Database();
   }
 
-  async start() {
+  async startDatabase() {
     await this.database.connect();
-    await this.database.createAll();
-    logger.info("created database and tables");
+    logger.info("connected to database");
 
+    if (process.env.INSERT_TEST_DATA) {
+      await this.database.insertTestData();
+      logger.info("inserted test data");
+    }
+  }
+
+  async startMqtt() {
     this.mqttClient.username = SUPERUSER;
     this.mqttClient.password = await generateSuperuserToken();
     this.mqttClient.start();
+  }
+
+  async start() {
+    await Promise.all([
+      this.startDatabase(), this.startMqtt(),
+    ]);
   }
 }

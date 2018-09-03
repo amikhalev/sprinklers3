@@ -1,3 +1,4 @@
+import { Command } from "@oclif/command";
 import chalk from "chalk";
 import * as pump from "pump";
 import * as split from "split2";
@@ -132,22 +133,26 @@ function asColoredLevel(value: any) {
   }
 }
 
-class PrettyPrintTranform extends Transform {
+export class PinoPrettyTransform extends Transform {
   _transform(chunk: any, encoding: string, cb: TransformCallback) {
     let value: any;
     try {
       value = JSON.parse(chunk.toString());
     } catch (e) {
-      process.stdout.write(chunk.toString() + "\n");
-      return cb();
+      return cb(undefined, chunk.toString() + "\n");
     }
     const line = formatter(value);
     if (!line) {
       return cb();
     }
-    process.stdout.write(line + "\n");
-    cb();
+    cb(undefined, line + "\n");
   }
 }
 
-pump(process.stdin, split(), new PrettyPrintTranform());
+export default class PrettyCommand extends Command {
+  static description = "Transforms sprinklers3 log output into a pretty, colorized format";
+
+  async run(): Promise<any> {
+    pump(process.stdin, split(), new PinoPrettyTransform(), process.stdout);
+  }
+}

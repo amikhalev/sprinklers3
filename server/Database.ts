@@ -38,12 +38,10 @@ export class Database {
   }
 
   async createAll() {
-    if (process.env.INSERT_TEST_DATA) {
-      await this.insertData();
-    }
   }
 
-  async insertData() {
+  async insertTestData() {
+
     const NUM = 100;
     const users: User[] = [];
     for (let i = 0; i < NUM; i++) {
