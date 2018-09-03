@@ -1,6 +1,9 @@
 import * as express from "express";
 
 import ApiError from "@common/ApiError";
+import { ErrorCode } from "@common/ErrorCode";
+
+const isDev = process.env.NODE_ENV === "development";
 
 const errorHandler: express.ErrorRequestHandler = (
   err: any,
@@ -9,9 +12,11 @@ const errorHandler: express.ErrorRequestHandler = (
   next: express.NextFunction
 ) => {
   if (err instanceof ApiError) {
-    res.status(err.statusCode).json(err.toJSON());
+    // TODO: different content-type?
+    res.status(err.statusCode).json(err.toJSON(isDev));
   } else {
-    next(err);
+    const internalError = new ApiError("An internal server error has occurred", ErrorCode.Internal);
+    errorHandler(internalError, req, res, next);
   }
 };
 
