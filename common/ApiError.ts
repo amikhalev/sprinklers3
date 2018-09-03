@@ -22,11 +22,11 @@ export default class ApiError extends Error {
     }
   }
 
-  toJSON() {
+  toJSON(development: boolean = false) {
     return {
       message: this.message,
       code: this.code,
-      data: this.data
+      data: development ? this.data : undefined
     };
   }
 }
