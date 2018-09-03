@@ -24,6 +24,7 @@ services:
       - TYPEORM_DATABASE=postgres
       - TYPEORM_USERNAME=postgres
       - TYPEORM_PASSWORD=8JN4w0UsN5dbjMjNvPe452P2yYOqg5PV
+      - TYPEORM_SYNCHRONIZE=true
       - MQTT_URL=tcp://mosquitto:1883
       # Must specify JWT_SECRET and MQTT_URL
 

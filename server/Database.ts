@@ -38,7 +38,6 @@ export class Database {
   }
 
   async createAll() {
-    await this.conn.synchronize();
     if (process.env.INSERT_TEST_DATA) {
       await this.insertData();
     }
