@@ -38,8 +38,6 @@ export class ServerState {
   }
 
   async start() {
-    await Promise.all([
-      this.startDatabase(), this.startMqtt(),
-    ]);
+    await Promise.all([this.startDatabase(), this.startMqtt()]);
   }
 }

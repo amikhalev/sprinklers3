@@ -37,11 +37,7 @@ export class Database {
     }
   }
 
-  async createAll() {
-  }
-
   async insertTestData() {
-
     const NUM = 100;
     const users: User[] = [];
     for (let i = 0; i < NUM; i++) {

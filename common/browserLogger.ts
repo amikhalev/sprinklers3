@@ -119,8 +119,8 @@ function formatLevel(value: any): ColoredString {
 }
 
 const browserLogger = {
-    serialize: true,
-    write,
+  serialize: true,
+  write
 };
 
 export default browserLogger;

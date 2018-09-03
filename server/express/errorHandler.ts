@@ -15,7 +15,10 @@ const errorHandler: express.ErrorRequestHandler = (
     // TODO: different content-type?
     res.status(err.statusCode).json(err.toJSON(isDev));
   } else {
-    const internalError = new ApiError("An internal server error has occurred", ErrorCode.Internal);
+    const internalError = new ApiError(
+      "An internal server error has occurred",
+      ErrorCode.Internal
+    );
     errorHandler(internalError, req, res, next);
   }
 };
