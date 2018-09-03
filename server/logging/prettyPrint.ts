@@ -62,7 +62,6 @@ function formatter(value: any) {
   } else {
     line += filter(value);
   }
-  line += "\n";
   return line;
 }
 
@@ -146,7 +145,7 @@ class PrettyPrintTranform extends Transform {
     if (!line) {
       return cb();
     }
-    process.stdout.write(line);
+    process.stdout.write(line + "\n");
     cb();
   }
 }
