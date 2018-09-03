@@ -1,8 +1,9 @@
 import * as http from "http";
 import * as WebSocket from "ws";
 
-import log from "@common/logger";
 import { createApp, ServerState, WebSocketApi } from "../";
+
+import log from "@common/logger";
 
 const state = new ServerState();
 const app = createApp(state);
