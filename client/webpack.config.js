@@ -11,53 +11,58 @@ const BundleAnalyzerPlugin = require("webpack-bundle-analyzer")
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 const ForkTsCheckerWebpackPlugin = require("fork-ts-checker-webpack-plugin");
 
-const { getClientEnvironment } = require("./env");
-const paths = require("../paths");
+const { loadEnv, getClientEnvironment } = require("./env");
 
-// Webpack uses `publicPath` to determine where the app is being served from.
-// It requires a trailing slash, or the file assets will get an incorrect path.
-const publicPath = paths.publicPath;
-// `publicUrl` is just like `publicPath`, but we will provide it to our app
-// as %PUBLIC_URL% in `index.html` and `process.env.PUBLIC_URL` in JavaScript.
-// Omit trailing slash as %PUBLIC_URL%/xyz looks better than %PUBLIC_URL%xyz.
-const publicUrl = paths.publicUrl.slice(0, -1);
-// Source maps are resource heavy and can cause out of memory issue for large source files.
-const shouldUseSourceMap = process.env.GENERATE_SOURCEMAP !== "false";
-// Get environment variables to inject into our app.
-const environ = getClientEnvironment(publicUrl);
+function getConfig(env) {
+  const { isProd, isDev } = loadEnv(env);
 
-const postCssConfig = {
-  loader: require.resolve("postcss-loader"),
-  options: {
-    // Necessary for external CSS imports to work
-    // https://github.com/facebookincubator/create-react-app/issues/2677
-    ident: "postcss",
-    plugins: () => [
-      require("postcss-flexbugs-fixes"),
-      require("postcss-preset-env")({
-        stage: 0
-      })
-    ]
-  }
-};
+  const paths = require("../paths");
 
-const sassConfig = {
-  loader: require.resolve("sass-loader"),
-  options: {}
-};
+  // Webpack uses `publicPath` to determine where the app is being served from.
+  // It requires a trailing slash, or the file assets will get an incorrect path.
+  const publicPath = paths.publicPath;
+  // `publicUrl` is just like `publicPath`, but we will provide it to our app
+  // as %PUBLIC_URL% in `index.html` and `process.env.PUBLIC_URL` in JavaScript.
+  // Omit trailing slash as %PUBLIC_URL%/xyz looks better than %PUBLIC_URL%xyz.
+  const publicUrl = paths.publicUrl.slice(0, -1);
+  // Source maps are resource heavy and can cause out of memory issue for large source files.
+  const shouldUseSourceMap = process.env.GENERATE_SOURCEMAP !== "false";
+  const shouldExtractCss = process.env.EXTRACT_CSS
+    ? process.env.EXTRACT_CSS === "true"
+    : isProd;
+  // Get environment variables to inject into our app.
+  const environ = getClientEnvironment(env, publicUrl);
+  
+  const postCssConfig = {
+    loader: require.resolve("postcss-loader"),
+    options: {
+      // Necessary for external CSS imports to work
+      // https://github.com/facebookincubator/create-react-app/issues/2677
+      ident: "postcss",
+      plugins: () => [
+        require("postcss-flexbugs-fixes"),
+        require("postcss-preset-env")({
+          stage: 0
+        })
+      ]
+    }
+  };
 
-const rules = env => {
+  const sassConfig = {
+    loader: require.resolve("sass-loader"),
+    options: {}
+  };
+
   // "postcss" loader applies autoprefixer to our CSS.
   // "css" loader resolves paths in CSS and adds assets as dependencies.
   // "style" loader turns CSS into JS modules that inject <style> tags.
   // In production, we use a plugin to extract that CSS to a file, but
   // in development "style" loader enables hot editing of CSS.
-  const styleLoader =
-    env === "prod"
-      ? {
-          loader: MiniCssExtractPlugin.loader
-        }
-      : require.resolve("style-loader");
+  const styleLoader = shouldExtractCss
+    ? {
+        loader: MiniCssExtractPlugin.loader
+      }
+    : require.resolve("style-loader");
   const cssRule = {
     test: /\.css$/,
     use: [
@@ -85,7 +90,8 @@ const rules = env => {
       sassConfig
     ]
   };
-  return [
+
+  const rules = [
     {
       // "oneOf" will traverse all following loaders until one will
       // match the requirements. when no loader matches it will fall
@@ -98,7 +104,7 @@ const rules = env => {
           test: [/\.bmp$/, /\.gif$/, /\.jpe?g$/, /\.png$/],
           loader: require.resolve("url-loader"),
           options: {
-            limit: env === "prod" ? 10000 : 0,
+            limit: env === "production" ? 10000 : 0,
             name: "static/media/[name].[hash:8].[ext]"
           }
         },
@@ -144,19 +150,6 @@ const rules = env => {
       ]
     }
   ];
-};
-
-const getConfig = (module.exports = env => {
-  const isProd = env === "prod";
-  const isDev = env === "dev";
-  // Assert this just to be safe.
-  // Development builds of React are slow and not intended for production.
-  if (
-    isProd &&
-    environ.stringified["process.env"].NODE_ENV !== '"production"'
-  ) {
-    throw new Error("Production builds must have NODE_ENV=production.");
-  }
 
   const plugins = [
     new HtmlWebpackPlugin({
@@ -191,7 +184,6 @@ const getConfig = (module.exports = env => {
         sourceMap: shouldUseSourceMap
       }),
     isDev && new webpack.HotModuleReplacementPlugin(),
-    new webpack.NamedModulesPlugin(),
     new ForkTsCheckerWebpackPlugin({
       checkSyntacticErrors: true,
       tsconfig: paths.clientTsConfig,
@@ -248,9 +240,7 @@ const getConfig = (module.exports = env => {
         "@common": paths.commonDir
       }
     },
-    module: {
-      rules: rules(env)
-    },
+    module: { rules },
     plugins: plugins,
     optimization: {
       namedModules: isProd
@@ -268,4 +258,6 @@ const getConfig = (module.exports = env => {
       ]
     }
   };
-});
+}
+
+module.exports = getConfig;
