@@ -15,12 +15,21 @@ const errorHandler: express.ErrorRequestHandler = (
     // TODO: different content-type?
     res.status(err.statusCode).json(err.toJSON(isDev));
   } else if (err) {
-    const internalError = new ApiError(
-      "An internal server error has occurred",
-      ErrorCode.Internal,
-      err.stack ? err.stack : err
-    );
-    errorHandler(internalError, req, res, next);
+    let error: ApiError;
+    if (err.code === "ENOENT") {
+      error = new ApiError(
+        "The specified resource could not be found",
+        ErrorCode.NotFound,
+        err
+      );
+    } else {
+      error = new ApiError(
+        "An internal server error has occurred",
+        ErrorCode.Internal,
+        err.stack ? err.stack : err
+      );
+    }
+    errorHandler(error, req, res, next);
   }
   next();
 };

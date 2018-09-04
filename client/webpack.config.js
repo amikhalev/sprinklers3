@@ -32,7 +32,7 @@ function getConfig(env) {
     : isProd;
   // Get environment variables to inject into our app.
   const environ = getClientEnvironment(env, publicUrl);
-  
+
   const postCssConfig = {
     loader: require.resolve("postcss-loader"),
     options: {
@@ -170,9 +170,11 @@ function getConfig(env) {
           }
         : undefined
     }),
-    new FaviconsWebpackPlugin(
-      path.resolve(paths.clientDir, "images", "favicon-96x96.png")
-    ),
+    new FaviconsWebpackPlugin({
+      logo: path.resolve(paths.clientDir, "images", "favicon-96x96.png"),
+      emitStatis: false,
+      prefix: "static/icons-[hash]/"
+    }),
     // Makes some environment variables available to the JS code, for example:
     // if (process.env.NODE_ENV === "production") { ... }. See `./env.js`.
     // It is absolutely essential that NODE_ENV was set to production here.
