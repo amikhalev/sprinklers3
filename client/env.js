@@ -49,7 +49,7 @@ exports.getClientEnvironment = function getClientEnvironment(env, publicUrl) {
       }, {
         // Useful for determining whether we’re running in production mode.
         // Most importantly, it switches React into the correct mode.
-        NODE_ENV: process.env.NODE_ENV || env,
+        NODE_ENV: env,
         // Useful for resolving the correct path to static assets in `public`.
         // For example, <img src={process.env.PUBLIC_URL + "/img/logo.png"} />.
         // This should only be used as an escape hatch. Normally you would put
