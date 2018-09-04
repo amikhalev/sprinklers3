@@ -14,13 +14,15 @@ const errorHandler: express.ErrorRequestHandler = (
   if (err instanceof ApiError) {
     // TODO: different content-type?
     res.status(err.statusCode).json(err.toJSON(isDev));
-  } else {
+  } else if (err) {
     const internalError = new ApiError(
       "An internal server error has occurred",
-      ErrorCode.Internal
+      ErrorCode.Internal,
+      err.stack ? err.stack : err
     );
     errorHandler(internalError, req, res, next);
   }
+  next();
 };
 
 export default errorHandler;

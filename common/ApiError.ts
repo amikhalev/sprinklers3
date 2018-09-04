@@ -25,6 +25,7 @@ export default class ApiError extends Error {
   toJSON(development: boolean = false) {
     return {
       message: this.message,
+      statusCode: this.statusCode,
       code: this.code,
       data: development ? this.data : undefined
     };
