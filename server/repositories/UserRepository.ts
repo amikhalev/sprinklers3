@@ -1,6 +1,5 @@
-import { EntityRepository, FindOneOptions, Repository, DeepPartial, FindConditions, SaveOptions } from "typeorm";
+import { EntityRepository, FindConditions, FindOneOptions, Repository } from "typeorm";
 
-import ApiError from "@common/ApiError";
 import { User } from "@server/entities";
 
 export interface FindUserOptions extends FindOneOptions<User> {

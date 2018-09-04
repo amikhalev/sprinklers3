@@ -3,13 +3,10 @@ import { omit } from "lodash";
 import {
   Column,
   Entity,
+  Index,
   JoinTable,
   ManyToMany,
-  PrimaryGeneratedColumn,
-  BeforeInsert,
-  BeforeUpdate,
-  Index,
-  InsertEvent
+  PrimaryGeneratedColumn
 } from "typeorm";
 
 import { IUser } from "@common/httpApi";

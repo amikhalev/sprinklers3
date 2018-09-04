@@ -14,6 +14,8 @@ type UserFlags = (typeof UserCommand)["flags"] extends Input<infer F>
 
 type Action = "create" | "update" | "delete";
 
+// tslint:disable:no-shadowed-variable
+
 export default class UserCommand extends ManageCommand {
   static description = "Manage users";
 
@@ -105,7 +107,7 @@ export default class UserCommand extends ManageCommand {
 
     const user = await this.getOrDeleteUser(flags, action);
 
-    if (flags.id != null && flags.username) {
+    if (flags.username && (flags.create || flags.id)) {
       user.username = flags.username;
     }
     if (flags.name) {
@@ -122,7 +124,6 @@ export default class UserCommand extends ManageCommand {
       await this.database.users.save(user);
       this.log(`${capitalize(action)}d user id ${user.id} (${user.username})`);
     } catch (e) {
-      console.log(e)
       throw e;
     }
   }
