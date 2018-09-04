@@ -23,12 +23,19 @@ export class ServerState {
 
   async startDatabase() {
     await this.database.connect();
-    logger.info("connected to database");
 
     if (process.env.INSERT_TEST_DATA) {
-      await this.database.insertTestData();
-      logger.info("inserted test data");
+      try {
+        await this.database.insertTestData();
+        logger.info("inserted test data");
+      } catch (e) {
+        logger.error(e, "error inserting test data");
+      }
     }
+  }
+  
+  async stopDatabase() {
+    await this.database.disconnect();
   }
 
   async startMqtt() {

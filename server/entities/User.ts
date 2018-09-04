@@ -5,7 +5,11 @@ import {
   Entity,
   JoinTable,
   ManyToMany,
-  PrimaryGeneratedColumn
+  PrimaryGeneratedColumn,
+  BeforeInsert,
+  BeforeUpdate,
+  Index,
+  InsertEvent
 } from "typeorm";
 
 import { IUser } from "@common/httpApi";
@@ -18,7 +22,8 @@ export class User implements IUser {
   @PrimaryGeneratedColumn()
   id!: number;
 
-  @Column({ unique: true })
+  @Column()
+  @Index("user_username_unique", { unique: true })
   username: string = "";
 
   @Column()

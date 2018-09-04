@@ -1,6 +1,7 @@
-import { EntityRepository, Repository } from "typeorm";
+import { DeepPartial, EntityRepository, Repository, SaveOptions } from "typeorm";
 
 import { SprinklersDevice, User } from "@server/entities";
+import UniqueConstraintError from "@server/UniqueConstraintError";
 
 @EntityRepository(SprinklersDevice)
 export class SprinklersDeviceRepository extends Repository<SprinklersDevice> {
@@ -38,5 +39,18 @@ export class SprinklersDeviceRepository extends Repository<SprinklersDevice> {
       return null;
     }
     return user.devices![0];
+  }
+
+  save<T extends DeepPartial<SprinklersDevice>>(entities: T[], options?: SaveOptions): Promise<T[]>;
+  save<T extends DeepPartial<SprinklersDevice>>(entity: T, options?: SaveOptions): Promise<T>;
+  async save(entity: any, options?: SaveOptions): Promise<any> {
+    try {
+      return await super.save(entity, options);
+    } catch (e) {
+      if (UniqueConstraintError.is(e)) {
+        throw new UniqueConstraintError(e);
+      }
+      throw e;
+    }
   }
 }

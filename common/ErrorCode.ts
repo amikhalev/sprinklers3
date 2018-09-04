@@ -7,9 +7,10 @@ export enum ErrorCode {
   BadToken = 105,
   Unauthorized = 106,
   NoPermission = 107,
-  NotImplemented = 108,
   NotFound = 109,
+  NotUnique = 110,
   Internal = 200,
+  NotImplemented = 201,
   Timeout = 300,
   ServerDisconnected = 301,
   BrokerDisconnected = 302
@@ -22,6 +23,7 @@ export function toHttpStatus(errorCode: ErrorCode): number {
     case ErrorCode.Parse:
     case ErrorCode.Range:
     case ErrorCode.InvalidData:
+    case ErrorCode.NotUnique:
       return 400; // Bad request
     case ErrorCode.Unauthorized:
     case ErrorCode.BadToken:
