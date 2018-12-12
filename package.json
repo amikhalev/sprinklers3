@@ -86,8 +86,8 @@
     "@types/prop-types": "^15.5.5",
     "@types/pump": "^1.0.1",
     "@types/query-string": "^6.1.0",
-    "@types/react": "16.4.13",
-    "@types/react-dom": "16.0.7",
+    "@types/react": "^16.7.13",
+    "@types/react-dom": "^16.0.11",
     "@types/react-hot-loader": "^4.1.0",
     "@types/react-router-dom": "^4.3.0",
     "@types/react-sortable-hoc": "^0.6.4",
@@ -120,9 +120,9 @@
     "promise": "^8.0.1",
     "prop-types": "^15.6.2",
     "query-string": "^6.1.0",
-    "react": "16.4.2",
+    "react": "^16.6.3",
     "react-dev-utils": "^5.0.2",
-    "react-dom": "16.4.2",
+    "react-dom": "^16.6.3",
     "react-hot-loader": "^4.3.5",
     "react-router": "^4.3.1",
     "react-router-dom": "^4.3.1",
@@ -149,9 +149,9 @@
     "webpack-dev-server": "^3.1.7"
   },
   "resolutions": {
-    "**/@types/react": "16.4.11",
-    "**/@types/react-dom": "16.0.7",
-    "**/react": "16.4.2",
-    "**/react-dom": "16.4.2"
+    "**/@types/react": "16.7.13",
+    "**/@types/react-dom": "16.0.11",
+    "**/react": "16.6.3",
+    "**/react-dom": "16.6.3"
   }
 }

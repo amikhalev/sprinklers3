@@ -36,7 +36,7 @@ services:
       - "1883:1883"
 
   database:
-    image: "postgres:11-alpine"
+    image: "postgres:11"
     ports:
       - "5432:5432"
     environment:

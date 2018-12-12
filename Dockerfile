@@ -5,8 +5,7 @@ WORKDIR /app/
 COPY package.json yarn.lock /app/
 RUN yarn install --frozen-lockfile
 
-COPY tslint.json /app
-COPY paths.js /app
+COPY tsconfig.json tslint.json paths.js /app/
 COPY client/ /app/client
 COPY common/ /app/common
 COPY server/ /app/server

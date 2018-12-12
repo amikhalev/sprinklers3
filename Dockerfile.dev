@@ -5,8 +5,7 @@ WORKDIR /app/
 COPY package.json yarn.lock /app/
 RUN yarn install --frozen-lockfile
 
-COPY paths.js /app
-COPY tslint.json /app
+COPY tsconfig.json tslint.json paths.js /app/
 
 EXPOSE 8080
 ENTRYPOINT [ "npm", "run", "start:dev" ]
