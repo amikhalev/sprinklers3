@@ -6,6 +6,7 @@ COPY package.json yarn.lock /app/
 RUN yarn install --frozen-lockfile
 
 COPY tsconfig.json tslint.json paths.js /app/
+COPY bin/ /app/bin
 COPY client/ /app/client
 COPY common/ /app/common
 COPY server/ /app/server
@@ -18,10 +19,11 @@ FROM node:10
 
 WORKDIR /app/
 
-COPY --from=builder /app/package.json /app/yarn.lock ./
+COPY --from=builder /app/package.json /app/yarn.lock /app/paths.js ./
 COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/bin ./bin
 COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/public ./public
 
 EXPOSE 8080
-ENTRYPOINT [ "node", "." ]
+ENTRYPOINT [ "node", ".", "serve"]

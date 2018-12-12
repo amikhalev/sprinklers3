@@ -54,6 +54,7 @@
     "express": "^4.16.3",
     "express-pino-logger": "^4.0.0",
     "express-promise-router": "^3.0.3",
+    "globby": "^8.0.1",
     "jsonwebtoken": "^8.3.0",
     "lodash": "^4.17.10",
     "mobx": "^5.1.0",
