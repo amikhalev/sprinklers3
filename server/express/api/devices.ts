@@ -5,6 +5,7 @@ import { serialize } from "serializr";
 import ApiError from "@common/ApiError";
 import { ErrorCode } from "@common/ErrorCode";
 import * as schema from "@common/sprinklersRpc/schema";
+import { DeviceToken } from "@common/TokenClaims";
 import { generateDeviceToken } from "@server/authentication";
 import { SprinklersDevice } from "@server/entities";
 import { verifyAuthorization } from "@server/express/verifyAuthorization";
@@ -50,6 +51,13 @@ export function devices(state: ServerState) {
   }
 
   router.get("/:deviceId", verifyAuthorization(), async (req, res) => {
+    const deviceInfo = await verifyUserDevice(req);
+    res.send({
+      id: deviceInfo.id, deviceId: deviceInfo.deviceId, name: deviceInfo.name
+    })
+  });
+
+  router.get("/:deviceId/data", verifyAuthorization(), async (req, res) => {
     await verifyUserDevice(req);
     const device = state.mqttClient.acquireDevice(req.params.deviceId);
     const j = serialize(schema.sprinklersDevice, device);
@@ -98,8 +106,13 @@ export function devices(state: ServerState) {
       type: "device"
     }),
     async (req, res) => {
+      const token: DeviceToken = req.token! as any;
+      const deviceId = token.aud;
+      const clientId  = `device-${deviceId}`;
       res.send({
-        url: state.mqttUrl
+        mqttUrl: state.mqttUrl,
+        deviceId,
+        clientId,
       });
     }
   );
